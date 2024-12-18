@@ -1,4 +1,4 @@
-#  λ-tune
+# λ-Tune
 λ-Tune: A Database System Tuning framework based on Large Language Models 
 
 ## Prerequisites
