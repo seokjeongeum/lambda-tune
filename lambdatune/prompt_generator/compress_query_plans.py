@@ -56,7 +56,10 @@ def generate_conditions(benchmark: str, dbms: str, num_tokens: int, db:str):
 
     num_tokens = num_tokens
     solver = ILPSolver()
+    start_time = time.time()
     grouped_optimized = solver.optimize_with_dependencies(grouped_conditions, num_tokens)
+    elapsed = time.time() - start_time
+    logging.info(f"solver.optimize_with_dependencies ran in {elapsed:.3f} seconds")
 
     return grouped_optimized
 
@@ -220,7 +223,10 @@ def get_configurations_with_compression_hidden_columns():
 
     indexes = True
     solver = ILPSolver()
+    start_time = time.time()
     optimized_with_dependencies = solver.optimize_with_dependencies(grouped_conditions, token_budget)
+    elapsed = time.time() - start_time
+    logging.info(f"solver.optimize_with_dependencies ran in {elapsed:.3f} seconds")
     hidden_cols, tables, columns = hide_table_column_names(optimized_with_dependencies)
 
     for i in range(0, 1):
@@ -259,7 +265,11 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
 
     indexes = True
     solver = ILPSolver()
+    
+    start_time = time.time()
     optimized_with_dependencies = solver.optimize_with_dependencies(grouped_conditions, token_budget)
+    elapsed = time.time() - start_time
+    logging.info(f"solver.optimize_with_dependencies ran in {elapsed:.3f} seconds")
 
     output_dir = os.path.join(output_dir_path)
 
