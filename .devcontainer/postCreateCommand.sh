@@ -14,12 +14,14 @@ su postgres -c "/usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data -l logfile 
 echo "Starting MySQL..."
 mysqld_safe &   # Background mysqld_safe so the script can continue
 
-# Run TPC-DS and JOB load scripts
 echo "Running TPC-DS loading script..."
 bash .devcontainer/tpcds.sh
 
 echo "Running JOB loading script..."
 bash .devcontainer/job.sh
+
+echo "Running TPC-H loading script..."
+bash .devcontainer/tpch.sh
 
 # Keep the container running by tailing the PostgreSQL logfile
 echo "Tailing PostgreSQL logfile..."
