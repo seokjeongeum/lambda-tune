@@ -29,13 +29,8 @@ make
 ./dbgen -scale ${SCALE} -f
 popd > /dev/null
 
-echo "Ensuring PostgreSQL database '${DB_NAME}' exists..."
-if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" | grep -q 1; then
-  echo "Creating PostgreSQL database '${DB_NAME}'..."
-  sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME};"
-else
-  echo "PostgreSQL database '${DB_NAME}' already exists. Skipping creation..."
-fi
+sudo -u postgres psql -c "DROP DATABASE ${DB_NAME};"
+sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME};"
 
 sudo -u postgres psql -d ${DB_NAME} -c "CREATE TABLE IF NOT EXISTS NATION  (
   N_NATIONKEY  INTEGER NOT NULL,
@@ -122,18 +117,11 @@ CREATE TABLE IF NOT EXISTS LINEITEM (
   L_COMMENT      VARCHAR(44) NOT NULL
 );"
 
-# Load each table only if it is empty (PostgreSQL)
 for table in "${TABLES[@]}"; do
-  echo "Checking if PostgreSQL table ${table} has data..."
-  data_exists=$(sudo -u postgres psql -d ${DB_NAME} -tAc "SELECT 1 FROM ${table} LIMIT 1")
-  if [ "$data_exists" != "1" ]; then
-    echo "Loading data for ${table} from ${TPCH_DIR}/${table}.tbl..."
-    # Remove trailing pipes if present
-    sed -i 's/|$//' "${TPCH_DIR}/${table}.tbl"
-    sudo -u postgres psql -d ${DB_NAME} -c "\COPY ${table} FROM '${TPCH_DIR}/${table}.tbl' WITH DELIMITER '|' NULL ''"
-  else
-    echo "Table ${table} already has data. Skipping CSV load for ${table}..."
-  fi
+  echo "Loading data for ${table} from ${TPCH_DIR}/${table}.tbl..."
+  # Remove trailing pipes if present
+  sed -i 's/|$//' "${TPCH_DIR}/${table}.tbl"
+  sudo -u postgres psql -d ${DB_NAME} -c "\COPY ${table} FROM '${TPCH_DIR}/${table}.tbl' WITH DELIMITER '|' NULL ''"
 done
 
 echo "PostgreSQL TPC-H data load complete."
@@ -147,8 +135,8 @@ make
 ./dbgen -scale ${SCALE} -f
 popd > /dev/null
 
-echo "Ensuring MySQL database '${DB_NAME}' exists..."
-mysql -u root  -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
+mysql -u root  -e "DROP DATABASE ${DB_NAME};"
+mysql -u root  -e "CREATE DATABASE ${DB_NAME};"
 
 mysql -u root  ${DB_NAME} -e "CREATE TABLE IF NOT EXISTS nation  (
   N_NATIONKEY  INTEGER NOT NULL,
@@ -235,16 +223,10 @@ CREATE TABLE IF NOT EXISTS lineitem (
   L_COMMENT      VARCHAR(44) NOT NULL
 );"
 
-# Load data for each table only if it is empty in MySQL
 for table in "${TABLES[@]}"; do
   echo "Checking if MySQL table ${table} has data..."
-  count=$(mysql -u root  -N -s -e "SELECT COUNT(*) FROM ${table};" ${DB_NAME})
-  if [ "$count" -eq 0 ]; then
-    echo "Loading data for ${table} from ${TPCH_DIR}/${table}.tbl..."
-    mysql --local-infile=1 -u root  ${DB_NAME} -e "LOAD DATA LOCAL INFILE '${TPCH_DIR}/${table}.tbl' INTO TABLE ${table} FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';"
-  else
-    echo "Table ${table} already has data. Skipping CSV load for ${table}..."
-  fi
+  echo "Loading data for ${table} from ${TPCH_DIR}/${table}.tbl..."
+  mysql --local-infile=1 -u root  ${DB_NAME} -e "LOAD DATA LOCAL INFILE '${TPCH_DIR}/${table}.tbl' INTO TABLE ${table} FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';"
 done
 
 echo "MySQL TPC-H data load complete."
