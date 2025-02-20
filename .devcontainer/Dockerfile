@@ -47,7 +47,10 @@ RUN wget https://ftp.postgresql.org/pub/source/v12.0/postgresql-12.0.tar.gz && \
     adduser --disabled-password --gecos "" postgres && \
     mkdir -p /usr/local/pgsql/data && \
     chown postgres /usr/local/pgsql/data && \
-    su postgres -c "/usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data"
+    su postgres -c "/usr/local/pgsql/bin/initdb -D /usr/local/pgsql/data" && \
+    mkdir -p /var/run/postgresql && \
+    chown postgres /var/run/postgresql && \
+    sed -i "s|#unix_socket_directories = '/tmp'|unix_socket_directories = '/var/run/postgresql'|" /usr/local/pgsql/data/postgresql.conf
 
 # Update package lists and install MySQL server and client.
 RUN apt-get update && apt-get install -y mysql-server mysql-client
