@@ -12,7 +12,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 def get_response(text: str, temperature: float):    
-    client = OpenAI(api_key='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', base_url="https://api.perplexity.ai")
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), base_url="https://api.perplexity.ai")
     response = client.chat.completions.create(
         model="sonar",
         messages=[

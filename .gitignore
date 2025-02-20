@@ -3,3 +3,6 @@ logfile
 *.dat
 imdb.tgz
 csv_files
+.env
+lambdatune/configs/
+test
