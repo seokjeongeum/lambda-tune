@@ -20,7 +20,14 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     debconf-utils \
     apt-transport-https \
-    lsb-release
+    lsb-release \
+    pkg-config\
+    libmysqlclient-dev\
+    software-properties-common\
+    libpq-dev
+RUN sudo add-apt-repository ppa:deadsnakes/ppa && sudo apt install python3.9\
+    python3.9-distutils\
+    python3.9-dev
 
 WORKDIR /tmp
 
@@ -47,19 +54,6 @@ RUN apt-get update && apt-get install -y mysql-server mysql-client
 
 # Expose PostgreSQL (5432) and MySQL (3306) default ports.
 EXPOSE 5432 3306
-
-# Create a startup script to launch both PostgreSQL and MySQL.
-RUN echo '#!/bin/bash\n\
-\n\
-# Start PostgreSQL as the postgres user and log output\n\
-su postgres -c "/usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data -l /usr/local/pgsql/logfile start"\n\
-\n\
-# Start MySQL in the background\n\
-mysqld_safe &\n\
-\n\
-# Keep the container running by tailing the PostgreSQL logfile\n\
-tail -f /usr/local/pgsql/logfile\n' > /start.sh && \
-    chmod +x /start.sh
 
 # Use the JSON (exec) form so that OS signals are handled correctly.
 CMD ["/start.sh"]
