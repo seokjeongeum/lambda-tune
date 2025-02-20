@@ -8,7 +8,7 @@ git config --global user.name "Jeongeum Seok"
 
 # Start PostgreSQL
 echo "Starting PostgreSQL..."
-su postgres -c "/usr/local/pgsql/bin/pg_ctl -D /usr/local/pgsql/data -l logfile start"
+service postgresql start
 
 # Start MySQL in the background
 echo "Starting MySQL..."

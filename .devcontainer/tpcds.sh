@@ -9,21 +9,18 @@ popd > /dev/null
 #########################
 ## PostgreSQL Loading  ##
 #########################
-
-PG_BIN="/usr/local/pgsql/bin"
-
 # Check if the database 'tpcds' exists; if not, create it.
 echo "Checking for PostgreSQL database 'tpcds'..."
-if ! $PG_BIN/psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='tpcds'" | grep -q 1; then
+if ! psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='tpcds'" | grep -q 1; then
   echo "Creating PostgreSQL database 'tpcds'..."
-  $PG_BIN/psql -U postgres -c "CREATE DATABASE tpcds;"
+  psql -U postgres -c "CREATE DATABASE tpcds;"
 fi
 
 # Load schema and constraints into PostgreSQL
 echo "Loading schema and constraints into PostgreSQL..."
-$PG_BIN/psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds.sql
-$PG_BIN/psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_source.sql
-$PG_BIN/psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
+psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds.sql
+psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_source.sql
+psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
 
 # Create a temporary SQL file for bulk load operations and a temporary directory for processed .dat files
 bulk_script="bulk_load.sql"
@@ -50,7 +47,7 @@ echo "SET session_replication_role = 'origin';" >> "$bulk_script"
 
 # Execute the bulk loading operations via psql
 echo "Executing bulk load script for PostgreSQL..."
-$PG_BIN/psql -U postgres -d tpcds -f "$bulk_script"
+psql -U postgres -d tpcds -f "$bulk_script"
 
 # Clean up temporary files
 rm "$bulk_script"

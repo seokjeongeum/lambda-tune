@@ -26,18 +26,15 @@ make
 ./dbgen -scale 1 -f
 popd > /dev/null
 
-# Set PostgreSQL binary path (adjust as necessary)
-PG_BIN="/usr/local/pgsql/bin"
-
 echo "Ensuring PostgreSQL database '${DB_NAME}' exists..."
-if ! $PG_BIN/psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" | grep -q 1; then
+if ! psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" | grep -q 1; then
   echo "Creating PostgreSQL database '${DB_NAME}'..."
-  $PG_BIN/psql -U postgres -c "CREATE DATABASE ${DB_NAME};"
+  psql -U postgres -c "CREATE DATABASE ${DB_NAME};"
 else
   echo "PostgreSQL database '${DB_NAME}' already exists. Skipping creation..."
 fi
 
-$PG_BIN/psql -U postgres -d $DB_NAME -c "CREATE TABLE IF NOT EXISTS NATION  ( N_NATIONKEY  INTEGER NOT NULL,
+psql -U postgres -d $DB_NAME -c "CREATE TABLE IF NOT EXISTS NATION  ( N_NATIONKEY  INTEGER NOT NULL,
                             N_NAME       CHAR(25) NOT NULL,
                             N_REGIONKEY  INTEGER NOT NULL,
                             N_COMMENT    VARCHAR(152));
@@ -109,12 +106,12 @@ CREATE TABLE IF NOT EXISTS LINEITEM ( L_ORDERKEY    INTEGER NOT NULL,
 # Load each table only if it is empty
 for table in "${TABLES[@]}"; do
   echo "Checking if PostgreSQL table ${table} has data..."
-  data_exists=$($PG_BIN/psql -U postgres -d ${DB_NAME} -tAc "SELECT 1 FROM ${table} LIMIT 1")
+  data_exists=$(psql -U postgres -d ${DB_NAME} -tAc "SELECT 1 FROM ${table} LIMIT 1")
   if [ "$data_exists" != "1" ]; then
     echo "Loading data for ${table} from ${TPCH_DIR}/${table}.tbl..."
     # TPC-H files typically use a pipe | as the field delimiter.
     sed -i 's/|$//' "${TPCH_DIR}/${table}.tbl"
-    $PG_BIN/psql -U postgres -d ${DB_NAME} -c "\COPY ${table} FROM '${TPCH_DIR}/${table}.tbl' WITH DELIMITER '|' NULL ''"
+    psql -U postgres -d ${DB_NAME} -c "\COPY ${table} FROM '${TPCH_DIR}/${table}.tbl' WITH DELIMITER '|' NULL ''"
   else
     echo "Table ${table} already has data. Skipping CSV load for ${table}..."
   fi

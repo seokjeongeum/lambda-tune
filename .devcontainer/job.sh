@@ -25,22 +25,19 @@ fi
 ##   PostgreSQL Loading    ##
 #############################
 
-# Set PostgreSQL binary path (adjust if necessary)
-PG_BIN="/usr/local/pgsql/bin"
-
 echo "Checking for PostgreSQL database 'job'..."
-if ! $PG_BIN/psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='job'" | grep -q 1; then
+if ! psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='job'" | grep -q 1; then
   echo "Creating PostgreSQL database 'job'..."
-  $PG_BIN/psql -U postgres -c "CREATE DATABASE job;"
+  psql -U postgres -c "CREATE DATABASE job;"
 else
   echo "PostgreSQL database 'job' already exists. Skipping creation..."
 fi
 
 # Check if schema is already loaded (using table 'name' as an indicator)
-schema_loaded=$($PG_BIN/psql -U postgres -d job -tAc "SELECT 1 FROM pg_tables WHERE tablename='name'")
+schema_loaded=$(psql -U postgres -d job -tAc "SELECT 1 FROM pg_tables WHERE tablename='name'")
 if [ "$schema_loaded" != "1" ]; then
   echo "Loading schema into PostgreSQL database 'job'..."
-  $PG_BIN/psql -U postgres -d job -f job/schema.sql
+  psql -U postgres -d job -f job/schema.sql
 else
   echo "PostgreSQL schema already loaded. Skipping schema load..."
 fi
@@ -57,10 +54,10 @@ tables=(
 for table in "${tables[@]}"
 do
   echo "Checking if PostgreSQL table ${table} has data..."
-  data_exists=$($PG_BIN/psql -U postgres -d job -tAc "SELECT 1 FROM ${table} LIMIT 1")
+  data_exists=$(psql -U postgres -d job -tAc "SELECT 1 FROM ${table} LIMIT 1")
   if [ "$data_exists" != "1" ]; then
     echo "Loading csv_files/${table}.csv into PostgreSQL table ${table}..."
-    $PG_BIN/psql -U postgres -d job -c "\copy ${table} FROM 'csv_files/${table}.csv' CSV ESCAPE '\\'"
+    psql -U postgres -d job -c "\copy ${table} FROM 'csv_files/${table}.csv' CSV ESCAPE '\\'"
   else
     echo "Table ${table} already has data. Skipping CSV load for ${table}..."
   fi
