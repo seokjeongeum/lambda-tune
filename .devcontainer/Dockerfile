@@ -49,9 +49,8 @@ RUN apt-get update && apt-get install -y \
     python3.9-dev \
     mysql-server \
     mysql-client \
-    locales
-
-RUN mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_new_password';FLUSH PRIVILEGES;"
+    locales \
+    sudo
 
 # Uncomment the en_US.UTF-8 locale in /etc/locale.gen and generate it
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
@@ -61,6 +60,7 @@ RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
-
+ENV PGPASSWORD=your_new_password
+ENV MYSQL_PWD=your_new_password
 # Keep the container running by tailing /dev/null indefinitely.
 CMD ["tail", "-f", "/dev/null"]

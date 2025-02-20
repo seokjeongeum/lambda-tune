@@ -148,9 +148,9 @@ make
 popd > /dev/null
 
 echo "Ensuring MySQL database '${DB_NAME}' exists..."
-mysql -u root -pyour_new_password -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
+mysql -u root  -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
 
-mysql -u root -pyour_new_password ${DB_NAME} -e "CREATE TABLE IF NOT EXISTS nation  (
+mysql -u root  ${DB_NAME} -e "CREATE TABLE IF NOT EXISTS nation  (
   N_NATIONKEY  INTEGER NOT NULL,
   N_NAME       CHAR(25) NOT NULL,
   N_REGIONKEY  INTEGER NOT NULL,
@@ -238,10 +238,10 @@ CREATE TABLE IF NOT EXISTS lineitem (
 # Load data for each table only if it is empty in MySQL
 for table in "${TABLES[@]}"; do
   echo "Checking if MySQL table ${table} has data..."
-  count=$(mysql -u root -pyour_new_password -N -s -e "SELECT COUNT(*) FROM ${table};" ${DB_NAME})
+  count=$(mysql -u root  -N -s -e "SELECT COUNT(*) FROM ${table};" ${DB_NAME})
   if [ "$count" -eq 0 ]; then
     echo "Loading data for ${table} from ${TPCH_DIR}/${table}.tbl..."
-    mysql --local-infile=1 -u root -pyour_new_password ${DB_NAME} -e "LOAD DATA LOCAL INFILE '${TPCH_DIR}/${table}.tbl' INTO TABLE ${table} FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';"
+    mysql --local-infile=1 -u root  ${DB_NAME} -e "LOAD DATA LOCAL INFILE '${TPCH_DIR}/${table}.tbl' INTO TABLE ${table} FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';"
   else
     echo "Table ${table} already has data. Skipping CSV load for ${table}..."
   fi

@@ -71,13 +71,13 @@ echo "PostgreSQL JOB data load complete."
 
 # Create the MySQL database 'job' if it doesn't exist.
 echo "Ensuring MySQL database 'job' exists..."
-mysql -u root -pyour_new_password -e"CREATE DATABASE IF NOT EXISTS job;"
+mysql -u root  -e"CREATE DATABASE IF NOT EXISTS job;"
 
 # Check if schema is loaded in MySQL by testing for a known table (e.g. 'name')
 schema_exists=$(mysql -u root -D job -sse "SHOW TABLES LIKE 'name'")
 if [ -z "$schema_exists" ]; then
   echo "Loading schema into MySQL database 'job'..."
-  mysql -u root -pyour_new_password job < job/schema.sql
+  mysql -u root  job < job/schema.sql
 else
   echo "MySQL schema already loaded. Skipping schema load..."
 fi
@@ -94,10 +94,10 @@ tables=(
 
 for table in "${tables[@]}"; do
   echo "Checking if MySQL table ${table} has data..."
-  count=$(mysql -u root -pyour_new_password -N -s -e "SELECT COUNT(*) FROM ${table};" job)
+  count=$(mysql -u root  -N -s -e "SELECT COUNT(*) FROM ${table};" job)
   if [ "$count" -eq 0 ]; then
     echo "Table ${table} is empty. Loading data from ${CSV_DIR}/${table}.csv..."
-    mysql --local-infile=1 -u root -pyour_new_password job -e "LOAD DATA LOCAL INFILE '${CSV_DIR}/${table}.csv' INTO TABLE ${table} FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"';"
+    mysql --local-infile=1 -u root  job -e "LOAD DATA LOCAL INFILE '${CSV_DIR}/${table}.csv' INTO TABLE ${table} FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"';"
   else
     echo "Table ${table} already has data. Skipping CSV load for ${table}..."
   fi
