@@ -9,23 +9,22 @@ popd > /dev/null
 #########################
 ## PostgreSQL Loading  ##
 #########################
-# Check if the database 'tpcds' exists; if not, create it.
-echo "Checking for PostgreSQL database 'tpcds'..."
-if ! psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname='tpcds'" | grep -q 1; then
-  echo "Creating PostgreSQL database 'tpcds'..."
-  psql -U postgres -c "CREATE DATABASE tpcds;"
-fi
+echo "Dropping existing PostgreSQL database 'tpcds' (if it exists)..."
+sudo -u postgres psql -c "DROP DATABASE IF EXISTS tpcds;"
+echo "Creating PostgreSQL database 'tpcds'..."
+sudo -u postgres psql -c "CREATE DATABASE tpcds;"
 
 # Load schema and constraints into PostgreSQL
 echo "Loading schema and constraints into PostgreSQL..."
-psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds.sql
-psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_source.sql
-psql -U postgres -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
+sudo -u postgres psql -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds.sql
+sudo -u postgres psql -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_source.sql
 
 # Create a temporary SQL file for bulk load operations and a temporary directory for processed .dat files
 bulk_script="bulk_load.sql"
 echo "SET session_replication_role = 'replica';" > "$bulk_script"
 tmp_dir=$(mktemp -d)
+# Adjust permissions on the temporary directory so that the 'postgres' user can traverse it.
+chmod 755 "$tmp_dir"
 
 # Process each .dat file for PostgreSQL loading
 for dat_file in DSGen-software-code-4.0.0_final/tools/*.dat; do
@@ -36,6 +35,8 @@ for dat_file in DSGen-software-code-4.0.0_final/tools/*.dat; do
     tmp_file="${tmp_dir}/${table_name}_copy.dat"
     cp "$dat_file" "$tmp_file"
     sed -i 's/|$//' "$tmp_file"
+    # Set permissions so that the file is globally readable (at least for the postgres user)
+    chmod 644 "$tmp_file"
     
     # Append the \copy command for this table to the bulk script
     abs_tmp_file=$(realpath "$tmp_file")
@@ -47,39 +48,41 @@ echo "SET session_replication_role = 'origin';" >> "$bulk_script"
 
 # Execute the bulk loading operations via psql
 echo "Executing bulk load script for PostgreSQL..."
-psql -U postgres -d tpcds -f "$bulk_script"
+sudo -u postgres psql -d tpcds -f "$bulk_script"
 
 # Clean up temporary files
 rm "$bulk_script"
 rm -rf "$tmp_dir"
 
+sudo -u postgres psql -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
 echo "PostgreSQL TPC-DS data load complete."
 
 #########################
 ##     MySQL Loading   ##
 #########################
-
-# Create the MySQL database 'tpcds' if it doesn't exist.
+# Note: Replace 'your_new_password' with your actual password or use a more secure method of authentication.
+echo "Dropping any existing MySQL database 'tpcds'..."
+mysql -u root -pyour_new_password -e "DROP DATABASE IF EXISTS tpcds;"
 echo "Creating MySQL database 'tpcds'..."
-mysql -u root -e "CREATE DATABASE IF NOT EXISTS tpcds;"
+mysql -u root -pyour_new_password -e "CREATE DATABASE tpcds;"
 
 # Load schema and constraints into MySQL
 echo "Loading schema and constraints into MySQL..."
-mysql -u root tpcds < DSGen-software-code-4.0.0_final/tools/tpcds.sql
-mysql -u root tpcds < DSGen-software-code-4.0.0_final/tools/tpcds_source.sql
-mysql -u root tpcds < DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
+mysql -u root -pyour_new_password tpcds < DSGen-software-code-4.0.0_final/tools/tpcds.sql
+mysql -u root -pyour_new_password tpcds < DSGen-software-code-4.0.0_final/tools/tpcds_source.sql
 
 # Enable local infile capability (ensure your MySQL server allows this)
 echo "Enabling LOCAL INFILE for MySQL..."
-mysql -u root -e "SET GLOBAL local_infile = 1;"
+mysql -u root -pyour_new_password -e "SET GLOBAL local_infile = 1;"
 
 # Load data into MySQL tables from each .dat file
 for dat_file in DSGen-software-code-4.0.0_final/tools/*.dat; do
     table_name=$(basename "$dat_file" .dat)
     abs_dat_file=$(realpath "$dat_file")
     echo "Loading MySQL table: $table_name"
-    mysql --local-infile=1 -u root tpcds \
+    mysql --local-infile=1 -u root -pyour_new_password tpcds \
         -e "LOAD DATA LOCAL INFILE '$abs_dat_file' INTO TABLE $table_name FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';"
 done
 
+mysql -u root -pyour_new_password tpcds < DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
 echo "MySQL TPC-DS data load complete."

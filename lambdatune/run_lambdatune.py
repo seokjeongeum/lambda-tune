@@ -74,8 +74,8 @@ if __name__ == "__main__":
         get_configurations_with_compression(output_dir_path=llm_configs_dir,
                                             driver=driver,
                                             queries=queries,
-                                            target_db="postgres",
-                                            benchmark="tpch",
+                                            target_db=system,
+                                            benchmark=benchmark,
                                             memory_gb=memory,
                                             num_cores=cores,
                                             num_configs=3)

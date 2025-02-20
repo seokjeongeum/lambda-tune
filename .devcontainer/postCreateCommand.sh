@@ -20,9 +20,6 @@ bash .devcontainer/tpcds.sh
 echo "Running JOB loading script..."
 bash .devcontainer/job.sh
 
-echo "Running TPC-H loading script..."
-bash .devcontainer/tpch.sh
-
 # Keep the container running by tailing the PostgreSQL logfile
 echo "Tailing PostgreSQL logfile..."
 exec tail -f logfile

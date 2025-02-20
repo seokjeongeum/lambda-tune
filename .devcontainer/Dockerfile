@@ -48,15 +48,19 @@ RUN apt-get update && apt-get install -y \
     python3.9-distutils \
     python3.9-dev \
     mysql-server \
-    mysql-client
+    mysql-client \
+    locales
 
-# Expose PostgreSQL (5432) and MySQL (3306) default ports.
-EXPOSE 5432 3306
+RUN mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_new_password';FLUSH PRIVILEGES;"
 
-# Copy an entrypoint/start script and make it executable.
-# Ensure you have a local file named "start.sh" (adjust as needed).
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+# Uncomment the en_US.UTF-8 locale in /etc/locale.gen and generate it
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen en_US.UTF-8
 
-# Use the JSON (exec) form so that OS signals are handled correctly.
-CMD ["/start.sh"]
+# Set environment variables so that the locale is used system-wide
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+
+# Keep the container running by tailing /dev/null indefinitely.
+CMD ["tail", "-f", "/dev/null"]
