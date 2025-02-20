@@ -13,6 +13,14 @@
             "args": [
                 "--config_gen",
                 "true",
+                "--configs",
+                "./lambdatune/configs",
+                "--out",
+                "./test",
+                "--cores",
+                "22",
+                "--memory",
+                "31",
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

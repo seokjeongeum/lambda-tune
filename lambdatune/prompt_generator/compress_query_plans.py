@@ -282,8 +282,8 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                                           temperature=temperature,
                                                           retrieve_response=True,
                                                           join_conditions=optimized_with_dependencies,
-                                                          system_specs={"memory": "61GiB", "cores": 8},
-                                                          indexes_only=True,
+                                                          system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
+                                                        #   indexes_only=True,
                                                           indexes=True)
 
         path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")

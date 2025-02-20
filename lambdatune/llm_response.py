@@ -1,4 +1,5 @@
 import json
+import re
 
 
 class LLMResponse:
@@ -9,6 +10,7 @@ class LLMResponse:
             self.prompt = data["prompt"]
             self.response = data["response"]
             self.config = self.response["choices"][0]["message"]["content"]
+            self.config = re.sub(r'^```(python|json)\s+|```', '', self.config)
 
             self.columns_dict = None
             self.tables_dict = None

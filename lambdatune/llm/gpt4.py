@@ -6,14 +6,15 @@ import tiktoken
 
 from lambdatune.utils import get_llm, get_openai_key
 
-
+from openai import OpenAI
 encoding = tiktoken.encoding_for_model(get_llm())
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
-def get_response(text: str, temperature: float):
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
+def get_response(text: str, temperature: float):    
+    client = OpenAI(api_key='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', base_url="https://api.perplexity.ai")
+    response = client.chat.completions.create(
+        model="sonar",
         messages=[
             {"role": "system", "content": "You are a helpful Database Administrator."},
             {"role": "user", "content": text}
@@ -94,7 +95,7 @@ def get_config_recommendations_with_compression(dst_system,
 
     if retrieve_response:
         resp = get_response(prompt, temperature=temperature)
-        resp = json.loads(str(resp))
+        resp = json.loads(resp.json())
 
     # num_tokens = len(encoding.encode(prompt))
 
