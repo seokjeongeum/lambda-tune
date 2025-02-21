@@ -68,9 +68,8 @@ class ConfigurationSelector:
         self.results_dir = output_dir
         self.table_cardinalities = self.driver.get_table_cardinalities()
         self.continue_loop=continue_loop
-        if self.continue_loop:
-            with open('e3_continue_loop.txt','a')as f:             
-                f.write(f'''{system} {benchmark_name}
+        with open('e3_continue_loop.txt','a')as f:
+            f.write(f'''{system} {benchmark_name}
 ''') 
 
         logging.info(f"Results dir: {self.results_dir}")
