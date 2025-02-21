@@ -153,8 +153,8 @@ class PostgresDriver(Driver):
         if execute:
             start = time.time()
 
-            if timeout:
-                cursor.execute(f"SET statement_timeout={timeout}")
+            if timeout:                
+                cursor.execute(f"SET statement_timeout={min(2147483647,timeout)}")
 
             try:
                 if analyze:

@@ -40,6 +40,9 @@ class ConfigurationSelector:
         logging.info(f"Max Rounds: {max_rounds}")
         logging.info(f"Benchmark Name: {benchmark_name}")
         logging.info(f"System: {system}")
+        with open('e3_terminate_loop.txt','a')as f:             
+            f.write(f'''{system} {benchmark_name}
+''') 
 
         if enable_query_scheduler and create_all_indexes_first:
             raise Exception("enable_query_scheduler and create_all_indexes_first "
@@ -366,12 +369,23 @@ class ConfigurationSelector:
                 throughput = round_completed_queries
                 logging.info(f"{cfg_idx}: {throughput}")
 
-            if self.terminate_loop and completed_configs:
-                break
+            if completed_configs:
+                if self.terminate_loop:
+                    break
+                else:                    
+                    with open('e3_terminate_loop.txt','a')as f:             
+                        f.write(f'''early terminate:
+{sorted(completed_configs, key=lambda x: x[1])[0]}
+''') 
 
             current_timeout *= self.timeout_interval
 
         completed_configs = sorted(completed_configs, key=lambda x: x[1])
+        if not self.terminate_loop:
+            with open('e3_terminate_loop.txt','a')as f:             
+                f.write(f'''full evaluation:
+{completed_configs[0]}
+''') 
 
         self.reset_configuration(restart_system=True, drop_indexes=self.drop_indexes)
 

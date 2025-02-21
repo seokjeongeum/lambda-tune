@@ -1,3 +1,4 @@
+rm e3_terminate_loop.txt
 export PYTHONPATH=.
 
 # Automatically export all variables defined in the .env file
