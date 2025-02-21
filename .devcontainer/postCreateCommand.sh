@@ -26,13 +26,13 @@ echo "Configuring git user settings..."
 git config --global user.email "jeseok@dblab.postech.ac.kr"
 git config --global user.name "Jeongeum Seok"
 
-# # Start PostgreSQL
-# echo "Starting PostgreSQL..."
-# service postgresql start
+# Start PostgreSQL
+echo "Starting PostgreSQL..."
+service postgresql start
 
-# # Start MySQL in the background
-# echo "Starting MySQL..."
-# mysqld_safe &   # Background mysqld_safe so the script can continue
+# Start MySQL in the background
+echo "Starting MySQL..."
+mysqld_safe &   # Background mysqld_safe so the script can continue
 
 mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_new_password';FLUSH PRIVILEGES;"
 
