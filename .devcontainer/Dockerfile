@@ -17,12 +17,6 @@ RUN curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmo
 # Add the PostgreSQL repository; $(lsb_release -cs) dynamically inserts your Ubuntu codename (e.g., focal)
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
 
-# # Configure the MySQL APT repository for MySQL 8.0.
-# RUN wget https://dev.mysql.com/get/mysql-apt-config_0.8.32-1_all.deb && \
-#     echo "mysql-apt-config mysql-apt-config/select-server select mysql-8.0" | debconf-set-selections && \
-#     dpkg -i mysql-apt-config_0.8.32-1_all.deb && \
-#     rm mysql-apt-config_0.8.32-1_all.deb
-
 # Add the deadsnakes PPA to install newer Python versions
 RUN add-apt-repository ppa:deadsnakes/ppa
 
@@ -40,15 +34,12 @@ RUN apt-get update && apt-get install -y \
     libjson-c-dev \
     git \
     pkg-config \
-    # libmysqlclient-dev \
     libpq-dev \
     postgresql-12=12.2-4 \
     postgresql-client-12=12.2-4 \
     python3.9 \
     python3.9-distutils \
     python3.9-dev \
-    # mysql-server \
-    # mysql-client \
     locales \
     sudo
 
@@ -61,6 +52,6 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 ENV PGPASSWORD=your_new_password
-# ENV MYSQL_PWD=your_new_password
+
 # Keep the container running by tailing /dev/null indefinitely.
 CMD ["tail", "-f", "/dev/null"]
