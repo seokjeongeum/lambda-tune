@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, help="The number of cores of the system")
     parser.add_argument("--memory", type=int, help="The amount of memory (GB) of the system")
 
-    parser.add_argument("--terminate_loop", type=bool, default=True)
+    parser.add_argument("--continue_loop", action='store_true')
 
     args = parser.parse_args()
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     memory = args.memory
     cores = args.cores
 
-    terminate_loop=args.terminate_loop
+    continue_loop=args.continue_loop
 
     args = parser.parse_args()
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     configurations = ConfigurationSelector.load_configs(llm_configs_dir, system=system)
 
-    with open('e2_config_reset_time.txt','a')as f:             
+    with open('e2_index_time.txt','a')as f:             
         f.write(f'''{system} {benchmark}
 ''') 
     for timeout in timeouts:
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                                          system=system,
                                          adaptive_timeout=adaptive_timeout,
                                          output_dir=output_dir,
-                                         terminate_loop=terminate_loop,
+                                         continue_loop=continue_loop,
                                          )
 
         selector.select_configuration()

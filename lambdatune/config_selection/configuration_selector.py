@@ -22,7 +22,7 @@ class ConfigurationSelector:
     def __init__(self, driver: PostgresDriver, queries: list[str], configs: list[str], reset_command: str, adaptive_timeout: bool,
                  enable_query_scheduler: bool, create_all_indexes_first: bool, create_indexes: bool, drop_indexes: bool,
                  initial_time_out_seconds: int, timeout_interval: int, max_rounds: int,
-                 benchmark_name: str, system: str,terminate_loop:bool, output_dir: str = None):
+                 benchmark_name: str, system: str,continue_loop:bool, output_dir: str = None):
         """
         @param driver: The database driver used to execute the queries
         @param configs: The configurations to be tested
@@ -40,9 +40,6 @@ class ConfigurationSelector:
         logging.info(f"Max Rounds: {max_rounds}")
         logging.info(f"Benchmark Name: {benchmark_name}")
         logging.info(f"System: {system}")
-        with open('e3_terminate_loop.txt','a')as f:             
-            f.write(f'''{system} {benchmark_name}
-''') 
 
         if enable_query_scheduler and create_all_indexes_first:
             raise Exception("enable_query_scheduler and create_all_indexes_first "
@@ -69,7 +66,11 @@ class ConfigurationSelector:
         self.timeout_interval = timeout_interval
         self.results_dir = output_dir
         self.table_cardinalities = self.driver.get_table_cardinalities()
-        self.terminate_loop=terminate_loop
+        self.continue_loop=continue_loop
+        if self.continue_loop:
+            with open('e3_continue_loop.txt','a')as f:             
+                f.write(f'''{system} {benchmark_name}
+''') 
 
         logging.info(f"Results dir: {self.results_dir}")
 
@@ -80,7 +81,7 @@ class ConfigurationSelector:
             config_reset_time_start = time.time()
             self.driver.drop_all_non_pk_indexes()
             config_reset_time = time.time() - config_reset_time_start
-            with open('e2_config_reset_time.txt','a')as f:             
+            with open('e2_index_time.txt','a')as f:             
                 f.write(f'''drop index: {config_reset_time}
 ''') 
 
@@ -223,8 +224,8 @@ class ConfigurationSelector:
                                     index_creation_time_start = time.time()
                                     self.driver.cursor.execute(index.get_create_index_statement())
                                     round_index_creation_time += time.time() - index_creation_time_start
-                                    with open('e2_config_reset_time.txt','a')as f:             
-                                        f.write(f'''create index: {config_reset_time}
+                                    with open('e2_index_time.txt','a')as f:             
+                                        f.write(f'''create index: {round_index_creation_time}
 ''') 
                                     indexes_created_per_config[config_id].add(index)
                                     indexes_created.add(index)
@@ -370,19 +371,19 @@ class ConfigurationSelector:
                 logging.info(f"{cfg_idx}: {throughput}")
 
             if completed_configs:
-                if self.terminate_loop:
-                    break
-                else:                    
-                    with open('e3_terminate_loop.txt','a')as f:             
+                if self.continue_loop:                    
+                    with open('e3_continue_loop.txt','a')as f:             
                         f.write(f'''early terminate:
 {sorted(completed_configs, key=lambda x: x[1])[0]}
 ''') 
+                else:
+                    break
 
             current_timeout *= self.timeout_interval
 
         completed_configs = sorted(completed_configs, key=lambda x: x[1])
-        if not self.terminate_loop:
-            with open('e3_terminate_loop.txt','a')as f:             
+        if self.continue_loop:
+            with open('e3_continue_loop.txt','a')as f:             
                 f.write(f'''full evaluation:
 {completed_configs[0]}
 ''') 

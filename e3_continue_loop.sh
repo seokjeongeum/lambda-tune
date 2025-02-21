@@ -1,4 +1,4 @@
-rm e3_terminate_loop.txt
+rm e3_continue_loop.txt
 export PYTHONPATH=.
 
 # Automatically export all variables defined in the .env file
@@ -12,44 +12,44 @@ rm -r ./test/e3
 # Run the first batch of tests
 bash .devcontainer/tpch.sh 1
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --config_gen true \
+    --benchmark tpch\
+    --system POSTGRES \
     --configs ./lambdatune/configs/e3/tpch1 \
     --out ./test/e3/tpch1 \
+    --config_gen true \
     --core 16 \
     --memory 62 \
-    --system POSTGRES \
-    --benchmark tpch\
-    --terminate_loop false
+    --continue_loop
 
 # Run the next batch of tests
 bash .devcontainer/tpch.sh 10
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --config_gen true \
+    --benchmark tpch\
+    --system POSTGRES \
     --configs ./lambdatune/configs/e3/tpch10 \
     --out ./test/e3/tpch10 \
+    --config_gen true \
     --core 16 \
     --memory 62 \
-    --system POSTGRES \
-    --benchmark tpch\
-    --terminate_loop false
+    --continue_loop 
 
 # Run tests for other benchmarks
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --config_gen true \
+    --benchmark tpcds\
+    --system POSTGRES \
     --configs ./lambdatune/configs/e3/tpcds \
     --out ./test/e3/tpcds \
+    --config_gen true \
     --core 16 \
     --memory 62 \
-    --system POSTGRES \
-    --benchmark tpcds\
-    --terminate_loop false
+    --continue_loop 
 
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --config_gen true \
+    --benchmark job\
+    --system POSTGRES \
     --configs ./lambdatune/configs/e3/job \
     --out ./test/e3/job \
+    --config_gen true \
     --core 16 \
     --memory 62 \
-    --system POSTGRES \
-    --benchmark job\
-    --terminate_loop false
+    --continue_loop 
