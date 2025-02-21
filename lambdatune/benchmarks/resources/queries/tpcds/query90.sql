@@ -1,5 +1,5 @@
 -- start query 1 in stream 0 using template ../query_templates/query90.tpl
-select  cast(amc as decimal(15,4))/cast(pmc as decimal(15,4)) am_pm_ratio
+select  cast(amc as decimal(15,4))/NULLIF(cast(pmc as decimal(15,4)),0) am_pm_ratio
  from ( select count(*) amc
        from web_sales, household_demographics , time_dim, web_page
        where ws_sold_time_sk = time_dim.t_time_sk

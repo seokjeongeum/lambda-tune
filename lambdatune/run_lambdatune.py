@@ -81,7 +81,9 @@ if __name__ == "__main__":
                                             benchmark=benchmark,
                                             memory_gb=memory,
                                             num_cores=cores,
-                                            num_configs=3)
+                                            num_configs=3,
+                                            token_budget=355
+                                            )
 
     timeouts = [10]
 
