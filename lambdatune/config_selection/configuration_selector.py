@@ -1,5 +1,6 @@
 import os
 import json
+import pprint
 import time
 import logging
 
@@ -160,7 +161,7 @@ class ConfigurationSelector:
             raise Exception("No configurations were found.")
 
         start: float = time.time()
-        while rounds_ran < self.max_rounds:
+        while rounds_ran < self.max_rounds and len(completed_configs)!=len(configs):
             round_results: set = {}
 
             for current_configuration in configs:
@@ -271,6 +272,9 @@ class ConfigurationSelector:
                                     logging.error(e)
 
                                 round_index_creation_time += time.time() - index_creation_time_start
+                                with open('e2_index_time.txt','a')as f:             
+                                    f.write(f'''create index: {round_index_creation_time}
+''') 
                                 indexes_created_per_config[config_id].add(index)
                                 indexes_created.add(index)
                             else:
@@ -371,7 +375,7 @@ class ConfigurationSelector:
                 logging.info(f"{cfg_idx}: {throughput}")
 
             if completed_configs:
-                if self.continue_loop:                    
+                if self.continue_loop:
                     with open('e3_continue_loop.txt','a')as f:             
                         f.write(f'''early terminate:
 {sorted(completed_configs, key=lambda x: x[1])[0]}
@@ -385,7 +389,7 @@ class ConfigurationSelector:
         if self.continue_loop:
             with open('e3_continue_loop.txt','a')as f:             
                 f.write(f'''full evaluation:
-{completed_configs[0]}
+{pprint.pformat(completed_configs)}
 ''') 
 
         self.reset_configuration(restart_system=True, drop_indexes=self.drop_indexes)

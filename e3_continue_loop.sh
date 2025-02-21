@@ -1,3 +1,4 @@
+rm e2_index_time.txt
 rm e3_continue_loop.txt
 export PYTHONPATH=.
 
