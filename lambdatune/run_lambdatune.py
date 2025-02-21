@@ -10,7 +10,6 @@ from lambdatune.config_selection.configuration_selector import ConfigurationSele
 
 from lambdatune.prompt_generator.compress_query_plans import get_configurations_with_compression
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script to run benchmarks.')
     parser.add_argument('--benchmark', type=str, default='tpch',
@@ -85,7 +84,7 @@ if __name__ == "__main__":
     configurations = ConfigurationSelector.load_configs(llm_configs_dir, system=system)
 
     with open('e2_config_reset_time.txt','a')as f:             
-        f.write(f'''{benchmark}
+        f.write(f'''{system} {benchmark}
 ''') 
     for timeout in timeouts:
         selector = ConfigurationSelector(configs=configurations,

@@ -83,38 +83,66 @@ class MySQLDriver:
 
         return self.cursor
 
-    def explain(self, query, execute=True, timeout=None, results_path=None):
+    def explain(self, query, execute=True, explain_json=False, timeout=None, results_path=None):
+        # Optionally modify the query to force a timeout (using a MAX_EXECUTION_TIME hint).
         if timeout:
-            query = query.replace("select", "select\n\t/*+ MAX_EXECUTION_TIME({}) */".format(int(timeout)))
-
+            # This example shows how you might apply MySQL's MAX_EXECUTION_TIME hint.
+            # Adjust the replacement if your query structure is different.
+            query = query.replace("select", "select\n\t/*+ MAX_EXECUTION_TIME({}) */".format(int(timeout)), 1)
+            
         cursor = self.get_cursor()
-        explain_cmd = "EXPLAIN " + query
+        # Build the EXPLAIN command depending on whether JSON format is requested.
+        explain_cmd = "EXPLAIN"
+        if explain_json:
+            explain_cmd += " (FORMAT JSON)"
+        explain_cmd = f"{explain_cmd} {query}"
         cursor.execute(explain_cmd)
-        plan = cursor.fetchall()[0]
+        rows = cursor.fetchall()
 
+        # Parse the plan based on the expected format.
+        if explain_json:
+            try:
+                # For JSON, it is common for MySQL to return a single row containing a JSON string.
+                # Adjust the following indexing based on your MySQL version.
+                plan = rows
+            except Exception as e:
+                logging.warning(f"Failed to parse JSON plan: {e}")
+                plan = None
+        else:
+            try:
+                # For non-JSON, join all rows (assuming each row has a first column with part of the plan)
+                plan = "\n".join(row for row in rows)
+            except Exception as e:
+                logging.warning(f"Failed to parse plan: {e}")
+                plan = None
+
+        # Optionally execute the query (and time its execution) if execute is True.
         duration = None
         if execute:
-            logging.info(f"Executing query...")
+            logging.info("Executing query...")
             start = time.time()
             try:
                 cursor.execute(query)
-                duration = (time.time() - start)
+                duration = time.time() - start
             except Exception as e:
-                logging.warning(e)
+                logging.warning(f"Execution error: {e}")
                 duration = "TIMEOUT"
 
-            logging.info(f"Took: {duration}")
+            logging.info(f"Query execution took: {duration}")
 
         out = {
             "plan": plan,
             "execTime": duration
         }
 
+        # Optionally write the output to a file.
         if results_path:
-            json.dump(out, open(results_path, "w+"), indent=2)
+            with open(results_path, "w+") as f:
+                json.dump(out, f, indent=2)                
 
         cursor.close()
         return out
+
 
     def explain_json(self, query, analyze=False, verbose=False, config=None, dump_path=None):
         if config:

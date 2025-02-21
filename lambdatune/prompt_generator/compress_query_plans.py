@@ -270,7 +270,7 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
     optimized_with_dependencies = solver.optimize_with_dependencies(grouped_conditions, token_budget)
     # elapsed = time.time() - start_time
 #     with open('e1_ilp_time.txt','a')as f:             
-#         f.write(f'''{benchmark}:{elapsed}
+#         f.write(f'''{target_db} {benchmark}:{elapsed}
 # ''') 
 
     output_dir = os.path.join(output_dir_path)
