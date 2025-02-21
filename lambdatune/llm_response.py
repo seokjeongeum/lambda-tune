@@ -11,6 +11,7 @@ class LLMResponse:
             self.response = data["response"]
             self.config = self.response["choices"][0]["message"]["content"]
             self.config = re.sub(r'^```(python|json)\s+|```', '', self.config)
+            self.config = re.sub(r'^\s*#.*$', '', self.config, flags=re.MULTILINE)
 
             self.columns_dict = None
             self.tables_dict = None
