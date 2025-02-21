@@ -73,7 +73,12 @@ class ConfigurationSelector:
         logging.info("Resetting configuration")
 
         if drop_indexes:
+            config_reset_time_start = time.time()
             self.driver.drop_all_non_pk_indexes()
+            config_reset_time = time.time() - config_reset_time_start
+            with open('e2_config_reset_time.txt','a')as f:             
+                f.write(f'''drop index: {config_reset_time}
+''') 
 
         # Reset the system configuration
         self.driver.reset_configuration(restart_system=restart_system)
@@ -178,6 +183,9 @@ class ConfigurationSelector:
                 self.reset_configuration(restart_system=False, drop_indexes=self.drop_indexes)
                 config_reset_time = time.time() - config_reset_time_start
                 logging.debug(f"Resetting config took: {config_reset_time}")
+                with open('e2_config_reset_time.txt','a')as f:             
+                    f.write(f'''total: {config_reset_time}
+''') 
 
                 indexes: QueryToIndex = self.get_query_index_dependencies(config.get_index_commands())
 
