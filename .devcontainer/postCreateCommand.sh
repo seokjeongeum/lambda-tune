@@ -25,6 +25,7 @@ sed -ri 's/^(local\s+all\s+postgres\s+)peer/\1md5/' /etc/postgresql/12/main/pg_h
 echo "Configuring git user settings..."
 git config --global user.email "jeseok@dblab.postech.ac.kr"
 git config --global user.name "Jeongeum Seok"
+git submodule update --init
 
 # Start PostgreSQL
 echo "Starting PostgreSQL..."

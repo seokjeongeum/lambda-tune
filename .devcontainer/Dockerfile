@@ -41,7 +41,10 @@ RUN apt-get update && apt-get install -y \
     python3.9-distutils \
     python3.9-dev \
     locales \
-    sudo
+    sudo\
+    libmysqlclient-dev \
+    mysql-server \
+    mysql-client 
 
 # Uncomment the en_US.UTF-8 locale in /etc/locale.gen and generate it
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
