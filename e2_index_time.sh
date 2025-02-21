@@ -1,4 +1,4 @@
-rm e2_config_reset_time.txt
+rm e2_index_time.txt
 export PYTHONPATH=.
 
 # Automatically export all variables defined in the .env file
