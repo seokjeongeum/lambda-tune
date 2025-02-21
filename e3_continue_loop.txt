@@ -1,0 +1,30 @@
+POSTGRES tpch
+early terminate:
+[['config_tpch_tokens_355_0.2_1740125964', 0.05925393104553223]]
+full evaluation:
+[['config_tpch_tokens_355_0.2_1740125970', 0.05110907554626465],
+ ['config_tpch_tokens_355_0.2_1740125964', 0.06554388999938965],
+ ['config_tpch_tokens_355_0.2_1740125975', 0.06737971305847168]]
+POSTGRES tpch
+early terminate:
+[['config_tpch_tokens_355_0.2_1740126078', 0.07056784629821777]]
+full evaluation:
+[['config_tpch_tokens_355_0.2_1740126078', 0.06434822082519531],
+ ['config_tpch_tokens_355_0.2_1740126083', 0.07500553131103516],
+ ['config_tpch_tokens_355_0.2_1740126088', 0.08390188217163086]]
+POSTGRES tpcds
+early terminate:
+[['config_tpcds_tokens_355_0.2_1740126182', 0.6391656398773193]]
+full evaluation:
+[['config_tpcds_tokens_355_0.2_1740126182', 0.6602153778076172],
+ ['config_tpcds_tokens_355_0.2_1740126194', 0.6926114559173584],
+ ['config_tpcds_tokens_355_0.2_1740126187', 0.7452559471130371]]
+POSTGRES job
+early terminate:
+[['config_job_tokens_355_0.2_1740126304', 172.5242416858673],
+ ['config_job_tokens_355_0.2_1740126298', 174.16803622245789],
+ ['config_job_tokens_355_0.2_1740126312', 174.7300159931183]]
+full evaluation:
+[['config_job_tokens_355_0.2_1740126298', 170.6085422039032],
+ ['config_job_tokens_355_0.2_1740126304', 171.31678986549377],
+ ['config_job_tokens_355_0.2_1740126312', 172.1552882194519]]
