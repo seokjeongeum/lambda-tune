@@ -9,8 +9,8 @@ set +o allexport
 bash .devcontainer/tpch.sh 1
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
-    --configs ./lambdatune/configs \
-    --out ./e3 \
+    --configs ./lambdatune/configs/tpch1 \
+    --out ./e3/tpch1 \
     --core 16 \
     --memory 62 \
     --system POSTGRES \
@@ -21,8 +21,8 @@ bash .devcontainer/tpch.sh 1
 bash .devcontainer/tpch.sh 10
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
-    --configs ./lambdatune/configs \
-    --out ./e3 \
+    --configs ./lambdatune/configs/tpch10 \
+    --out ./e3/tpch10 \
     --core 16 \
     --memory 62 \
     --system POSTGRES \
@@ -32,8 +32,8 @@ bash .devcontainer/tpch.sh 10
 # Run tests for other benchmarks
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
-    --configs ./lambdatune/configs \
-    --out ./e3 \
+    --configs ./lambdatune/configs/tpcds \
+    --out ./e3/tpcds \
     --core 16 \
     --memory 62 \
     --system POSTGRES \
@@ -42,8 +42,8 @@ bash .devcontainer/tpch.sh 10
 
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
-    --configs ./lambdatune/configs \
-    --out ./e3 \
+    --configs ./lambdatune/configs/job \
+    --out ./e3/job \
     --core 16 \
     --memory 62 \
     --system POSTGRES \
