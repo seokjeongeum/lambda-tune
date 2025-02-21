@@ -57,32 +57,32 @@ rm -rf "$tmp_dir"
 sudo -u postgres psql -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
 echo "PostgreSQL TPC-DS data load complete."
 
-#########################
-##     MySQL Loading   ##
-#########################
-# Note: Replace 'your_new_password' with your actual password or use a more secure method of authentication.
-echo "Dropping any existing MySQL database 'tpcds'..."
-mysql -u root  -e "DROP DATABASE IF EXISTS tpcds;"
-echo "Creating MySQL database 'tpcds'..."
-mysql -u root  -e "CREATE DATABASE tpcds;"
+# #########################
+# ##     MySQL Loading   ##
+# #########################
+# # Note: Replace 'your_new_password' with your actual password or use a more secure method of authentication.
+# echo "Dropping any existing MySQL database 'tpcds'..."
+# mysql -u root  -e "DROP DATABASE IF EXISTS tpcds;"
+# echo "Creating MySQL database 'tpcds'..."
+# mysql -u root  -e "CREATE DATABASE tpcds;"
 
-# Load schema and constraints into MySQL
-echo "Loading schema and constraints into MySQL..."
-mysql -u root  tpcds < DSGen-software-code-4.0.0_final/tools/tpcds.sql
-mysql -u root  tpcds < DSGen-software-code-4.0.0_final/tools/tpcds_source.sql
+# # Load schema and constraints into MySQL
+# echo "Loading schema and constraints into MySQL..."
+# mysql -u root  tpcds < DSGen-software-code-4.0.0_final/tools/tpcds.sql
+# mysql -u root  tpcds < DSGen-software-code-4.0.0_final/tools/tpcds_source.sql
 
-# Enable local infile capability (ensure your MySQL server allows this)
-echo "Enabling LOCAL INFILE for MySQL..."
-mysql -u root  -e "SET GLOBAL local_infile = 1;"
+# # Enable local infile capability (ensure your MySQL server allows this)
+# echo "Enabling LOCAL INFILE for MySQL..."
+# mysql -u root  -e "SET GLOBAL local_infile = 1;"
 
-# Load data into MySQL tables from each .dat file
-for dat_file in DSGen-software-code-4.0.0_final/tools/*.dat; do
-    table_name=$(basename "$dat_file" .dat)
-    abs_dat_file=$(realpath "$dat_file")
-    echo "Loading MySQL table: $table_name"
-    mysql --local-infile=1 -u root  tpcds \
-        -e "LOAD DATA LOCAL INFILE '$abs_dat_file' INTO TABLE $table_name FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';"
-done
+# # Load data into MySQL tables from each .dat file
+# for dat_file in DSGen-software-code-4.0.0_final/tools/*.dat; do
+#     table_name=$(basename "$dat_file" .dat)
+#     abs_dat_file=$(realpath "$dat_file")
+#     echo "Loading MySQL table: $table_name"
+#     mysql --local-infile=1 -u root  tpcds \
+#         -e "LOAD DATA LOCAL INFILE '$abs_dat_file' INTO TABLE $table_name FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';"
+# done
 
-mysql -u root  tpcds < DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
-echo "MySQL TPC-DS data load complete."
+# mysql -u root  tpcds < DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql
+# echo "MySQL TPC-DS data load complete."

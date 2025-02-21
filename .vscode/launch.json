@@ -13,6 +13,8 @@
             "args": [
                 "--benchmark",
                 "tpcds",
+                "--system",
+                "POSTGRES",
                 "--configs",
                 "./lambdatune/configs",
                 "--out",

@@ -65,48 +65,48 @@ done
 
 echo "PostgreSQL JOB data load complete."
 
-#############################
-##     MySQL Loading       ##
-#############################
+# #############################
+# ##     MySQL Loading       ##
+# #############################
 
-# Create the MySQL database 'job' if it doesn't exist.
-echo "Ensuring MySQL database 'job' exists..."
-mysql -u root  -e"CREATE DATABASE IF NOT EXISTS job;"
+# # Create the MySQL database 'job' if it doesn't exist.
+# echo "Ensuring MySQL database 'job' exists..."
+# mysql -u root  -e"CREATE DATABASE IF NOT EXISTS job;"
 
-# Check if schema is loaded in MySQL by testing for a known table (e.g. 'name')
-schema_exists=$(mysql -u root -D job -sse "SHOW TABLES LIKE 'name'")
-if [ -z "$schema_exists" ]; then
-  echo "Loading schema into MySQL database 'job'..."
-  mysql -u root  job < job/schema.sql
-else
-  echo "MySQL schema already loaded. Skipping schema load..."
-fi
+# # Check if schema is loaded in MySQL by testing for a known table (e.g. 'name')
+# schema_exists=$(mysql -u root -D job -sse "SHOW TABLES LIKE 'name'")
+# if [ -z "$schema_exists" ]; then
+#   echo "Loading schema into MySQL database 'job'..."
+#   mysql -u root  job < job/schema.sql
+# else
+#   echo "MySQL schema already loaded. Skipping schema load..."
+# fi
 
-CSV_DIR="csv_files"
+# CSV_DIR="csv_files"
 
-# Load CSV data into MySQL tables only if they are empty
-tables=(
-  "aka_name" "aka_title" "cast_info" "char_name" "comp_cast_type"
-  "company_name" "company_type" "complete_cast" "info_type" "keyword"
-  "kind_type" "link_type" "movie_companies" "movie_info" "movie_info_idx"
-  "movie_keyword" "movie_link" "name" "person_info" "role_type" "title"
-)
+# # Load CSV data into MySQL tables only if they are empty
+# tables=(
+#   "aka_name" "aka_title" "cast_info" "char_name" "comp_cast_type"
+#   "company_name" "company_type" "complete_cast" "info_type" "keyword"
+#   "kind_type" "link_type" "movie_companies" "movie_info" "movie_info_idx"
+#   "movie_keyword" "movie_link" "name" "person_info" "role_type" "title"
+# )
 
-# Enable local infile capability (ensure your MySQL server allows this)
-echo "Enabling LOCAL INFILE for MySQL..."
-mysql -u root  -e "SET GLOBAL local_infile = 1;"
-for table in "${tables[@]}"; do
-  echo "Checking if MySQL table ${table} has data..."
-  count=$(mysql -u root  -N -s -e "SELECT COUNT(*) FROM ${table};" job)
-  if [ "$count" -eq 0 ]; then
-    echo "Table ${table} is empty. Loading data from ${CSV_DIR}/${table}.csv..."
-    mysql --local-infile=1 -u root  job -e "LOAD DATA LOCAL INFILE '${CSV_DIR}/${table}.csv' INTO TABLE ${table} FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"';"
-  else
-    echo "Table ${table} already has data. Skipping CSV load for ${table}..."
-  fi
-done
+# # Enable local infile capability (ensure your MySQL server allows this)
+# echo "Enabling LOCAL INFILE for MySQL..."
+# mysql -u root  -e "SET GLOBAL local_infile = 1;"
+# for table in "${tables[@]}"; do
+#   echo "Checking if MySQL table ${table} has data..."
+#   count=$(mysql -u root  -N -s -e "SELECT COUNT(*) FROM ${table};" job)
+#   if [ "$count" -eq 0 ]; then
+#     echo "Table ${table} is empty. Loading data from ${CSV_DIR}/${table}.csv..."
+#     mysql --local-infile=1 -u root  job -e "LOAD DATA LOCAL INFILE '${CSV_DIR}/${table}.csv' INTO TABLE ${table} FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"';"
+#   else
+#     echo "Table ${table} already has data. Skipping CSV load for ${table}..."
+#   fi
+# done
 
-echo "MySQL JOB data load complete."
+# echo "MySQL JOB data load complete."
 
 
 # Cleanup temporary files

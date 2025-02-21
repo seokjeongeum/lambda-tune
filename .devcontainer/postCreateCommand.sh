@@ -30,11 +30,11 @@ git config --global user.name "Jeongeum Seok"
 echo "Starting PostgreSQL..."
 service postgresql start
 
-# Start MySQL in the background
-echo "Starting MySQL..."
-mysqld_safe &   # Background mysqld_safe so the script can continue
+# # Start MySQL in the background
+# echo "Starting MySQL..."
+# mysqld_safe &   # Background mysqld_safe so the script can continue
 
-mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_new_password';FLUSH PRIVILEGES;"
+# mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_new_password';FLUSH PRIVILEGES;"
 
 echo "Running TPC-DS loading script..."
 bash .devcontainer/tpcds.sh
