@@ -5,12 +5,15 @@ set -o allexport
 source .env
 set +o allexport
 
+rm -r ./lambdatune/configs/e3
+rm -r ./test/e3
+
 # Run the first batch of tests
 bash .devcontainer/tpch.sh 1
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
-    --configs ./lambdatune/configs/tpch1 \
-    --out ./e3/tpch1 \
+    --configs ./lambdatune/configs/e3/tpch1 \
+    --out ./test/e3/tpch1 \
     --core 16 \
     --memory 62 \
     --system POSTGRES \
@@ -21,8 +24,8 @@ bash .devcontainer/tpch.sh 1
 bash .devcontainer/tpch.sh 10
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
-    --configs ./lambdatune/configs/tpch10 \
-    --out ./e3/tpch10 \
+    --configs ./lambdatune/configs/e3/tpch10 \
+    --out ./test/e3/tpch10 \
     --core 16 \
     --memory 62 \
     --system POSTGRES \
@@ -32,8 +35,8 @@ bash .devcontainer/tpch.sh 10
 # Run tests for other benchmarks
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
-    --configs ./lambdatune/configs/tpcds \
-    --out ./e3/tpcds \
+    --configs ./lambdatune/configs/e3/tpcds \
+    --out ./test/e3/tpcds \
     --core 16 \
     --memory 62 \
     --system POSTGRES \
@@ -42,8 +45,8 @@ bash .devcontainer/tpch.sh 10
 
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
-    --configs ./lambdatune/configs/job \
-    --out ./e3/job \
+    --configs ./lambdatune/configs/e3/job \
+    --out ./test/e3/job \
     --core 16 \
     --memory 62 \
     --system POSTGRES \
