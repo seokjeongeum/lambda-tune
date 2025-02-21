@@ -22,7 +22,7 @@ class ConfigurationSelector:
     def __init__(self, driver: PostgresDriver, queries: list[str], configs: list[str], reset_command: str, adaptive_timeout: bool,
                  enable_query_scheduler: bool, create_all_indexes_first: bool, create_indexes: bool, drop_indexes: bool,
                  initial_time_out_seconds: int, timeout_interval: int, max_rounds: int,
-                 benchmark_name: str, system: str, output_dir: str = None):
+                 benchmark_name: str, system: str,terminate_loop:bool, output_dir: str = None):
         """
         @param driver: The database driver used to execute the queries
         @param configs: The configurations to be tested
@@ -66,6 +66,7 @@ class ConfigurationSelector:
         self.timeout_interval = timeout_interval
         self.results_dir = output_dir
         self.table_cardinalities = self.driver.get_table_cardinalities()
+        self.terminate_loop=terminate_loop
 
         logging.info(f"Results dir: {self.results_dir}")
 
@@ -365,7 +366,7 @@ class ConfigurationSelector:
                 throughput = round_completed_queries
                 logging.info(f"{cfg_idx}: {throughput}")
 
-            if completed_configs:
+            if self.terminate_loop and completed_configs:
                 break
 
             current_timeout *= self.timeout_interval

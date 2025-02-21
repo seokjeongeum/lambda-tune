@@ -28,6 +28,8 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, help="The number of cores of the system")
     parser.add_argument("--memory", type=int, help="The amount of memory (GB) of the system")
 
+    parser.add_argument("--terminate_loop", type=bool, default=False)
+
     args = parser.parse_args()
 
     llm_configs_dir = args.configs
@@ -38,6 +40,8 @@ if __name__ == "__main__":
 
     memory = args.memory
     cores = args.cores
+
+    terminate_loop=args.terminate_loop
 
     args = parser.parse_args()
 
@@ -101,7 +105,8 @@ if __name__ == "__main__":
                                          benchmark_name=benchmark,
                                          system=system,
                                          adaptive_timeout=adaptive_timeout,
-                                         output_dir=output_dir
+                                         output_dir=output_dir,
+                                         terminate_loop=terminate_loop,
                                          )
 
         selector.select_configuration()
