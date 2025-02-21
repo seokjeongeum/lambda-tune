@@ -92,6 +92,9 @@ tables=(
   "movie_keyword" "movie_link" "name" "person_info" "role_type" "title"
 )
 
+# Enable local infile capability (ensure your MySQL server allows this)
+echo "Enabling LOCAL INFILE for MySQL..."
+mysql -u root  -e "SET GLOBAL local_infile = 1;"
 for table in "${tables[@]}"; do
   echo "Checking if MySQL table ${table} has data..."
   count=$(mysql -u root  -N -s -e "SELECT COUNT(*) FROM ${table};" job)

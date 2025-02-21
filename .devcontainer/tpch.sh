@@ -29,7 +29,7 @@ make
 ./dbgen -scale ${SCALE} -f
 popd > /dev/null
 
-sudo -u postgres psql -c "DROP DATABASE ${DB_NAME};"
+sudo -u postgres psql -c "DROP DATABASE IF EXISTS ${DB_NAME};"  
 sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME};"
 
 sudo -u postgres psql -d ${DB_NAME} -c "CREATE TABLE IF NOT EXISTS NATION  (
@@ -135,7 +135,7 @@ make
 ./dbgen -scale ${SCALE} -f
 popd > /dev/null
 
-mysql -u root  -e "DROP DATABASE ${DB_NAME};"
+mysql -u root -e "DROP DATABASE IF EXISTS ${DB_NAME};"
 mysql -u root  -e "CREATE DATABASE ${DB_NAME};"
 
 mysql -u root  ${DB_NAME} -e "CREATE TABLE IF NOT EXISTS nation  (
@@ -223,6 +223,9 @@ CREATE TABLE IF NOT EXISTS lineitem (
   L_COMMENT      VARCHAR(44) NOT NULL
 );"
 
+# Enable local infile capability (ensure your MySQL server allows this)
+echo "Enabling LOCAL INFILE for MySQL..."
+mysql -u root  -e "SET GLOBAL local_infile = 1;"
 for table in "${TABLES[@]}"; do
   echo "Checking if MySQL table ${table} has data..."
   echo "Loading data for ${table} from ${TPCH_DIR}/${table}.tbl..."

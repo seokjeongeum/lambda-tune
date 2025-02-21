@@ -10,6 +10,14 @@ bash .devcontainer/tpch.sh 1
     --memory 31 \
     --system POSTGRES \
     --benchmark tpch
+.venv/bin/python lambdatune/run_lambdatune.py \
+    --config_gen true \
+    --configs ./lambdatune/configs \
+    --out ./test \
+    --core 22 \
+    --memory 31 \
+    --system MYSQL \
+    --benchmark tpch
 
 bash .devcontainer/tpch.sh 10
 .venv/bin/python lambdatune/run_lambdatune.py \
@@ -20,6 +28,14 @@ bash .devcontainer/tpch.sh 10
     --memory 31 \
     --system POSTGRES \
     --benchmark tpch
+.venv/bin/python lambdatune/run_lambdatune.py \
+    --config_gen true \
+    --configs ./lambdatune/configs \
+    --out ./test \
+    --core 22 \
+    --memory 31 \
+    --system MYSQL \
+    --benchmark tpch
     
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
@@ -29,6 +45,14 @@ bash .devcontainer/tpch.sh 10
     --memory 31 \
     --system POSTGRES \
     --benchmark tpcds
+.venv/bin/python lambdatune/run_lambdatune.py \
+    --config_gen true \
+    --configs ./lambdatune/configs \
+    --out ./test \
+    --core 22 \
+    --memory 31 \
+    --system MYSQL \
+    --benchmark tpcds
     
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
@@ -37,5 +61,13 @@ bash .devcontainer/tpch.sh 10
     --core 22 \
     --memory 31 \
     --system POSTGRES \
+    --benchmark job
+.venv/bin/python lambdatune/run_lambdatune.py \
+    --config_gen true \
+    --configs ./lambdatune/configs \
+    --out ./test \
+    --core 22 \
+    --memory 31 \
+    --system MYSQL \
     --benchmark job
     

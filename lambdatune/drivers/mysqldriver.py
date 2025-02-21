@@ -1,3 +1,4 @@
+from collections import defaultdict
 import logging
 
 import platform
@@ -193,3 +194,25 @@ class MySQLDriver:
     def reset_session(self):
         self.cursor.close()
         self.__init__(self.conf)
+
+    def get_db_schema(self) -> dict:
+        cursor = self.get_cursor()
+
+        # Query the information_schema to fetch table and column names
+        query = f"""
+        SELECT 
+            table_name,
+            column_name
+        FROM 
+            information_schema.columns
+        ORDER BY 
+            table_name, ordinal_position;
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        # Group the column names by table name using a defaultdict of lists
+        schema = defaultdict(list)
+        for table, col in rows:
+            schema[table].append(col)
+        return schema
