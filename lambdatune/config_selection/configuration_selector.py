@@ -187,9 +187,6 @@ class ConfigurationSelector:
                 self.reset_configuration(restart_system=False, drop_indexes=self.drop_indexes)
                 config_reset_time = time.time() - config_reset_time_start
                 logging.debug(f"Resetting config took: {config_reset_time}")
-                with open('e2_config_reset_time.txt','a')as f:             
-                    f.write(f'''total: {config_reset_time}
-''') 
 
                 indexes: QueryToIndex = self.get_query_index_dependencies(config.get_index_commands())
 
@@ -226,6 +223,9 @@ class ConfigurationSelector:
                                     index_creation_time_start = time.time()
                                     self.driver.cursor.execute(index.get_create_index_statement())
                                     round_index_creation_time += time.time() - index_creation_time_start
+                                    with open('e2_config_reset_time.txt','a')as f:             
+                                        f.write(f'''create index: {config_reset_time}
+''') 
                                     indexes_created_per_config[config_id].add(index)
                                     indexes_created.add(index)
                                 except Exception as e:
