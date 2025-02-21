@@ -12,6 +12,12 @@ class LLMResponse:
             self.config = self.response["choices"][0]["message"]["content"]
             self.config = re.sub(r'^```(python|json)\s+|```', '', self.config)
             self.config = re.sub(r'^\s*#.*$', '', self.config, flags=re.MULTILINE)
+            # Parse the JSON string
+            parsed_json = json.loads(self.config)
+            # Check if parsed_json is a list with a single element,
+            # then extract that element.
+            if isinstance(parsed_json, list) and len(parsed_json) == 1:
+                self.config =  json.dumps(parsed_json[0], indent=4)
 
             self.columns_dict = None
             self.tables_dict = None
