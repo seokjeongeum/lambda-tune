@@ -15,7 +15,7 @@ bash .devcontainer/tpch.sh 1
     --memory 62 \
     --system POSTGRES \
     --benchmark tpch\
-    --terminate_loop true
+    --terminate_loop false
 
 # Run the next batch of tests
 bash .devcontainer/tpch.sh 10
@@ -27,7 +27,7 @@ bash .devcontainer/tpch.sh 10
     --memory 62 \
     --system POSTGRES \
     --benchmark tpch\
-    --terminate_loop true
+    --terminate_loop false
 
 # Run tests for other benchmarks
 .venv/bin/python lambdatune/run_lambdatune.py \
@@ -38,7 +38,7 @@ bash .devcontainer/tpch.sh 10
     --memory 62 \
     --system POSTGRES \
     --benchmark tpcds\
-    --terminate_loop true
+    --terminate_loop false
 
 .venv/bin/python lambdatune/run_lambdatune.py \
     --config_gen true \
@@ -48,4 +48,4 @@ bash .devcontainer/tpch.sh 10
     --memory 62 \
     --system POSTGRES \
     --benchmark job\
-    --terminate_loop true
+    --terminate_loop false

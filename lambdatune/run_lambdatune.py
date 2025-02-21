@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, help="The number of cores of the system")
     parser.add_argument("--memory", type=int, help="The amount of memory (GB) of the system")
 
-    parser.add_argument("--terminate_loop", type=bool, default=False)
+    parser.add_argument("--terminate_loop", type=bool, default=True)
 
     args = parser.parse_args()
 
