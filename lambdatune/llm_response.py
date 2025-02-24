@@ -1,7 +1,35 @@
 import json
 import re
 
+def validate_input_format(input_data):
+    # Ensure the input is a list
+    if not isinstance(input_data, list):
+        return False
 
+    # Process each dictionary in the list
+    for item in input_data:
+        # Each item must be a dictionary with a 'command' key
+        if not isinstance(item, dict) or 'command' not in item:
+            return False
+
+        # The value of 'command' must be a string
+        if not isinstance(item['command'], str):
+            return False
+
+        # Define a regex pattern to match SQL commands starting with ALTER SYSTEM or CREATE INDEX
+        sql_pattern = r'^(ALTER SYSTEM|CREATE INDEX)\s'
+        # Split the command string into lines
+        lines = item['command'].strip().split('\n')
+        for line in lines:
+            stripped_line = line.strip()
+            # Skip empty lines
+            if not stripped_line:
+                continue
+            # Validate the command format using the regex pattern
+            if not re.match(sql_pattern, stripped_line, re.IGNORECASE):
+                return False
+
+    return True
 class LLMResponse:
     def __init__(self, path):
         with open(path) as f:
@@ -13,7 +41,11 @@ class LLMResponse:
             self.config = re.sub(r'^```(python|json)\s+|```', '', self.config)
             self.config = re.sub(r'^\s*#.*$', '', self.config, flags=re.MULTILINE)
             # Parse the JSON string
-            parsed_json = json.loads(self.config)
+            parsed_json = eval(self.config)
+            if validate_input_format(parsed_json):
+                merged_commands = "\n".join(entry["command"].strip() for entry in parsed_json)
+                # Create the resulting merged structure
+                self.config = json.dumps({"commands": merged_commands}, indent=4)
             # Check if parsed_json is a list with a single element,
             # then extract that element.
             if isinstance(parsed_json, list) and len(parsed_json) == 1:

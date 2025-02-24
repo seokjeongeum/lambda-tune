@@ -30,7 +30,7 @@ def queries_to_index(queries: list[str], create_index_commands: list[str]):
         index_name = index.split(" ")[2].strip()
         table_column = index.split("ON ")[1].strip()
         table_name = table_column.split("(")[0].strip()
-        column_name = table_column.split("(")[1][:-2].strip()
+        column_name = table_column.split("(")[1].split(")")[0].strip()
 
         index_obj = Index(index_name, table_name, column_name)
         index_map[f"{table_name}.{column_name}"] = index_obj

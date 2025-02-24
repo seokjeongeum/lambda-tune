@@ -5,7 +5,7 @@ import math
 import matplotlib.pyplot as plt
 
 # Find all JSON files matching the structure "test/e4/<token>/<method>/reports.json"
-file_paths = glob.glob("test/e4/*/*/reports.json")
+file_paths = glob.glob("e4/*/*/reports.json")
 if not file_paths:
     print("No files found matching the pattern.")
     exit(1)
@@ -16,11 +16,11 @@ data_group = {}
 
 for file_path in file_paths:
     parts = file_path.split(os.sep)
-    # Expecting parts like: ['test', 'e4', '<token>', '<method>', 'reports.json']
-    if len(parts) < 5:
+    # Expecting parts like: ['e4', '<token>', '<method>', 'reports.json']
+    if len(parts) < 4:
         continue
-    token = parts[2]  # e.g. "196", "251", etc.
-    method = parts[3]  # e.g. "lambdatune" or "naive"
+    token = parts[1]  # e.g. "196", "251", etc.
+    method = parts[2]  # e.g. "lambdatune" or "naive"
 
     # Load JSON data
     with open(file_path, "r") as f:
