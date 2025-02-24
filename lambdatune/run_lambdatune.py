@@ -101,9 +101,9 @@ if __name__ == "__main__":
 
     configurations = ConfigurationSelector.load_configs(llm_configs_dir, system=system)
 
-    with open('e2_index_time.txt','a')as f:             
-        f.write(f'''{system} {benchmark}
-''') 
+#     with open('e2_index_time.txt','a')as f:             
+#         f.write(f'''{system} {benchmark}
+# ''') 
     for timeout in timeouts:
         selector = ConfigurationSelector(configs=configurations,
                                          driver=driver,

@@ -68,9 +68,9 @@ class ConfigurationSelector:
         self.results_dir = output_dir
         self.table_cardinalities = self.driver.get_table_cardinalities()
         self.continue_loop=continue_loop
-        with open('e3_continue_loop.txt','a')as f:
-            f.write(f'''{system} {benchmark_name}
-''') 
+#         with open('e3_continue_loop.txt','a')as f:
+#             f.write(f'''{system} {benchmark_name}
+# ''') 
 
         logging.info(f"Results dir: {self.results_dir}")
 
@@ -81,9 +81,9 @@ class ConfigurationSelector:
             config_reset_time_start = time.time()
             self.driver.drop_all_non_pk_indexes()
             config_reset_time = time.time() - config_reset_time_start
-            with open('e2_index_time.txt','a')as f:             
-                f.write(f'''drop index: {config_reset_time}
-''') 
+#             with open('e2_index_time.txt','a')as f:             
+#                 f.write(f'''drop index: {config_reset_time}
+# ''') 
 
         # Reset the system configuration
         self.driver.reset_configuration(restart_system=restart_system)
@@ -224,9 +224,9 @@ class ConfigurationSelector:
                                     index_creation_time_start = time.time()
                                     self.driver.cursor.execute(index.get_create_index_statement())
                                     round_index_creation_time += time.time() - index_creation_time_start
-                                    with open('e2_index_time.txt','a')as f:             
-                                        f.write(f'''create index: {round_index_creation_time}
-''') 
+#                                     with open('e2_index_time.txt','a')as f:             
+#                                         f.write(f'''create index: {round_index_creation_time}
+# ''') 
                                     indexes_created_per_config[config_id].add(index)
                                     indexes_created.add(index)
                                 except Exception as e:
@@ -271,9 +271,9 @@ class ConfigurationSelector:
                                     logging.error(e)
 
                                 round_index_creation_time += time.time() - index_creation_time_start
-                                with open('e2_index_time.txt','a')as f:             
-                                    f.write(f'''create index: {round_index_creation_time}
-''') 
+#                                 with open('e2_index_time.txt','a')as f:             
+#                                     f.write(f'''create index: {round_index_creation_time}
+# ''') 
                                 indexes_created_per_config[config_id].add(index)
                                 indexes_created.add(index)
                             else:
@@ -380,10 +380,10 @@ class ConfigurationSelector:
 
         completed_configs = sorted(completed_configs, key=lambda x: x[1])
 
-        with open('e3_continue_loop.txt','a')as f:             
-            f.write(f'''early terminate:
-{pprint.pformat(completed_configs)}
-''') 
+#         with open('e3_continue_loop.txt','a')as f:             
+#             f.write(f'''early terminate:
+# {pprint.pformat(completed_configs)}
+# ''') 
             
         self.reset_configuration(restart_system=True, drop_indexes=self.drop_indexes)
 
@@ -482,9 +482,9 @@ class ConfigurationSelector:
                                 index_creation_time_start = time.time()
                                 self.driver.cursor.execute(index.get_create_index_statement())
                                 round_index_creation_time += time.time() - index_creation_time_start
-                                with open('e2_index_time.txt','a')as f:             
-                                    f.write(f'''create index: {round_index_creation_time}
-''') 
+#                                 with open('e2_index_time.txt','a')as f:             
+#                                     f.write(f'''create index: {round_index_creation_time}
+# ''') 
                                 indexes_created_per_config[config_id].add(index)
                                 indexes_created.add(index)
                             except Exception as e:
@@ -520,9 +520,9 @@ class ConfigurationSelector:
                                 logging.error(e)
 
                             round_index_creation_time += time.time() - index_creation_time_start
-                            with open('e2_index_time.txt','a')as f:             
-                                f.write(f'''create index: {round_index_creation_time}
-''') 
+#                             with open('e2_index_time.txt','a')as f:             
+#                                 f.write(f'''create index: {round_index_creation_time}
+# ''') 
                             indexes_created_per_config[config_id].add(index)
                             indexes_created.add(index)
                         else:
@@ -625,10 +625,10 @@ class ConfigurationSelector:
             current_timeout *= self.timeout_interval
 
         completed_configs = sorted(completed_configs, key=lambda x: x[1])
-        with open('e3_continue_loop.txt','a')as f:             
-            f.write(f'''full evaluation:
-{pprint.pformat(completed_configs)}
-''') 
+#         with open('e3_continue_loop.txt','a')as f:             
+#             f.write(f'''full evaluation:
+# {pprint.pformat(completed_configs)}
+# ''') 
 
         self.reset_configuration(restart_system=True, drop_indexes=self.drop_indexes)
 
