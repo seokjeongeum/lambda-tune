@@ -258,37 +258,83 @@ def get_configurations_with_compression_hidden_columns():
 
 def get_configurations_with_compression(target_db: str, benchmark: str, memory_gb: int, num_cores: int, driver: Driver,
                                         queries: dict, output_dir_path: str, token_budget: int = sys.maxsize,
-                                        num_configs: int=5, temperature: float=0.2):
+                                        num_configs: int=5, temperature: float=0.2,method:str='lambdatune'):
 
     conditions = extract_conditions(driver, queries)
     grouped_conditions = group_join_conditions(conditions)
 
     indexes = True
     solver = ILPSolver()
+
+    sorted_condtions=sorted(conditions,key=lambda x:x[2],reverse=True)   
     
     # start_time = time.time()
-    optimized_with_dependencies = solver.optimize_with_dependencies(grouped_conditions, token_budget)
+    optimized_with_dependencies,lambda_tune_cost = solver.optimize_with_dependencies(grouped_conditions, token_budget)
     # elapsed = time.time() - start_time
 #     with open('e1_ilp_time.txt','a')as f:             
 #         f.write(f'''{target_db} {benchmark}:{elapsed}
 # ''') 
-
+    lambda_tune_prompt=''
+    for cond in optimized_with_dependencies:
+        lambda_tune_prompt += f"{cond}: {optimized_with_dependencies[cond]}\n"
+    prompt=''
+    cost=0
+    join_conditions=defaultdict(list)
+    for cond in sorted_condtions:
+        next_=f"{cond[0]}\n"
+        if len(prompt+next_)>len(lambda_tune_prompt):
+            break
+        prompt+=next_
+        cost+=cond[2]
+        s=cond[0].split(' = ')
+        join_conditions[s[0]].append(s[1])
+        
     output_dir = os.path.join(output_dir_path)
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    for i in range(0, num_configs):
-        doc = get_config_recommendations_with_compression(dst_system=target_db,
-                                                          relations=None,
-                                                          temperature=temperature,
-                                                          retrieve_response=True,
-                                                          join_conditions=optimized_with_dependencies,
-                                                          system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
-                                                        #   indexes_only=True,
-                                                          indexes=True)
+    if method=='lambdatune':
+        for i in range(0, num_configs):
+            doc = get_config_recommendations_with_compression(dst_system=target_db,
+                                                            relations=None,
+                                                            temperature=temperature,
+                                                            retrieve_response=True,
+                                                            join_conditions=optimized_with_dependencies,
+                                                            system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
+                                                            #   indexes_only=True,
+                                                            indexes=True)
 
-        path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
-        json.dump(doc, open(path, "w+"), indent=2)
+            path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
+            json.dump(doc, open(path, "w+"), indent=2)
 
-        print("Done: " + output_dir)
+            print("Done: " + output_dir)
+
+    if method=='naive':
+        for i in range(0, num_configs):
+            doc = get_config_recommendations_with_compression(dst_system=target_db,
+                                                            relations=None,
+                                                            temperature=temperature,
+                                                            retrieve_response=True,
+                                                            join_conditions=join_conditions,
+                                                            system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
+                                                            #   indexes_only=True,
+                                                            indexes=True)
+
+            path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
+            json.dump(doc, open(path, "w+"), indent=2)
+
+            print("Done: " + output_dir)
+
+    if method=='query':
+        for i in range(0, num_configs):
+            doc = get_config_recommendations_with_full_queries(dst_system=target_db,
+                                                               queries=[query[1] for query in queries],
+                                                            temperature=temperature,
+                                                            retrieve_response=True,
+                                                            system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores})
+
+            path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
+            json.dump(doc, open(path, "w+"), indent=2)
+
+            print("Done: " + output_dir)

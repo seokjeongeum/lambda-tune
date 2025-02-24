@@ -12,13 +12,13 @@
             "console": "integratedTerminal",
             "args": [
                 "--benchmark",
-                "tpcds",
+                "job",
                 "--system",
                 "POSTGRES",
                 "--configs",
-                "./lambdatune/configs/tpcds",
+                "./lambdatune/configs/job",
                 "--out",
-                "./test/e3/tpcds",
+                "./test/e3/job",
                 "--config_gen",
                 "true",
                 "--cores",
@@ -26,6 +26,10 @@
                 "--memory",
                 "31",
                 // "--continue_loop",
+                "--token_budget",
+                "196",
+                "--method",
+                "query",
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

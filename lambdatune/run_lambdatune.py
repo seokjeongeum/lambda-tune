@@ -1,6 +1,8 @@
 import configparser
 import logging
 import argparse
+import os
+import sys
 
 from lambdatune.utils import get_dbms_driver
 from pkg_resources import resource_filename
@@ -30,6 +32,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--continue_loop", action='store_true')
 
+    parser.add_argument("--token_budget", type=int,default=sys.maxsize)
+    parser.add_argument("--method", type=str,default='lambdatune')
+
     args = parser.parse_args()
 
     llm_configs_dir = args.configs
@@ -42,6 +47,9 @@ if __name__ == "__main__":
     cores = args.cores
 
     continue_loop=args.continue_loop
+
+    token_budget=args.token_budget
+    method=args.method
 
     args = parser.parse_args()
 
@@ -59,6 +67,9 @@ if __name__ == "__main__":
     create_all_indexes_first = False
     compressor = True
     no_queries_in_prompt = False
+
+    output_dir=os.path.join(output_dir,method)
+    llm_configs_dir=os.path.join(llm_configs_dir,method)
 
     logging.info(f"LLM Config Dir: {llm_configs_dir}")
 
@@ -81,8 +92,9 @@ if __name__ == "__main__":
                                             benchmark=benchmark,
                                             memory_gb=memory,
                                             num_cores=cores,
-                                            num_configs=3,
-                                            token_budget=355
+                                            num_configs=5,
+                                            token_budget=token_budget,
+                                            method=method,
                                             )
 
     timeouts = [10]

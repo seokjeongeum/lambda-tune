@@ -161,6 +161,8 @@ class ILPSolver:
 
         key_counter = defaultdict(int)
 
+        total_cost=0
+
         for condition_set in conditions.items():
             left_key = condition_set[0]
 
@@ -180,5 +182,5 @@ class ILPSolver:
 
                     if x[right_key_idx].x == 1:
                         selected_conditions[left_key].append(key)
-
-        return selected_conditions
+                        total_cost+=cost
+        return selected_conditions,total_cost
