@@ -139,7 +139,7 @@ def extract_conditions(driver, queries):
 
         conditions[idx] = [f"{left_operand} = {right_operand}", condition[1], condition[2]]
 
-    return conditions
+    return conditions,[(x[0],x[1],'filter') for x in sorted(collector.filters.items(),key=lambda x:x[1],reverse=True)]
 
 
 def hide_table_column_names(compressed_columns):
@@ -260,13 +260,13 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                         queries: dict, output_dir_path: str, token_budget: int = sys.maxsize,
                                         num_configs: int=5, temperature: float=0.2,method:str='lambdatune'):
 
-    conditions = extract_conditions(driver, queries)
+    conditions,filters = extract_conditions(driver, queries)
     grouped_conditions = group_join_conditions(conditions)
 
     indexes = True
     solver = ILPSolver()
 
-    sorted_condtions=sorted(conditions,key=lambda x:x[2],reverse=True)   
+    sorted_condtions=sorted([(c[0],c[2],'join') for c in conditions]+filters,key=lambda x:x[1],reverse=True)   
     
     # start_time = time.time()
     optimized_with_dependencies,lambda_tune_cost = solver.optimize_with_dependencies(grouped_conditions, token_budget)
@@ -274,20 +274,22 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
 #     with open('e1_ilp_time.txt','a')as f:             
 #         f.write(f'''{target_db} {benchmark}:{elapsed}
 # ''') 
-    lambda_tune_prompt=''
-    for cond in optimized_with_dependencies:
-        lambda_tune_prompt += f"{cond}: {optimized_with_dependencies[cond]}\n"
     prompt=''
     cost=0
     join_conditions=defaultdict(list)
+    filters=list()
     for cond in sorted_condtions:
-        next_=f"{cond[0]}\n"
-        if len(prompt+next_)>len(lambda_tune_prompt):
+        next_=f"""{cond[0]}
+"""
+        if len(prompt+next_)>token_budget:
             break
         prompt+=next_
-        cost+=cond[2]
-        s=cond[0].split(' = ')
-        join_conditions[s[0]].append(s[1])
+        cost+=cond[1]
+        if cond[2]=='join':
+            s=cond[0].split(' = ')
+            join_conditions[s[0]].append(s[1])
+        if cond[2]=='filter':
+            filters.append(cond[0])
         
     output_dir = os.path.join(output_dir_path)
 
@@ -319,7 +321,8 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                                             join_conditions=join_conditions,
                                                             system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
                                                             #   indexes_only=True,
-                                                            indexes=True)
+                                                            indexes=True,
+                                                            filters=filters)
 
             path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
             json.dump(doc, open(path, "w+"), indent=2)

@@ -41,7 +41,8 @@ def get_config_recommendations_with_compression(dst_system,
                            system_specs=None,
                            indexes: bool = False,
                            indexes_only: bool = False,
-                           hints=None):
+                           hints=None,
+                           filters:list=list()):
     """
     Generate a prompt for the user to provide configuration recommendations for a system. The prompt includes
     @param dst_system: The system for which the recommendations are requested
@@ -74,6 +75,13 @@ def get_config_recommendations_with_compression(dst_system,
 
         for cond in join_conditions:
             prompt += f"{cond}: {join_conditions[cond]}\n"
+
+    if filters:
+        prompt += (f"\n\nEach row in the following list has the following format:\n"
+                   f"{{a relation A}}:{{all the filters with A in the workload}}.\n\n")
+
+        for cond in filters:
+            prompt += f"{cond}\n"
 
     if system_specs:
         prompt += f"\nThe workload runs on a system with the following specs:"

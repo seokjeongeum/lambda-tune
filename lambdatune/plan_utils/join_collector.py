@@ -9,6 +9,7 @@ class JoinCollectorVisitor:
         self.relations = defaultdict(int)
         self.aliases = dict()
         self.db_schema = db_schema
+        self.filters=dict()
 
     def get_filter_operands(self, condition):
         operands = set()
@@ -68,6 +69,7 @@ class JoinCollectorVisitor:
                     if "Relation Name" in node.info:
                         name = node.info["Relation Name"]
                         self.filter_operands.add(f"{name}.{operand}")
+                self.filters[f'{node.info["Relation Name"]}.{cond}']=node.cost_estim
 
         # Check for join keys
         join_cond = None

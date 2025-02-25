@@ -9,8 +9,8 @@ from matplotlib.colors import Normalize
 # Define marker styles for each method
 method_markers = {"lambdatune": "o", "naive": "^"}
 
-# Find all JSON files matching the structure "test/e4/<token>/<method>/reports.json"
-file_paths = glob.glob("test/e4/*/*/reports.json")
+# Find all JSON files matching the structure "test/e5/<token>/<method>/reports.json"
+file_paths = glob.glob("test/e5/*/*/reports.json")
 if not file_paths:
     print("No files found matching the pattern.")
     exit(1)
@@ -21,7 +21,7 @@ data_group = {}
 
 for file_path in file_paths:
     parts = file_path.split(os.sep)
-    # Expected parts structure: ['test', 'e4', '<token>', '<method>', 'reports.json']
+    # Expected parts structure: ['test', 'e5', '<token>', '<method>', 'reports.json']
     if len(parts) < 5:
         continue
     token = parts[2]  # Extract token from the third part
@@ -41,50 +41,6 @@ for file_path in file_paths:
         data_group.setdefault(token, {}).setdefault(method, {"x": [], "y": []})
         data_group[token][method]["x"].append(x_val)
         data_group[token][method]["y"].append(best_time)
-
-# ----------------------------------------------------------------
-# Extract separated tokens into one dictionary
-separated_tokens = ["9223372036854775807", "query"]
-separated_data = {}
-for token in separated_tokens:
-    token_data = data_group.pop(token, None)
-    if token_data is not None:
-        separated_data[token] = token_data
-    else:
-        print(f"Token '{token}' was not found in the dataset.")
-
-# If there is any separated token data, plot them in one figure
-if separated_data:
-    fig_sep, ax_sep = plt.subplots(figsize=(10, 6))
-    for token, methods in separated_data.items():
-        for method, values in methods.items():
-            # Sort the data by x for proper line plotting (if more than one data point exists)
-            if len(values["x"]) > 1:
-                sorted_pairs = sorted(
-                    zip(values["x"], values["y"]), key=lambda pair: pair[0]
-                )
-                sorted_x, sorted_y = zip(*sorted_pairs)
-            else:
-                sorted_x, sorted_y = values["x"], values["y"]
-            ax_sep.plot(
-                sorted_x,
-                sorted_y,
-                label=f"{method} (Token: {token})",
-                marker=method_markers.get(method, "o"),
-                alpha=0.8,
-            )
-    ax_sep.set_title("Performance for Separated Tokens")
-    ax_sep.set_xlabel("duration_seconds")
-    ax_sep.set_ylabel("best_execution_time")
-    ax_sep.legend()
-    plt.tight_layout()
-    output_sep = "e4_fig2.png"
-    plt.savefig(output_sep)
-    plt.close(fig_sep)
-    print(f"Separated tokens plot saved to {output_sep}")
-
-# ----------------------------------------------------------------
-# Prepare plotting for the remaining tokens in a combined plot
 
 # Sort tokens numerically (ignoring non-digit tokens by treating them as infinity)
 tokens = sorted(
@@ -137,7 +93,7 @@ ax_comb.set_ylabel("best_execution_time")
 ax_comb.legend(loc="upper left", bbox_to_anchor=(1.05, 1), borderaxespad=0.0)
 
 plt.tight_layout()
-output_comb = "e4_fig1.png"
+output_comb = "e5_fig.png"
 plt.savefig(output_comb)
 plt.close(fig_comb)
 print(f"Combined plot saved to {output_comb}")
