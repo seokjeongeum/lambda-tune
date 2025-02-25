@@ -16,9 +16,9 @@
                 "--system",
                 "POSTGRES",
                 "--configs",
-                "./lambdatune/configs/e4/251",
+                "./lambdatune/configs/e4/query",
                 "--out",
-                "./test/e4/251",
+                "./test/e4/query",
                 // "--config_gen",
                 // "true",
                 "--cores",
@@ -27,9 +27,9 @@
                 "62",
                 // "--continue_loop",
                 "--token_budget",
-                "251",
+                "9223372036854775807",
                 "--method",
-                "naive",
+                "query",
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
