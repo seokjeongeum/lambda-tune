@@ -72,9 +72,10 @@ def get_config_recommendations_with_compression(dst_system,
     if join_conditions:
         prompt += (f"\n\nEach row in the following list has the following format:\n"
                    f"{{a join key A}}:{{all the joins with A in the workload}}.\n\n")
-
+        before=(len(prompt))
         for cond in join_conditions:
             prompt += f"{cond}: {join_conditions[cond]}\n"
+        print(len(prompt)-before)
 
     if filters:
         prompt += (f"\n\nEach row in the following list has the following format:\n"

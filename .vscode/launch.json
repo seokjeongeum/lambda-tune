@@ -18,9 +18,9 @@
                 "--configs",
                 "./lambdatune/configs",
                 "--out",
-                "./test/e6",
-                // "--config_gen",
-                // "config_gen",
+                "./test",
+                "--config_gen",
+                "config_gen",
                 "--cores",
                 "22",
                 "--memory",
@@ -30,8 +30,8 @@
                 "786",
                 "--method",
                 "lambdatune",
-                "--default",
-                "default"
+                // "--default",
+                // "default"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

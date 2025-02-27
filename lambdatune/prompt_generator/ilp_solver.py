@@ -52,7 +52,7 @@ class ILPSolver:
     def extract_dependencies(self, conditions: dict):
         dependencies = defaultdict(set)
 
-        conditions = sorted(conditions.items(), key=lambda x: x[0])
+        conditions = conditions.items()
         idx = 0
 
         values = list()
@@ -101,7 +101,7 @@ class ILPSolver:
 
                 values.append(value)
                 # costs.append(len(encoding.encode(key)))
-                costs.append(len(left_key))
+                costs.append(len(key))
 
         return dependencies, costs, values
 
@@ -161,26 +161,32 @@ class ILPSolver:
 
         key_counter = defaultdict(int)
 
-        total_cost=0
-
-        for condition_set in conditions.items():
-            left_key = condition_set[0]
-
-            kc = key_counter[left_key]
-            left_key_idx = self.key_to_idx[left_key][kc]
-            key_counter[left_key] += 1
-
-            if x[left_key_idx].x == 1:
-                right_keys = sorted(condition_set[1], key=lambda x: x[0])
-                for pair in right_keys:
-                    key = pair[0]
-                    cost = pair[1]
-
-                    kc = key_counter[key]
-                    right_key_idx = self.key_to_idx[key][kc]
-                    key_counter[key] += 1
-
-                    if x[right_key_idx].x == 1:
+        for dep_key in dependencies:
+            left_key=self.idx_to_key[dep_key]
+            if x[dep_key].x == 1:
+                for dep_value in dependencies[dep_key]:
+                    key=self.idx_to_key[dep_value]
+                    if x[dep_value].x == 1:
                         selected_conditions[left_key].append(key)
-                        total_cost+=cost
-        return selected_conditions,total_cost
+
+        # for condition_set in conditions.items():
+        #     left_key = condition_set[0]
+
+        #     kc = key_counter[left_key]
+        #     left_key_idx = self.key_to_idx[left_key][kc]
+        #     key_counter[left_key] += 1
+
+        #     if x[left_key_idx].x == 1:
+        #         right_keys = sorted(condition_set[1], key=lambda x: x[0])
+        #         for pair in right_keys:
+        #             key = pair[0]
+        #             cost = pair[1]
+
+        #             kc = key_counter[key]
+        #             right_key_idx = self.key_to_idx[key][kc]
+        #             key_counter[key] += 1
+
+        #             if x[right_key_idx].x == 1:
+        #                 selected_conditions[left_key].append(key)
+        #                 total_cost+=cost
+        return selected_conditions,sum(values[i] * x[i] for i in range(len(values))).getValue()

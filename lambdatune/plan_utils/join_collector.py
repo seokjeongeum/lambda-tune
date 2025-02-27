@@ -69,7 +69,8 @@ class JoinCollectorVisitor:
                     if "Relation Name" in node.info:
                         name = node.info["Relation Name"]
                         self.filter_operands.add(f"{name}.{operand}")
-                self.filters[f'{node.info["Relation Name"]}.{cond}']=node.cost_estim
+                # if "Relation Name" in node.info:
+                #     self.filters[f'{node.info["Relation Name"]}.{cond}']=node.cost_estim
 
         # Check for join keys
         join_cond = None

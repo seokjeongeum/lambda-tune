@@ -1,6 +1,7 @@
 import json
 import logging
 import os.path
+import pprint
 import sys
 import time
 from collections import defaultdict
@@ -266,24 +267,27 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
     indexes = True
     solver = ILPSolver()
 
-    sorted_condtions=sorted([(c[0],c[2],'join') for c in conditions]+filters,key=lambda x:x[1],reverse=True)   
-    
+    sorted_conditions=sorted([(c[0],c[2],'join') for c in conditions]+filters,key=lambda x:x[1],reverse=True)   
+    pprint.pprint(sorted_conditions)
     # start_time = time.time()
     optimized_with_dependencies,lambda_tune_cost = solver.optimize_with_dependencies(grouped_conditions, token_budget)
+    pprint.pprint(optimized_with_dependencies)
     # elapsed = time.time() - start_time
 #     with open('e1_ilp_time.txt','a')as f:             
 #         f.write(f'''{target_db} {benchmark}:{elapsed}
 # ''') 
-    prompt=''
+    target=''
+    for c in optimized_with_dependencies:
+        target += f"{c}: {optimized_with_dependencies[c]}\n"
     cost=0
     join_conditions=defaultdict(list)
     filters=list()
-    for cond in sorted_condtions:
-        next_=f"""{cond[0]}
-"""
-        if len(prompt+next_)>token_budget:
+    for cond in sorted_conditions:
+        prompt=''
+        for c in join_conditions:
+            prompt += f"{c}: {join_conditions[c]}\n"
+        if len(prompt)>len(target):
             break
-        prompt+=next_
         cost+=cond[1]
         if cond[2]=='join':
             s=cond[0].split(' = ')
