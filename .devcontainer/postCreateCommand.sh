@@ -38,4 +38,4 @@ echo "Running JOB loading script..."
 bash .devcontainer/job.sh
 
 echo "Running JOB loading script..."
-bash .devcontainer/tpch.sh 10
+bash .devcontainer/tpch.sh
