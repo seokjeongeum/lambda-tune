@@ -30,10 +30,12 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, help="The number of cores of the system")
     parser.add_argument("--memory", type=int, help="The amount of memory (GB) of the system")
 
-    parser.add_argument("--continue_loop", action='store_true')
+    parser.add_argument("--continue_loop", type=bool, default=False)
 
     parser.add_argument("--token_budget", type=int,default=sys.maxsize)
     parser.add_argument("--method", type=str,default='lambdatune')
+
+    parser.add_argument("--default", type=bool, default=False)
 
     args = parser.parse_args()
 
@@ -50,6 +52,8 @@ if __name__ == "__main__":
 
     token_budget=args.token_budget
     method=args.method
+
+    default=args.default
 
     args = parser.parse_args()
 
@@ -96,6 +100,25 @@ if __name__ == "__main__":
                                             token_budget=token_budget,
                                             method=method,
                                             )
+    if default:
+        with open(f'{llm_configs_dir}/config.json','w') as f:
+            f.write('''{
+    "prompt": "",
+    "response": {
+        "choices": [
+            {
+                "message": {
+                    "role": "assistant",
+                    "content": "```python\\n{\\n    \\"commands\\": []\\n}\\n```"
+                },
+                "delta": {
+                    "role": "assistant",
+                    "content": ""
+                }
+            }
+        ]
+    }
+}''')
 
     timeouts = [10]
 

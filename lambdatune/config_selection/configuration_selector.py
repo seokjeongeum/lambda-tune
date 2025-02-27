@@ -366,7 +366,7 @@ class ConfigurationSelector:
                 if best_execution_time < float('inf'):
                     current_timeout = best_execution_time
 
-            configs = sorted(configs, key=lambda x: -len(completed_queries[x[0]]))
+            configs = sorted(configs, key=lambda x: -len(completed_queries[x[0].split(".json")[0]]))
 
             logging.info("New config order")
             for cfg_idx in dict(configs):
