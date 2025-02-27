@@ -3,6 +3,9 @@
 # Generate TPC-DS data with dsdgen
 echo "Generating TPC-DS data..."
 pushd DSGen-software-code-4.0.0_final/tools > /dev/null
+# Clean and rebuild to avoid potential issues
+make clean
+make
 ./dsdgen -sc 10 -ve
 popd > /dev/null
 
