@@ -19,7 +19,6 @@ def get_response(text: str, temperature: float):
             {"role": "user", "content": text}
         ],
         temperature=temperature,
-        max_tokens=4096
     )
 
     return response
