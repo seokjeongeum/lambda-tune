@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--benchmark",
-                "tpcds",
+                "tpch",
                 "--system",
                 "POSTGRES",
                 "--configs",
