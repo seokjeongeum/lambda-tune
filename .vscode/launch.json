@@ -12,7 +12,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--benchmark",
-                "job",
+                "tpcds",
                 "--system",
                 "POSTGRES",
                 "--configs",
@@ -30,8 +30,8 @@
                 "786",
                 "--method",
                 "lambdatune",
-                // "--default",
-                // "default"
+                "--default",
+                "default"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
