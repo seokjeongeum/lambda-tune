@@ -76,9 +76,6 @@ if __name__ == "__main__":
     compressor = True
     no_queries_in_prompt = False
 
-    output_dir=os.path.join(output_dir,exploit_index)
-    llm_configs_dir=os.path.join(llm_configs_dir,exploit_index)
-
     logging.info(f"LLM Config Dir: {llm_configs_dir}")
 
     driver = get_dbms_driver(system, db=benchmark)
