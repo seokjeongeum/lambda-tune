@@ -23,9 +23,11 @@ sed -ri 's/^(local\s+all\s+postgres\s+)peer/\1md5/' /etc/postgresql/12/main/pg_h
 
 # Configure git user settings
 echo "Configuring git user settings..."
+git config --global --add safe.directory /workspaces/lambda-tune
+git config --global --add safe.directory /workspaces/lambda-tune/job
 git config --global user.email "jeseok@dblab.postech.ac.kr"
 git config --global user.name "Jeongeum Seok"
-git submodule update --init
+git submodule update --init --recursive
 
 # Start PostgreSQL
 echo "Starting PostgreSQL..."

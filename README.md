@@ -1,3 +1,9 @@
+# Setup Dev Container
+Run following command
+```bash
+docker load -i ubuntu-20.04.tar
+```
+Then set up dev container in Visual Studio Code or JetBrains IDEs.
 # λ-Tune
 The source code of λ-Tune: A Database System Tuning framework based on Large Language Models.
 

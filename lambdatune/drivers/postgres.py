@@ -1,6 +1,7 @@
 import json
 import logging
 import os.path
+import pprint
 
 import psycopg2
 import time
@@ -120,7 +121,7 @@ class PostgresDriver(Driver):
         explain_cmd = f"{explain_cmd} {query}"
         cursor.execute(explain_cmd)
         plan = cursor.fetchall()
-
+        pprint.pprint(plan)
         if not explain_json:
             try:
                 plan = '\n'.join([d[0] for d in plan])
