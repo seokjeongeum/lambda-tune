@@ -121,7 +121,9 @@ class PostgresDriver(Driver):
         explain_cmd = f"{explain_cmd} {query}"
         cursor.execute(explain_cmd)
         plan = cursor.fetchall()
-        pprint.pprint(plan)
+        # pprint.pprint(plan)
+#         print(f'''plan: {len(json.dumps(plan))}
+# query: {len(query)}''')
         if not explain_json:
             try:
                 plan = '\n'.join([d[0] for d in plan])

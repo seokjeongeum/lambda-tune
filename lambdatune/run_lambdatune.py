@@ -37,6 +37,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--default", type=bool, default=False)
 
+    parser.add_argument("--exploit_index", type=bool, default=False)
+
     args = parser.parse_args()
 
     llm_configs_dir = args.configs
@@ -55,6 +57,8 @@ if __name__ == "__main__":
 
     default=args.default
 
+    exploit_index=args.exploit_index
+
     args = parser.parse_args()
 
     # Parse config file
@@ -72,8 +76,8 @@ if __name__ == "__main__":
     compressor = True
     no_queries_in_prompt = False
 
-    output_dir=os.path.join(output_dir,method)
-    llm_configs_dir=os.path.join(llm_configs_dir,method)
+    output_dir=os.path.join(output_dir,exploit_index)
+    llm_configs_dir=os.path.join(llm_configs_dir,exploit_index)
 
     logging.info(f"LLM Config Dir: {llm_configs_dir}")
 
@@ -144,6 +148,7 @@ if __name__ == "__main__":
                                          adaptive_timeout=adaptive_timeout,
                                          output_dir=output_dir,
                                          continue_loop=continue_loop,
+                                         exploit_index=exploit_index,
                                          )
 
         selector.select_configuration()

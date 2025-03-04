@@ -12,15 +12,15 @@
             "console": "integratedTerminal",
             "args": [
                 "--benchmark",
-                "tpch",
+                "job",
                 "--system",
                 "POSTGRES",
                 "--configs",
-                "./lambdatune/configs",
+                "./lambdatune/configs/0304_1",
                 "--out",
-                "./test",
-                "--config_gen",
-                "config_gen",
+                "./test/0304_1",
+                // "--config_gen",
+                // "config_gen",
                 "--cores",
                 "22",
                 "--memory",
@@ -30,8 +30,10 @@
                 "786",
                 "--method",
                 "lambdatune",
-                "--default",
-                "default"
+                // "--default",
+                // "default"
+                "--exploit_index",
+                "exploit_index"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

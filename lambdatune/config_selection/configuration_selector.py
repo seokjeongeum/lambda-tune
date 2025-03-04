@@ -1,3 +1,4 @@
+import itertools
 import os
 import json
 import pprint
@@ -23,7 +24,7 @@ class ConfigurationSelector:
     def __init__(self, driver: PostgresDriver, queries: list[str], configs: list[str], reset_command: str, adaptive_timeout: bool,
                  enable_query_scheduler: bool, create_all_indexes_first: bool, create_indexes: bool, drop_indexes: bool,
                  initial_time_out_seconds: int, timeout_interval: int, max_rounds: int,
-                 benchmark_name: str, system: str,continue_loop:bool, output_dir: str = None):
+                 benchmark_name: str, system: str,continue_loop:bool,exploit_index:bool, output_dir: str = None):
         """
         @param driver: The database driver used to execute the queries
         @param configs: The configurations to be tested
@@ -68,6 +69,7 @@ class ConfigurationSelector:
         self.results_dir = output_dir
         self.table_cardinalities = self.driver.get_table_cardinalities()
         self.continue_loop=continue_loop
+        self.exploit_index=exploit_index
 #         with open('e3_continue_loop.txt','a')as f:
 #             f.write(f'''{system} {benchmark_name}
 # ''') 
@@ -246,17 +248,25 @@ class ConfigurationSelector:
 
                 round_completed_query_times = dict()
 
-                for query_id in queries_to_execute:
+                i=0
+                while i<len(queries_to_execute):
+                    query_id=queries_to_execute[i]
+                    i+=1
+                # for query_id in queries_to_execute:
                     query_str = self.queries[query_id]
 
                     if query_id in completed_queries[config_id]:
                         continue
+                    query_indexes = indexes.get_query_indexes(query_id)
+                    
+                    if self.exploit_index and remaining_time <= 0 and query_indexes.isdisjoint(indexes_created):
+                        completed = False
+                        break
 
                     logging.info(f"Running query: {query_id} with timeout: {remaining_time}")
 
                     # Creates only the indexes associated with the current query
                     if self.create_indexes and not self.create_all_indexes_first:
-                        query_indexes = indexes.get_query_indexes(query_id)
                         logging.info(f"Created Indexes: {indexes_created}")
                         logging.info(f"Query Indexes: {len(query_indexes)}")
 
@@ -276,13 +286,17 @@ class ConfigurationSelector:
 # ''') 
                                 indexes_created_per_config[config_id].add(index)
                                 indexes_created.add(index)
+
+                                if self.exploit_index:
+                                    queries_to_execute.insert(i,[x[0]for x in indexes.query_to_index.items()if index in x[1] ])
+                                    queries_to_execute=[item for sublist in queries_to_execute for item in (sublist if isinstance(sublist, list) else [sublist])]
                             else:
                                 pass
 
                     query_exec_start = time.time()
                     r = self.driver.explain(query_str,
                                             execute=True,
-                                            timeout=remaining_time*1000,
+                                            timeout=(best_execution_time if self.exploit_index else remaining_time)*1000,
                                             results_path=f"{config_path}/{query_id}.json")
                     query_exec_time = time.time() - query_exec_start
                     round_query_execution_time += query_exec_time
@@ -290,7 +304,7 @@ class ConfigurationSelector:
                     # Remaining time for the rest of the queries
                     remaining_time -= query_exec_time
 
-                    if remaining_time <= 0 or r["execTime"] == "TIMEOUT":
+                    if not self.exploit_index and(remaining_time <= 0 or r["execTime"] == "TIMEOUT"):
                         completed = False
                         break
 
