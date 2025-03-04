@@ -80,8 +80,11 @@ if separated_data:
     plt.tight_layout()
     output_sep = "e4_fig2.png"
     plt.savefig(output_sep)
-    plt.close(fig_sep)
     print(f"Separated tokens plot saved to {output_sep}")
+    output_sep = "e4_fig2.pdf"
+    plt.savefig(output_sep)
+    print(f"Separated tokens plot saved to {output_sep}")
+    plt.close(fig_sep)
 
 # ----------------------------------------------------------------
 # Prepare plotting for the remaining tokens in a combined plot
@@ -139,5 +142,8 @@ ax_comb.legend(loc="upper left", bbox_to_anchor=(1.05, 1), borderaxespad=0.0)
 plt.tight_layout()
 output_comb = "e4_fig1.png"
 plt.savefig(output_comb)
-plt.close(fig_comb)
 print(f"Combined plot saved to {output_comb}")
+output_comb = "e4_fig1.pdf"
+plt.savefig(output_comb)
+print(f"Combined plot saved to {output_comb}")
+plt.close(fig_comb)

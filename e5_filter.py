@@ -95,5 +95,8 @@ ax_comb.legend(loc="upper left", bbox_to_anchor=(1.05, 1), borderaxespad=0.0)
 plt.tight_layout()
 output_comb = "e5_fig.png"
 plt.savefig(output_comb)
-plt.close(fig_comb)
 print(f"Combined plot saved to {output_comb}")
+output_comb = "e5_fig.pdf"
+plt.savefig(output_comb)
+print(f"Combined plot saved to {output_comb}")
+plt.close(fig_comb)
