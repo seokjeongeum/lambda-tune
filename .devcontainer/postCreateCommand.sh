@@ -1,6 +1,4 @@
 #!/bin/bash
-set -e  # Exit if any command fails
-
 export DEBIAN_FRONTEND=noninteractive
 
 # Update and install basic prerequisites
@@ -48,12 +46,17 @@ apt-get install -y \
     locales \
     sudo \
     libmysqlclient-dev \
-    mysql-server \
-    mysql-client 
+    mysql-server-8.0 mysql-client 
 
 # Fix locale issues
-sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen en_US.UTF-8
-update-locale LANG=en_US.UTF-8
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+locale-gen en_US.UTF-8 || true
+update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 || true
+
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+
+dpkg-reconfigure --frontend=noninteractive locales || true
 
 #------------------------------------------------------------------------------
 # Configure PostgreSQL authentication for psycopg2:
@@ -61,7 +64,10 @@ update-locale LANG=en_US.UTF-8
 echo "Configuring PostgreSQL authentication..."
 
 # Ensure PostgreSQL cluster is initialized (if not already)
-pg_createcluster 12 main || true
+if ! pg_lsclusters | grep -q "12 main"; then
+  pg_createcluster 12 main || true
+fi
+
 pg_ctlcluster 12 main start || true
 
 # Set the postgres password (replace 'your_new_password' with your desired password)
@@ -74,7 +80,7 @@ pg_ctlcluster 12 main stop
 sed -ri 's/^(local\s+all\s+postgres\s+)peer/\1md5/' /etc/postgresql/12/main/pg_hba.conf 
 
 # Restart PostgreSQL service to apply changes
-service postgresql restart
+service postgresql restart || true
 
 #------------------------------------------------------------------------------
 # Handle MySQL installation issues:
@@ -88,12 +94,19 @@ exit 0
 EOF
 chmod +x /usr/sbin/policy-rc.d
 
-# Ensure MySQL is properly configured and started
-dpkg --configure -a || true
+# Attempt to configure pending packages.
+if ! dpkg --configure -a; then
+    echo "dpkg configuration failed. Removing problematic MySQL pre- and post-installation scripts."
+    rm -f /var/lib/dpkg/info/mysql-server-8.0.preinst
+    rm -f /var/lib/dpkg/info/mysql-server-8.0.postinst
+    dpkg --configure -a || true
+fi
+
+# Start MySQL service (ignoring errors that may occur due to container restrictions)
 service mysql start || true
 
 # Set up a root password for MySQL (replace 'your_mysql_password' with your desired password)
-mysql -u root <<EOF
+mysql -u root <<EOF || true
 ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY 'your_mysql_password';
 FLUSH PRIVILEGES;
 EOF
