@@ -15,7 +15,9 @@
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
 	"runArgs": [
-	  "--shm-size=1g"
+		"--shm-size=1g",
+		"--network",
+		"host"
 	]
 	// Configure tool-specific properties.
 	// "customizations": {},
