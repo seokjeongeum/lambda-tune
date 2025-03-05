@@ -24,7 +24,7 @@ class ConfigurationSelector:
     def __init__(self, driver: PostgresDriver, queries: list[str], configs: list[str], reset_command: str, adaptive_timeout: bool,
                  enable_query_scheduler: bool, create_all_indexes_first: bool, create_indexes: bool, drop_indexes: bool,
                  initial_time_out_seconds: int, timeout_interval: int, max_rounds: int,
-                 benchmark_name: str, system: str,continue_loop:bool,exploit_index:bool, output_dir: str = None):
+                 benchmark_name: str, system: str,continue_loop:bool,exploit_index:bool,order_query:bool, output_dir: str = None):
         """
         @param driver: The database driver used to execute the queries
         @param configs: The configurations to be tested
@@ -70,6 +70,7 @@ class ConfigurationSelector:
         self.table_cardinalities = self.driver.get_table_cardinalities()
         self.continue_loop=continue_loop
         self.exploit_index=exploit_index
+        self.order_query=order_query
 #         with open('e3_continue_loop.txt','a')as f:
 #             f.write(f'''{system} {benchmark_name}
 # ''') 
@@ -211,7 +212,14 @@ class ConfigurationSelector:
                     clusters = self.sort_query_clusters(clusters)
 
                     for cluster in clusters:
-                        queries_to_execute.extend(cluster.get_queries())
+                        if self.order_query:
+                            queries_to_execute.extend(
+                            sorted(
+cluster.get_queries(),
+key=lambda q: self.driver.explain(self.queries[q], False, explain_json=True)['plan']['Plan']['Total Cost']
+))
+                        else:
+                            queries_to_execute.extend(cluster.get_queries())
                         logging.debug(f"Cluster: {cluster.get_cluster_id()}, #Indexes: {[str(index) for index in cluster.get_indexes()]}, "
                                       f"Queries: {cluster.get_queries()}")
 

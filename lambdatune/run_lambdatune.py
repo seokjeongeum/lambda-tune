@@ -39,6 +39,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--exploit_index", type=bool, default=False)
 
+    parser.add_argument("--order_query", type=bool, default=False)
+
     args = parser.parse_args()
 
     llm_configs_dir = args.configs
@@ -58,6 +60,8 @@ if __name__ == "__main__":
     default=args.default
 
     exploit_index=args.exploit_index
+
+    order_query=args.order_query
 
     args = parser.parse_args()
 
@@ -146,6 +150,7 @@ if __name__ == "__main__":
                                          output_dir=output_dir,
                                          continue_loop=continue_loop,
                                          exploit_index=exploit_index,
+                                         order_query=order_query,
                                          )
 
         selector.select_configuration()
