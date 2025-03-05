@@ -23,7 +23,7 @@ set +o allexport
     --benchmark job\
     --system POSTGRES \
     --configs ./lambdatune/configs/e8/job \
-    --out ./test/8/job/order_query \
+    --out ./test/e8/job/order_query \
     --core 22 \
     --memory 31 \
     --token_budget 786\

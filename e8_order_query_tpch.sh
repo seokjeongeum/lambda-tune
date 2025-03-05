@@ -23,7 +23,7 @@ set +o allexport
     --benchmark tpch\
     --system POSTGRES \
     --configs ./lambdatune/configs/e8/tpch \
-    --out ./test/8/tpch/order_query \
+    --out ./test/e8/tpch/order_query \
     --core 16 \
     --memory 62 \
     --token_budget 786\
