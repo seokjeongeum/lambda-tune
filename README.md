@@ -1,11 +1,8 @@
 # Setup
-Run following command
-```bash
-docker load -i ubuntu-20.04.tar
-```
-Then set up dev container in Visual Studio Code or JetBrains IDEs.
-Create virtual environment at .venv directory.
-OPENAI_API_KEY needs to be specified at .env file.
+- If you are running CentOS 7, run centos7.sh
+- Set up dev container in Visual Studio Code or JetBrains IDEs.
+- Create virtual environment at .venv directory.
+- OPENAI_API_KEY needs to be specified at .env file.
 # λ-Tune
 The source code of λ-Tune: A Database System Tuning framework based on Large Language Models.
 
