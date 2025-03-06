@@ -131,6 +131,15 @@ class ConfigurationSelector:
             return clusters_tmp
 
         return clusters
+    
+    def get_total_cost(self,query):
+        plan = self.driver.explain(self.queries[query], False, explain_json=True)['plan']
+        if isinstance(plan, dict):  
+            return plan['Plan']['Total Cost']
+        elif isinstance(plan, list):  
+            return float('inf')
+        # Optional: handle unexpected types if needed.
+        return float('inf')
 
     def select_configuration(self):
         rounds_ran = 0
@@ -213,11 +222,7 @@ class ConfigurationSelector:
 
                     for cluster in clusters:
                         if self.order_query:
-                            queries_to_execute.extend(
-                            sorted(
-cluster.get_queries(),
-key=lambda q: self.driver.explain(self.queries[q], False, explain_json=True)['plan']['Plan']['Total Cost']
-))
+                            queries_to_execute.extend(sorted(cluster.get_queries(), key=self.get_total_cost))
                         else:
                             queries_to_execute.extend(cluster.get_queries())
                         logging.debug(f"Cluster: {cluster.get_cluster_id()}, #Indexes: {[str(index) for index in cluster.get_indexes()]}, "
