@@ -10,6 +10,7 @@ class JoinCollectorVisitor:
         self.aliases = dict()
         self.db_schema = db_schema
         self.filters=dict()
+        self.query_costs=dict()
 
     def get_filter_operands(self, condition):
         operands = set()
@@ -45,9 +46,9 @@ class JoinCollectorVisitor:
 
         return operands
 
-    def visit(self, node):
+    def visit(self, node,query_cost):
         for child in node.children:
-            child.accept(self)
+            child.accept(self,query_cost)
 
         if "Alias" in node.info and "Relation Name" in node.info:
             rel_name = node.info["Relation Name"]
@@ -116,6 +117,7 @@ class JoinCollectorVisitor:
 
                     self.join_cost_estimations[join_cond] = cost_estim
                     self.join_conditions[join_cond] += 1
+                    self.query_costs[join_cond]=query_cost
 
     def resolve_aliases(self):
         for join_condition in list(self.join_conditions.keys()):
@@ -140,6 +142,7 @@ class JoinCollectorVisitor:
             if new_join_condition != join_condition:
                 self.join_conditions[new_join_condition] += 1
                 self.join_cost_estimations[new_join_condition] = self.join_cost_estimations[join_condition]
+                self.query_costs[new_join_condition]=self.query_costs[join_condition]
 
                 # Remove the old key
                 self.join_conditions.pop(join_condition)

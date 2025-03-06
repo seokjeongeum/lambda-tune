@@ -27,7 +27,7 @@ def group_join_conditions(join_conditions):
 
         left = split[0]
         right = split[1]
-        joins[left].append([right, cond[2]])
+        joins[left].append([right, cond[2], cond[3]])
 
     return joins
 
@@ -115,16 +115,16 @@ def extract_conditions(driver, queries):
             logging.warning(f"Plan: {plan[1]}")
             continue
 
-        postgres_plans.append((query_id, pg_plan))
+        postgres_plans.append((query_id, pg_plan,plan[1]['plan']['Plan']['Total Cost']))
 
     collector = JoinCollectorVisitor(db_schema = schema)
 
     for p in list(postgres_plans):
-        p[1].root.accept(collector)
+        p[1].root.accept(collector,p[2])
 
     collector.resolve_aliases()
 
-    conditions = [[d, collector.join_conditions[d], collector.join_cost_estimations[d]] for d in collector.join_conditions]
+    conditions = [[d, collector.join_conditions[d], collector.join_cost_estimations[d],collector.query_costs[d]] for d in collector.join_conditions]
 
     for idx, condition in enumerate(conditions):
         cond = condition[0]
@@ -138,7 +138,7 @@ def extract_conditions(driver, queries):
         left_operand = f"{left_tbl}.{left_col}" if left_cond else "--"
         right_operand = f"{right_tbl}.{right_col}" if right_cond else "--"
 
-        conditions[idx] = [f"{left_operand} = {right_operand}", condition[1], condition[2]]
+        conditions[idx] = [f"{left_operand} = {right_operand}", condition[1], condition[2], condition[3]]
 
     return conditions,[(x[0],x[1],'filter') for x in sorted(collector.filters.items(),key=lambda x:x[1],reverse=True)]
 
@@ -258,20 +258,18 @@ def get_configurations_with_compression_hidden_columns():
 
 
 def get_configurations_with_compression(target_db: str, benchmark: str, memory_gb: int, num_cores: int, driver: Driver,
-                                        queries: dict, output_dir_path: str, token_budget: int = sys.maxsize,
+                                        queries: dict, output_dir_path: str,query_weight:bool, token_budget: int = sys.maxsize,
                                         num_configs: int=5, temperature: float=0.2,method:str='lambdatune'):
 
     conditions,filters = extract_conditions(driver, queries)
     grouped_conditions = group_join_conditions(conditions)
 
     indexes = True
-    solver = ILPSolver()
+    solver = ILPSolver(query_weight)
 
-    sorted_conditions=sorted([(c[0],c[2],'join') for c in conditions]+filters,key=lambda x:x[1],reverse=True)   
-    pprint.pprint(sorted_conditions)
+    sorted_conditions=sorted([(c[0],c[2],'join') for c in conditions]+filters,key=lambda x:x[1],reverse=True)
     # start_time = time.time()
     optimized_with_dependencies,lambda_tune_cost = solver.optimize_with_dependencies(grouped_conditions, token_budget)
-    pprint.pprint(optimized_with_dependencies)
     # elapsed = time.time() - start_time
 #     with open('e1_ilp_time.txt','a')as f:             
 #         f.write(f'''{target_db} {benchmark}:{elapsed}

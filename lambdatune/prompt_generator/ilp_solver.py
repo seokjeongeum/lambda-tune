@@ -45,9 +45,10 @@ def optimize(conditions: list, token_budget: int):
 
 
 class ILPSolver:
-    def __init__(self):
+    def __init__(self,query_weight):
         self.key_to_idx = defaultdict(list)
         self.idx_to_key = dict()
+        self.query_weight=query_weight
 
     def extract_dependencies(self, conditions: dict):
         dependencies = defaultdict(set)
@@ -57,6 +58,7 @@ class ILPSolver:
 
         values = list()
         costs = list()
+        query_values=list()
 
         # Keeps track of the added conditions taking into account symmetry (a=b == b=a)
         added_conditions = set()
@@ -81,6 +83,7 @@ class ILPSolver:
 
             # The value of the left key alone is zero
             values.append(0)
+            query_values.append(0)
 
             # The cost of the left key is its number of tokens
             # costs.append(len(encoding.encode(left_key)))
@@ -91,6 +94,7 @@ class ILPSolver:
             for pair in right_keys:
                 key = pair[0]
                 value = pair[1]
+                query_value=pair[2]
 
                 right_key_idx = idx
                 self.key_to_idx[key].append(idx)
@@ -100,16 +104,17 @@ class ILPSolver:
                 dependencies[left_key_idx].add(right_key_idx)
 
                 values.append(value)
+                query_values.append(query_value)
                 # costs.append(len(encoding.encode(key)))
                 costs.append(len(key))
 
-        return dependencies, costs, values
+        return dependencies, costs, values,query_values
 
     def optimize_with_dependencies(self, conditions: dict, token_budget: int):
         # Reset key_to_idx
         self.key_to_idx = defaultdict(list)
 
-        dependencies, weights, values = self.extract_dependencies(conditions)
+        dependencies, weights, values,query_values = self.extract_dependencies(conditions)
 
         m = Model("knapsack")
         m.setParam("OutputFlag", 0)
@@ -118,7 +123,9 @@ class ILPSolver:
         x = m.addVars(len(weights), vtype=GRB.BINARY, name="x")
 
         # Set the objective: maximize the total value
-        m.setObjective(sum(values[i] * x[i] for i in range(len(values))), GRB.MAXIMIZE)
+        alpha=1
+        beta=1 if self.query_weight else 0
+        m.setObjective(alpha*sum(values[i] * x[i] for i in range(len(values)))+beta*sum(query_values[i] * x[i] for i in range(len(values))), GRB.MAXIMIZE)
 
         # Add constraint: the sum of the weights should be less than or equal to the max_weight
         m.addConstr(

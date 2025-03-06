@@ -16,11 +16,11 @@
                 "--system",
                 "POSTGRES",
                 "--configs",
-                "./lambdatune/configs/e5/1572/lambdatune",
+                "./lambdatune/configs/0306",
                 "--out",
-                "./test/0305",
-                // "--config_gen",
-                // "config_gen",
+                "./test/0306",
+                "--config_gen",
+                "config_gen",
                 "--cores",
                 "22",
                 "--memory",
@@ -34,8 +34,10 @@
                 // "default"
                 // "--exploit_index",
                 // "exploit_index"
-                "--order_query",
-                "order_query"
+                // "--order_query",
+                // "order_query"
+                "--query_weight",
+                "query_weight"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

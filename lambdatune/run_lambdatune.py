@@ -41,6 +41,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--order_query", type=bool, default=False)
 
+    parser.add_argument("--query_weight", type=bool, default=False)
+
     args = parser.parse_args()
 
     llm_configs_dir = args.configs
@@ -62,6 +64,8 @@ if __name__ == "__main__":
     exploit_index=args.exploit_index
 
     order_query=args.order_query
+
+    query_weight=args.query_weight
 
     args = parser.parse_args()
 
@@ -104,6 +108,7 @@ if __name__ == "__main__":
                                             num_configs=5,
                                             token_budget=token_budget,
                                             method=method,
+                                            query_weight=query_weight,
                                             )
     if default:
         with open(f'{llm_configs_dir}/config.json','w') as f:

@@ -82,8 +82,8 @@ class PostgresPlanNode:
 
         return nodes
 
-    def accept(self, visitor):
-        visitor.visit(self)
+    def accept(self, visitor,query_cost):
+        visitor.visit(self,query_cost)
 
     def __str__(self):
         return self.node_type
