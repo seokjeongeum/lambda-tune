@@ -11,7 +11,7 @@ rm -r ./test/e9
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/e9/tpcds \
+    --configs ./lambdatune/configs/e9/tpcds/lambdatune \
     --out ./test/e9/tpcds/lambdatune \
     --config_gen config_gen \
     --core 16 \
@@ -21,8 +21,9 @@ rm -r ./test/e9
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/e9/tpcds \
+    --configs ./lambdatune/configs/e9/tpcds/query_weight \
     --out ./test/e9/tpcds/query_weight \
+    --config_gen config_gen \
     --core 16 \
     --memory 62 \
     --token_budget 786\
