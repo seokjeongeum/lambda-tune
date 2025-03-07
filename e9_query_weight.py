@@ -4,17 +4,17 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-experiment = "e8"
-benchmark = "tpcds"
+experiment = "e9"
+benchmark = "job"
 # Define file paths for the two JSON reports
 file_paths = [
-    f"test/{experiment}/{benchmark}/order_query/reports.json",
+    f"test/{experiment}/{benchmark}/query_weight/reports.json",
     f"test/{experiment}/{benchmark}/lambdatune/reports.json",
 ]
 
 # Mapping for nicer display names
 display_names = {
-    f"test/{experiment}/{benchmark}/order_query/reports.json": "Ours",
+    f"test/{experiment}/{benchmark}/query_weight/reports.json": "Ours",
     f"test/{experiment}/{benchmark}/lambdatune/reports.json": "Lambda-Tune",
 }
 
@@ -53,7 +53,7 @@ df["best_execution_time"] = pd.to_numeric(df["best_execution_time"], errors="coe
 # --- Plotting ---
 # Define colors for each source for consistent plotting.
 colors = {
-    f"test/{experiment}/{benchmark}/order_query/reports.json": "blue",
+    f"test/{experiment}/{benchmark}/query_weight/reports.json": "blue",
     f"test/{experiment}/{benchmark}/lambdatune/reports.json": "green",
 }
 
