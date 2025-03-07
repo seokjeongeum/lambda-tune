@@ -39,14 +39,7 @@ tables=(
 # Load CSV data into PostgreSQL tables only if empty
 for table in "${tables[@]}"
 do
-  echo "Checking if PostgreSQL table ${table} has data..."
-  data_exists=$(sudo -u postgres psql -d job -tAc "SELECT 1 FROM ${table} LIMIT 1")
-  if [ "$data_exists" != "1" ]; then
-    echo "Loading csv_files/${table}.csv into PostgreSQL table ${table}..."
-    sudo -u postgres psql -d job -c "\copy ${table} FROM 'csv_files/${table}.csv' CSV ESCAPE '\\'"
-  else
-    echo "Table ${table} already has data. Skipping CSV load for ${table}..."
-  fi
+  sudo -u postgres psql -d job -c "\copy ${table} FROM 'csv_files/${table}.csv' CSV ESCAPE '\\'"
 done
 
 echo "PostgreSQL JOB data load complete."

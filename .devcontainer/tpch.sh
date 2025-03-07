@@ -20,8 +20,6 @@ DB_NAME="tpch"
 # PostgreSQL Loading Section#
 #############################
 pushd "${TPCH_DIR}" > /dev/null
-# Make sure dbgen is executable
-chmod +x dbgen
 # Clean and rebuild to avoid potential issues
 make clean
 make
