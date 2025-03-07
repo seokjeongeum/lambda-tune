@@ -5,14 +5,14 @@ set -o allexport
 source .env
 set +o allexport
 
-rm -r ./lambdatune/configs/e9
-rm -r ./test/e9
+rm -r ./lambdatune/configs/s52
+rm -r ./test/s52
     
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark job\
     --system POSTGRES \
-    --configs ./lambdatune/configs/e9/job/lambdatune \
-    --out ./test/e9/job/lambdatune \
+    --configs ./lambdatune/configs/s52/job/lambdatune \
+    --out ./test/s52/job/lambdatune \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -21,8 +21,8 @@ rm -r ./test/e9
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark job\
     --system POSTGRES \
-    --configs ./lambdatune/configs/e9/job/query_weight \
-    --out ./test/e9/job/query_weight \
+    --configs ./lambdatune/configs/s52/job/query_weight \
+    --out ./test/s52/job/query_weight \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \

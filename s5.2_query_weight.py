@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-experiment = "e9"
+experiment = "s52"
 benchmark = "tpch"
 # Define file paths for the two JSON reports
 file_paths = [
