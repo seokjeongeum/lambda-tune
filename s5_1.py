@@ -4,33 +4,30 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Set the experiment and benchmarks to plot
 experiment = "s51"
-benchmark = "tpch"
-# Define file paths for the two JSON reports
-file_paths = [
-    f"test/{experiment}/{benchmark}/ours/reports.json",
-    f"test/{experiment}/{benchmark}/lambdatune/reports.json",
-]
+benchmarks = ["tpch", "job", "tpcds"]
 
-# Mapping for nicer display names
-display_names = {
-    f"test/{experiment}/{benchmark}/ours/reports.json": "Ours",
-    f"test/{experiment}/{benchmark}/lambdatune/reports.json": "λ-Tune",
-}
-
-# Load and merge the data from both JSON files, tagging each record with its source file.
+# Load and merge the data from all JSON files for each benchmark,
+# tagging each record with its source and benchmark.
 data = []
-for fp in file_paths:
-    if os.path.exists(fp):
-        with open(fp, "r") as f:
-            reports = json.load(f)
-            for report in reports:
-                report["file"] = fp  # Tag the source
-            data.extend(reports)
-    else:
-        print(f"Warning: File {fp} not found.")
+for benchmark in benchmarks:
+    file_paths = [
+        f"test/{experiment}/{benchmark}/ours/reports.json",
+        f"test/{experiment}/{benchmark}/lambdatune/reports.json",
+    ]
+    for fp in file_paths:
+        if os.path.exists(fp):
+            with open(fp, "r") as f:
+                reports = json.load(f)
+                for report in reports:
+                    report["file"] = fp  # Tag the source file
+                    report["benchmark"] = benchmark  # Tag the benchmark
+                data.extend(reports)
+        else:
+            print(f"Warning: File {fp} not found.")
 
-# Create a DataFrame
+# Create a DataFrame with all collected data.
 df = pd.DataFrame(data)
 
 # List of required columns
@@ -47,43 +44,61 @@ missing_columns = [col for col in required_columns if col not in df.columns]
 if missing_columns:
     raise ValueError(f"Missing columns: {missing_columns}")
 
-# Convert best_execution_time to numeric (any non-numeric becomes NaN)
+# Convert numeric columns; non-numeric entries become NaN.
 df["best_execution_time"] = pd.to_numeric(df["best_execution_time"], errors="coerce")
+df["duration_seconds"] = pd.to_numeric(df["duration_seconds"], errors="coerce")
+
+# Define display name mapping and colors for each source file.
+display_names = {}
+colors = {}
+for benchmark in benchmarks:
+    ours_fp = f"test/{experiment}/{benchmark}/ours/reports.json"
+    lambdatune_fp = f"test/{experiment}/{benchmark}/lambdatune/reports.json"
+    display_names[ours_fp] = "Ours"
+    display_names[lambdatune_fp] = "λ-Tune"
+    colors[ours_fp] = "blue"
+    colors[lambdatune_fp] = "green"
 
 # --- Plotting ---
-# Define colors for each source for consistent plotting.
-colors = {
-    f"test/{experiment}/{benchmark}/ours/reports.json": "blue",
-    f"test/{experiment}/{benchmark}/lambdatune/reports.json": "green",
-}
+# Create one subplot per benchmark and combine them in one overall figure.
+num_benchmarks = len(benchmarks)
+fig, axes = plt.subplots(nrows=1, ncols=num_benchmarks, figsize=(6*num_benchmarks, 6), sharey=False)
 
-plt.figure(figsize=(10, 6))
-for source, group in df.groupby("file"):
-    # Sort by duration_seconds so the connecting line is meaningful.
-    group = group.sort_values("duration_seconds")
-    plt.scatter(
-        group["duration_seconds"],
-        group["best_execution_time"],
-        label=display_names.get(source, source),
-        color=colors.get(source, "black"),
-        alpha=0.7,
-    )
-    plt.plot(
-        group["duration_seconds"],
-        group["best_execution_time"],
-        color=colors.get(source, "black"),
-        linestyle="--",
-        alpha=0.7,
-    )
+# Ensure axes is always an iterable.
+if num_benchmarks == 1:
+    axes = [axes]
 
-plt.xlabel("Duration (Seconds)")
-plt.ylabel("Best Execution Time")
-plt.title("Scatter Plot: Duration vs Best Execution Time by Source")
-plt.legend(title="Source")
-plt.grid(True)
-plt.tight_layout()
+for ax, benchmark in zip(axes, benchmarks):
+    # Filter DataFrame for the current benchmark.
+    sub_df = df[df["benchmark"] == benchmark]
+    # For each source ('ours' and 'lambdatune'), plot the scatter and connecting line.
+    for source, group in sub_df.groupby("file"):
+        group = group.sort_values("duration_seconds")
+        ax.scatter(
+            group["duration_seconds"],
+            group["best_execution_time"],
+            label=display_names.get(source, source),
+            color=colors.get(source, "black"),
+            alpha=0.7,
+        )
+        ax.plot(
+            group["duration_seconds"],
+            group["best_execution_time"],
+            color=colors.get(source, "black"),
+            linestyle="--",
+            alpha=0.7,
+        )
+    # Convert benchmark name to proper title format: "tpch" -> "TPC-H", "tpcds" -> "TPC-DS"
+    title = benchmark.upper().replace("TPCH", "TPC-H").replace("TPCDS", "TPC-DS")
+    ax.set_title(f"{title} Benchmark")
+    ax.set_xlabel("Duration (Seconds)")
+    ax.set_ylabel("Best Execution Time")
+    ax.grid(True)
+    ax.legend(title="Source")
 
-plot_filename = f"{experiment}_order_query_{benchmark}"
+print("Scatter Plot: Duration vs Best Execution Time by Source for Each Benchmark")
+plt.tight_layout(rect=[0, 0, 1, 0.93])
+plot_filename = "s5_1_combined"
 plt.savefig(f"{plot_filename}.png")
 plt.savefig(f"{plot_filename}.pdf")
 print(f"Scatter plot saved as {plot_filename}")
@@ -110,3 +125,11 @@ for source, row in grouped_sums.iterrows():
         pct = (value / total * 100) if total > 0 else 0
         print(f"{metric}: {value:.6f} ({pct:.2f}%)")
     print(f"sum: {total:.6f}\n")
+
+# --- Compute and Print Best Execution Time Statistics per Source ---
+print("\nBest Execution Time per Source (aggregated):\n")
+# For each source, compute the minimum, maximum, and average best_execution_time.
+grouped_best = df.groupby("file")["best_execution_time"].agg(["min", "max", "mean"])
+for source, stats in grouped_best.iterrows():
+    disp_name = display_names.get(source, source)
+    print(f"{disp_name} -> Min: {stats['min']:.6f}, Max: {stats['max']:.6f}, Avg: {stats['mean']:.6f}")

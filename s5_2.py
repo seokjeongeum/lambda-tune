@@ -88,7 +88,9 @@ index_time_grouped = index_time_grouped.reindex(benchmarks).reindex(
 remainder_grouped = total_time_grouped - index_time_grouped
 
 # Print data that are plotted:
-print("Total Time Grouped:")
+# The print statement below suits the overall "Time Breakdown" theme.
+print("Time Breakdown Across Benchmarks and Sources:")
+print("\nTotal Time Grouped:")
 print(total_time_grouped)
 print("\nIndex Creation Time Grouped:")
 print(index_time_grouped)
@@ -206,6 +208,6 @@ fig.legend(
 )
 
 plt.tight_layout(rect=[0.02, 0.02, 0.98, 1.0])
-plt.savefig("s5.3.png", bbox_inches="tight")
-plt.savefig("s5.3.pdf", bbox_inches="tight")
+plt.savefig("s5_3.png", bbox_inches="tight")
+plt.savefig("s5_3.pdf", bbox_inches="tight")
 plt.show()

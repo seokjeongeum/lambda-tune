@@ -14,8 +14,8 @@ rm -r ./test/s52
     --configs ./lambdatune/configs/s52/tpcds \
     --out ./test/s52/tpcds/lambdatune \
     --config_gen config_gen \
-    --core 22 \
-    --memory 31 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --method lambdatune\
     
@@ -24,8 +24,8 @@ rm -r ./test/s52
     --system POSTGRES \
     --configs ./lambdatune/configs/s52/tpcds \
     --out ./test/s52/tpcds/ours \
-    --core 22 \
-    --memory 31 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --method lambdatune\
     --order_query order_query\
