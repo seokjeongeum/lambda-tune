@@ -10,27 +10,27 @@ from matplotlib.patches import Patch
 benchmarks = ["tpc-h", "job", "tpc-ds"]
 file_paths = {
     "tpc-h": [
-        "test/e7/tpch/exploit_index/reports.json",
-        "test/e7/tpch/lambdatune/reports.json",
+        "test/s53/tpch/ours/reports.json",
+        "test/s53/tpch/lambdatune/reports.json",
     ],
     "job": [
-        "test/e7/job/exploit_index/reports.json",
-        "test/e7/job/lambdatune/reports.json",
+        "test/s53/job/ours/reports.json",
+        "test/s53/job/lambdatune/reports.json",
     ],
     "tpc-ds": [
-        "test/e7/tpcds/exploit_index/reports.json",
-        "test/e7/tpcds/lambdatune/reports.json",
+        "test/s53/tpcds/ours/reports.json",
+        "test/s53/tpcds/lambdatune/reports.json",
     ],
 }
 
 # Mapping for nicer display names
 display_names = {
-    "test/e7/tpch/exploit_index/reports.json": "Ours",
-    "test/e7/tpch/lambdatune/reports.json": "Lambda-Tune",
-    "test/e7/job/exploit_index/reports.json": "Ours",
-    "test/e7/job/lambdatune/reports.json": "Lambda-Tune",
-    "test/e7/tpcds/exploit_index/reports.json": "Ours",
-    "test/e7/tpcds/lambdatune/reports.json": "Lambda-Tune",
+    "test/s53/tpch/ours/reports.json": "Ours",
+    "test/s53/tpch/lambdatune/reports.json": "Lambda-Tune",
+    "test/s53/job/ours/reports.json": "Ours",
+    "test/s53/job/lambdatune/reports.json": "Lambda-Tune",
+    "test/s53/tpcds/ours/reports.json": "Ours",
+    "test/s53/tpcds/lambdatune/reports.json": "Lambda-Tune",
 }
 
 # Load and merge the data from all JSON files
