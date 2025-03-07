@@ -24,23 +24,9 @@ fi
 #############################
 ##   PostgreSQL Loading    ##
 #############################
-
-echo "Checking for PostgreSQL database 'job'..."
-if ! sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='job'" | grep -q 1; then
-  echo "Creating PostgreSQL database 'job'..."
-  sudo -u postgres psql -c "CREATE DATABASE job;"
-else
-  echo "PostgreSQL database 'job' already exists. Skipping creation..."
-fi
-
-# Check if schema is already loaded (using table 'name' as an indicator)
-schema_loaded=$(sudo -u postgres psql -d job -tAc "SELECT 1 FROM pg_tables WHERE tablename='name'")
-if [ "$schema_loaded" != "1" ]; then
-  echo "Loading schema into PostgreSQL database 'job'..."
-  sudo -u postgres psql -d job -f job/schema.sql
-else
-  echo "PostgreSQL schema already loaded. Skipping schema load..."
-fi
+sudo -u postgres psql -c "DROP DATABASE IF EXISTS job;"
+sudo -u postgres psql -c "CREATE DATABASE job;"
+sudo -u postgres psql -d job -f job/schema.sql
 
 # List of JOB tables
 tables=(

@@ -118,10 +118,8 @@ rm /usr/sbin/policy-rc.d  # Remove policy override after configuration is comple
 #------------------------------------------------------------------------------
 echo "Configuring Git..."
 git config --global --add safe.directory /workspaces/lambda-tune
-git config --global --add safe.directory /workspaces/lambda-tune/job
 git config --global user.email "jeseok@dblab.postech.ac.kr"
 git config --global user.name "Jeongeum Seok"
-git submodule update --init --recursive
 
 #------------------------------------------------------------------------------
 # Run additional scripts:

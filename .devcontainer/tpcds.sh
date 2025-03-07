@@ -65,7 +65,4 @@ sudo -u postgres psql -d tpcds -f "$bulk_script" || { echo "Error during bulk lo
 # Clean up temporary files
 rm "$bulk_script"
 rm -rf "$tmp_dir"
-
-# Add foreign key constraints (ensure that DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql exists and its contents are valid SQL)
-sudo -u postgres psql -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_ri.sql || { echo "Error adding constraints"; exit 1; }
 echo "PostgreSQL TPC-DS data load complete."
