@@ -26,11 +26,11 @@ file_paths = {
 # Mapping for nicer display names
 display_names = {
     "test/s53/tpch/ours/reports.json": "Ours",
-    "test/s53/tpch/lambdatune/reports.json": "Lambda-Tune",
+    "test/s53/tpch/lambdatune/reports.json": "λ-Tune",
     "test/s53/job/ours/reports.json": "Ours",
-    "test/s53/job/lambdatune/reports.json": "Lambda-Tune",
+    "test/s53/job/lambdatune/reports.json": "λ-Tune",
     "test/s53/tpcds/ours/reports.json": "Ours",
-    "test/s53/tpcds/lambdatune/reports.json": "Lambda-Tune",
+    "test/s53/tpcds/lambdatune/reports.json": "λ-Tune",
 }
 
 # Load and merge the data from all JSON files
@@ -76,7 +76,7 @@ index_time_grouped = (
 )
 
 # Order benchmarks and sources
-sources_order = ["Ours", "Lambda-Tune"]
+sources_order = ["Ours", "λ-Tune"]
 total_time_grouped = total_time_grouped.reindex(benchmarks).reindex(
     columns=sources_order, fill_value=0
 )
@@ -96,8 +96,8 @@ print("\nRemaining (Other) Time Grouped:")
 print(remainder_grouped)
 
 # Define color mappings (saturated colors for clarity)
-color_mapping_index = {"Ours": "#1f77b4", "Lambda-Tune": "#ff7f0e"}
-color_mapping_other = {"Ours": "#005792", "Lambda-Tune": "#d35400"}
+color_mapping_index = {"Ours": "#1f77b4", "λ-Tune": "#ff7f0e"}
+color_mapping_other = {"Ours": "#005792", "λ-Tune": "#d35400"}
 
 # Create vertical subplots (one for each benchmark) arranged horizontally.
 # Independent y-axes for each subplot.
@@ -188,11 +188,11 @@ legend_elements = [
     Patch(facecolor=color_mapping_index["Ours"], label="Ours - Index Creation"),
     Patch(facecolor=color_mapping_other["Ours"], label="Ours - Other Time"),
     Patch(
-        facecolor=color_mapping_index["Lambda-Tune"],
-        label="Lambda-Tune - Index Creation",
+        facecolor=color_mapping_index["λ-Tune"],
+        label="λ-Tune - Index Creation",
     ),
     Patch(
-        facecolor=color_mapping_other["Lambda-Tune"], label="Lambda-Tune - Other Time"
+        facecolor=color_mapping_other["λ-Tune"], label="λ-Tune - Other Time"
     ),
 ]
 # Move the legend higher by adjusting bbox_to_anchor to (0.5, 1.10)

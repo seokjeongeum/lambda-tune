@@ -5,14 +5,14 @@ set -o allexport
 source .env
 set +o allexport
 
-rm -r ./lambdatune/configs/s53
-rm -r ./test/s53
+rm -r ./lambdatune/configs/s52
+rm -r ./test/s52
     
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/s53/tpcds \
-    --out ./test/s53/tpcds/lambdatune \
+    --configs ./lambdatune/configs/s52/tpcds \
+    --out ./test/s52/tpcds/lambdatune \
     --config_gen config_gen \
     --core 22 \
     --memory 31 \
@@ -22,8 +22,8 @@ rm -r ./test/s53
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/s53/tpcds \
-    --out ./test/s53/tpcds/ours \
+    --configs ./lambdatune/configs/s52/tpcds \
+    --out ./test/s52/tpcds/ours \
     --core 22 \
     --memory 31 \
     --token_budget 786\
