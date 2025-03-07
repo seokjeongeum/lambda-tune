@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 experiment = "e9"
-benchmark = "job"
+benchmark = "tpch"
 # Define file paths for the two JSON reports
 file_paths = [
     f"test/{experiment}/{benchmark}/query_weight/reports.json",

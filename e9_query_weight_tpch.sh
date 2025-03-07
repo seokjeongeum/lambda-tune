@@ -5,13 +5,13 @@ set -o allexport
 source .env
 set +o allexport
 
-# rm -r ./lambdatune/configs/e9
-# rm -r ./test/e9
+rm -r ./lambdatune/configs/e9
+rm -r ./test/e9
     
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpch\
     --system POSTGRES \
-    --configs ./lambdatune/configs/e9/tpch \
+    --configs ./lambdatune/configs/e9/tpch/lambdatune \
     --out ./test/e9/tpch/lambdatune \
     --config_gen config_gen \
     --core 16 \
@@ -21,8 +21,9 @@ set +o allexport
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpch\
     --system POSTGRES \
-    --configs ./lambdatune/configs/e9/tpch \
+    --configs ./lambdatune/configs/e9/tpch/query_weight \
     --out ./test/e9/tpch/query_weight \
+    --config_gen config_gen \
     --core 16 \
     --memory 62 \
     --token_budget 786\
