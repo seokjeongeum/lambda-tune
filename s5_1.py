@@ -3,6 +3,7 @@ import json
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Set the experiment and benchmarks to plot
 experiment = "s51"
@@ -21,7 +22,7 @@ for benchmark in benchmarks:
             with open(fp, "r") as f:
                 reports = json.load(f)
                 for report in reports:
-                    report["file"] = fp  # Tag the source file
+                    report["file"] = fp      # Tag the source file
                     report["benchmark"] = benchmark  # Tag the benchmark
                 data.extend(reports)
         else:
@@ -48,14 +49,24 @@ if missing_columns:
 df["best_execution_time"] = pd.to_numeric(df["best_execution_time"], errors="coerce")
 df["duration_seconds"] = pd.to_numeric(df["duration_seconds"], errors="coerce")
 
-# Define display name mapping and colors for each source file.
+# Define display name mapping and colors for each source file, including benchmark info.
 display_names = {}
 colors = {}
 for benchmark in benchmarks:
+    # Determine friendly benchmark title.
+    if benchmark.lower() == "tpch":
+        bench_title = "TPC-H"
+    elif benchmark.lower() == "job":
+        bench_title = "JOB"
+    elif benchmark.lower() == "tpcds":
+        bench_title = "TPC-DS"
+    else:
+        bench_title = benchmark.upper()
+
     ours_fp = f"test/{experiment}/{benchmark}/ours/reports.json"
     lambdatune_fp = f"test/{experiment}/{benchmark}/lambdatune/reports.json"
-    display_names[ours_fp] = "Ours"
-    display_names[lambdatune_fp] = "λ-Tune"
+    display_names[ours_fp] = f"{bench_title}: Ours"
+    display_names[lambdatune_fp] = f"{bench_title}: λ-Tune"
     colors[ours_fp] = "blue"
     colors[lambdatune_fp] = "green"
 
@@ -128,8 +139,10 @@ for source, row in grouped_sums.iterrows():
 
 # --- Compute and Print Best Execution Time Statistics per Source ---
 print("\nBest Execution Time per Source (aggregated):\n")
-# For each source, compute the minimum, maximum, and average best_execution_time.
-grouped_best = df.groupby("file")["best_execution_time"].agg(["min", "max", "mean"])
+# Aggregate only the minimum for best_execution_time.
+grouped_best = df.groupby("file")["best_execution_time"].agg(["min"])
 for source, stats in grouped_best.iterrows():
     disp_name = display_names.get(source, source)
-    print(f"{disp_name} -> Min: {stats['min']:.6f}, Max: {stats['max']:.6f}, Avg: {stats['mean']:.6f}")
+    # If the value is infinite, replace it with NaN so that "inf" isn't printed.
+    min_val = stats["min"] if not np.isinf(stats["min"]) else float("nan")
+    print(f"{disp_name} -> Min: {min_val:.6f}")
