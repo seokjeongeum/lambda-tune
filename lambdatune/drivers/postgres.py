@@ -66,7 +66,7 @@ class PostgresDriver(Driver):
             except Exception as e:
                 c += 1
 
-                if c > 3:
+                if c > 6:
                     raise e
 
                 logging.error(e)
