@@ -172,6 +172,11 @@ class ConfigurationSelector:
             raise Exception("No configurations were found.")
 
         start: float = time.time()
+
+        query_costs={x:self.get_total_cost(x) for x in self.queries}
+
+        print(time.time()-start)
+
         while rounds_ran < self.max_rounds:
             round_results: set = {}
 
@@ -222,7 +227,7 @@ class ConfigurationSelector:
 
                     for cluster in clusters:
                         if self.order_query:
-                            queries_to_execute.extend(sorted(cluster.get_queries(), key=self.get_total_cost))
+                            queries_to_execute.extend(sorted(cluster.get_queries(), key=lambda x:query_costs[x]))
                         else:
                             queries_to_execute.extend(cluster.get_queries())
                         logging.debug(f"Cluster: {cluster.get_cluster_id()}, #Indexes: {[str(index) for index in cluster.get_indexes()]}, "
@@ -364,7 +369,7 @@ class ConfigurationSelector:
                     "driver_config": driver_config,
                     "lambda_tune_config": list(config.get_configs()),
                     "created_indexes": self.driver.get_all_indexes(),
-                    "round_completed_query_times": round_completed_query_times
+                    "round_completed_query_times": round_completed_query_times,
                 }
 
                 round_results[config_id] = report
@@ -414,252 +419,7 @@ class ConfigurationSelector:
             
         self.reset_configuration(restart_system=True, drop_indexes=self.drop_indexes)
 
-        # self.evaluate(reports_output)
-
-    def select_configuration_(self):
-        rounds_ran = 0
-        current_timeout = 2147483647
-
-        # Completed queries per config
-        completed_queries = defaultdict(list)
-
-        # Execution time per config
-        total_query_execution_time_per_config = defaultdict(float)
-
-        # Completed query execution time per config
-        total_completed_query_execution_time_per_config = defaultdict(float)
-
-        # Best Execution Time Seen
-        best_execution_time = float("inf")
-
-        # Indexes created per config
-        indexes_created_per_config = defaultdict(set)
-
-        completed_configs = []
-
-        if self.results_dir:
-            os.makedirs(self.results_dir, exist_ok=True)
-
-        configs = list(self.configs.items())
-        configs = sorted(configs, key=lambda x: x[0])
-
-        if len(configs) == 0:
-            raise Exception("No configurations were found.")
-
-        start: float = time.time()
-        round_results: set = {}
-        for current_configuration in configs:
-            config_start = time.time()
-
-            # Indexes created in this configuration
-            indexes_created = set()
-
-            completed: bool = True
-            round_query_execution_time: float = 0.0
-            round_completed_query_execution_time: float = 0.0
-            round_completed_queries: int = 0
-            round_index_creation_time: float = 0.0
-            config_id: str = current_configuration[0].split(".json")[0]
-            config: Configuration = current_configuration[1]
-
-            # Path to store the results of this configuration
-            config_path = f"{self.results_dir}/{config_id}"
-
-            if not os.path.exists(config_path):
-                os.makedirs(config_path, exist_ok=True)
-
-            # Reset Config
-            config_reset_time_start = time.time()
-            self.reset_configuration(restart_system=False, drop_indexes=self.drop_indexes)
-            config_reset_time = time.time() - config_reset_time_start
-            logging.debug(f"Resetting config took: {config_reset_time}")
-
-            indexes: QueryToIndex = self.get_query_index_dependencies(config.get_index_commands())
-
-            # Set the system configuration
-            reconfiguration_start = time.time()
-            self.driver.set_configuration(config.get_configs(), restart=True, reset=True)
-            reconfiguration_time = time.time() - reconfiguration_start
-
-            queries_left = [query_id for query_id in self.queries if query_id not in completed_queries[config_id]]
-
-            logging.info(f"Trying config: {config_id}")
-            remaining_time = current_timeout
-
-            queries_to_execute = queries_left
-
-            if self.enable_query_scheduler:
-                queries_to_execute = list()
-                clusters: list[QueryCluster] = generate_query_clusters(queries_left, indexes)
-                clusters = self.sort_query_clusters(clusters)
-
-                for cluster in clusters:
-                    queries_to_execute.extend(cluster.get_queries())
-                    logging.debug(f"Cluster: {cluster.get_cluster_id()}, #Indexes: {[str(index) for index in cluster.get_indexes()]}, "
-                                    f"Queries: {cluster.get_queries()}")
-
-            # Creates all the indexes included in the configuration before query execution
-            if self.create_indexes and self.create_all_indexes_first:
-                for query in queries_to_execute:
-                    query_indexes = indexes.get_query_indexes(query)
-                    for index in query_indexes:
-                        if index not in indexes_created:
-                            try:
-                                logging.info(f"Creating index: {index}")
-                                index_creation_time_start = time.time()
-                                self.driver.cursor.execute(index.get_create_index_statement())
-                                round_index_creation_time += time.time() - index_creation_time_start
-#                                 with open('e2_index_time.txt','a')as f:             
-#                                     f.write(f'''create index: {round_index_creation_time}
-# ''') 
-                                indexes_created_per_config[config_id].add(index)
-                                indexes_created.add(index)
-                            except Exception as e:
-                                logging.warning(f"Error creating index: {index}")
-                                logging.warning(f"Error message: {e}")
-
-            driver_config: dict = self.driver.get_current_global_config();
-
-            round_completed_query_times = dict()
-
-            for query_id in queries_to_execute:
-                query_str = self.queries[query_id]
-
-                if query_id in completed_queries[config_id]:
-                    continue
-
-                logging.info(f"Running query: {query_id} with timeout: {remaining_time}")
-
-                # Creates only the indexes associated with the current query
-                if self.create_indexes and not self.create_all_indexes_first:
-                    query_indexes = indexes.get_query_indexes(query_id)
-                    logging.info(f"Created Indexes: {indexes_created}")
-                    logging.info(f"Query Indexes: {len(query_indexes)}")
-
-                    for index in query_indexes:
-                        if index not in indexes_created:
-                            logging.info(f"Creating index: {index}")
-                            index_creation_time_start = time.time()
-
-                            try:
-                                self.driver.get_cursor().execute(index.get_create_index_statement())
-                            except Exception as e:
-                                logging.error(e)
-
-                            round_index_creation_time += time.time() - index_creation_time_start
-#                             with open('e2_index_time.txt','a')as f:             
-#                                 f.write(f'''create index: {round_index_creation_time}
-# ''') 
-                            indexes_created_per_config[config_id].add(index)
-                            indexes_created.add(index)
-                        else:
-                            pass
-
-                query_exec_start = time.time()
-                r = self.driver.explain(query_str,
-                                        execute=True,
-                                        timeout=remaining_time*1000,
-                                        results_path=f"{config_path}/{query_id}.json")
-                query_exec_time = time.time() - query_exec_start
-                round_query_execution_time += query_exec_time
-
-                # Remaining time for the rest of the queries
-                remaining_time -= query_exec_time
-
-                if remaining_time <= 0 or r["execTime"] == "TIMEOUT":
-                    completed = False
-                    break
-
-                round_completed_query_times[query_id] = query_exec_time
-                completed_queries[config_id].append(query_id)
-                round_completed_query_execution_time += query_exec_time
-                total_completed_query_execution_time_per_config[config_id] += query_exec_time
-                round_completed_queries += 1
-
-            total_query_execution_time_per_config[config_id] += round_query_execution_time
-
-            if not completed:
-                logging.info("Config exceeded timeout")
-            else:
-                if total_query_execution_time_per_config[config_id] < best_execution_time:
-                    best_execution_time = total_query_execution_time_per_config[config_id]
-
-                logging.info(f"Config {config_id} succeeded!")
-                logging.debug(f"Created Indexes: {len(indexes_created)}, "
-                                f"Total Indexes: {len(config.get_indexes())}")
-
-                completed_configs.append([config_id, total_query_execution_time_per_config[config_id]])
-
-            report = {
-                "config_id": config_id,
-                "total_query_execution_time": total_query_execution_time_per_config[config_id],
-                "total_completed_query_execution_time": total_completed_query_execution_time_per_config[config_id],
-                "best_execution_time": best_execution_time,
-                "duration_seconds": time.time() - start,
-                "start_time": config_start,
-                "report_ts": time.time(),
-                "round_num_indexes_created": len(indexes_created),
-                "round_index_creation_time": round_index_creation_time,
-                "round_query_execution_time": round_query_execution_time,
-                "round_completed_queries": round_completed_queries,
-                "round_config_reset_time": config_reset_time,
-                "round_reconfiguration_time": reconfiguration_time,
-                "queries_completed_total": len(completed_queries[config_id]),
-                "num_indexes_created_total": len(indexes_created_per_config[config_id]),
-                "num_indexes_total": len(config.get_indexes()),
-                "completed": completed,
-                "timeout": current_timeout,
-                "alpha": self.timeout_interval,
-                "driver_config": driver_config,
-                "lambda_tune_config": list(config.get_configs()),
-                "created_indexes": self.driver.get_all_indexes(),
-                "round_completed_query_times": round_completed_query_times
-            }
-
-            round_results[config_id] = report
-
-            reports_output = f"{self.results_dir}/reports.json"
-
-            if os.path.exists(reports_output):
-                with open(reports_output, "r") as f:
-                    reports = json.load(f)
-            else:
-                reports = []
-
-            reports.append(report)
-
-            with open(reports_output, "w") as f:
-                f.write(json.dumps(reports, indent=2))
-                f.flush()
-
-            logging.info(json.dumps(report, indent=2))
-
-            if self.adaptive_timeout:
-                if current_timeout < round_index_creation_time:
-                    current_timeout = round_index_creation_time
-
-            # Always keep the best execution time as the current timeout
-            if best_execution_time < float('inf'):
-                current_timeout = best_execution_time
-
-            configs = sorted(configs, key=lambda x: -len(completed_queries[x[0]]))
-
-            logging.info("New config order")
-            for cfg_idx in dict(configs):
-                throughput = round_completed_queries
-                logging.info(f"{cfg_idx}: {throughput}")
-
-            current_timeout *= self.timeout_interval
-
-        completed_configs = sorted(completed_configs, key=lambda x: x[1])
-#         with open('e3_continue_loop.txt','a')as f:             
-#             f.write(f'''full evaluation:
-# {pprint.pformat(completed_configs)}
-# ''') 
-
-        self.reset_configuration(restart_system=True, drop_indexes=self.drop_indexes)
-
-        # self.evaluate(reports_output)
+        # self.evaluate(reports_output)    
     
     def evaluate(self, reports_output):
         logging.info("Evaluating Completed Configurations")

@@ -16,11 +16,11 @@
                 "--system",
                 "POSTGRES",
                 "--configs",
-                "./lambdatune/configs/0306",
+                "./lambdatune/configs/0309",
                 "--out",
-                "./test/0306",
-                "--config_gen",
-                "config_gen",
+                "./test/0309",
+                // "--config_gen",
+                // "config_gen",
                 "--cores",
                 "22",
                 "--memory",
@@ -31,11 +31,11 @@
                 "--method",
                 "lambdatune",
                 // "--default",
-                // "default"
-                // "--exploit_index",
-                // "exploit_index"
-                // "--order_query",
-                // "order_query"
+                // "default",
+                "--exploit_index",
+                "exploit_index",
+                "--order_query",
+                "order_query",
                 "--query_weight",
                 "query_weight"
             ],

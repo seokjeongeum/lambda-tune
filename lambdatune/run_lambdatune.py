@@ -159,5 +159,3 @@ if __name__ == "__main__":
                                          )
 
         selector.select_configuration()
-        if continue_loop:
-            selector.select_configuration_()
