@@ -24,7 +24,7 @@ class ConfigurationSelector:
     def __init__(self, driver: PostgresDriver, queries: list[str], configs: list[str], reset_command: str, adaptive_timeout: bool,
                  enable_query_scheduler: bool, create_all_indexes_first: bool, create_indexes: bool, drop_indexes: bool,
                  initial_time_out_seconds: int, timeout_interval: int, max_rounds: int,
-                 benchmark_name: str, system: str,continue_loop:bool,exploit_index:bool,order_query:bool, output_dir: str = None):
+                 benchmark_name: str, system: str,continue_loop:bool,exploit_index:bool,order_query:bool, output_dir: str = None,costs:dict=None):
         """
         @param driver: The database driver used to execute the queries
         @param configs: The configurations to be tested
@@ -71,6 +71,10 @@ class ConfigurationSelector:
         self.continue_loop=continue_loop
         self.exploit_index=exploit_index
         self.order_query=order_query
+        if costs:
+            self.costs=costs
+        else:
+            self.costs={x:self.get_total_cost(x) for x in self.queries}
 #         with open('e3_continue_loop.txt','a')as f:
 #             f.write(f'''{system} {benchmark_name}
 # ''') 
@@ -173,10 +177,6 @@ class ConfigurationSelector:
 
         start: float = time.time()
 
-        query_costs={x:self.get_total_cost(x) for x in self.queries}
-
-        print(time.time()-start)
-
         while rounds_ran < self.max_rounds:
             round_results: set = {}
 
@@ -227,7 +227,7 @@ class ConfigurationSelector:
 
                     for cluster in clusters:
                         if self.order_query:
-                            queries_to_execute.extend(sorted(cluster.get_queries(), key=lambda x:query_costs[x]))
+                            queries_to_execute.extend(sorted(cluster.get_queries(), key=lambda x:self.costs[x]))
                         else:
                             queries_to_execute.extend(cluster.get_queries())
                         logging.debug(f"Cluster: {cluster.get_cluster_id()}, #Indexes: {[str(index) for index in cluster.get_indexes()]}, "
@@ -306,8 +306,12 @@ class ConfigurationSelector:
                                 indexes_created.add(index)
 
                                 if self.exploit_index:
-                                    queries_to_execute.insert(i,[x[0]for x in indexes.query_to_index.items()if index in x[1] ])
-                                    queries_to_execute=[item for sublist in queries_to_execute for item in (sublist if isinstance(sublist, list) else [sublist])]
+                                    queries_to_execute.insert(i, [x[0] for x in indexes.query_to_index.items() if index in x[1]])
+                                    queries_to_execute = [item for sublist in queries_to_execute for item in (sublist if isinstance(sublist, list) else [sublist])]
+                                    queries_to_execute = list(dict.fromkeys(queries_to_execute))
+                                    with open('queries_to_execute','a') as f:
+                                        f.write(f'''{len(queries_to_execute)}
+''')
                             else:
                                 pass
 

@@ -7,30 +7,30 @@ import numpy as np
 from matplotlib.patches import Patch
 
 # Define benchmarks and file paths for the JSON reports
-benchmarks = ["tpc-h", "job", "tpc-ds"]
+benchmarks = ["TPC-H", "JOB", "TPC-DS"]
 file_paths = {
-    "tpc-h": [
-        "test/s53/tpch/ours/reports.json",
-        "test/s53/tpch/lambdatune/reports.json",
+    "TPC-H": [
+        "test/s52/tpch/ours/reports.json",
+        "test/s52/tpch/lambdatune/reports.json",
     ],
-    "job": [
-        "test/s53/job/ours/reports.json",
-        "test/s53/job/lambdatune/reports.json",
+    "JOB": [
+        "test/s52/job/ours/reports.json",
+        "test/s52/job/lambdatune/reports.json",
     ],
-    "tpc-ds": [
-        "test/s53/tpcds/ours/reports.json",
-        "test/s53/tpcds/lambdatune/reports.json",
+    "TPC-DS": [
+        "test/s52/tpcds/ours/reports.json",
+        "test/s52/tpcds/lambdatune/reports.json",
     ],
 }
 
 # Mapping for nicer display names
 display_names = {
-    "test/s53/tpch/ours/reports.json": "Ours",
-    "test/s53/tpch/lambdatune/reports.json": "λ-Tune",
-    "test/s53/job/ours/reports.json": "Ours",
-    "test/s53/job/lambdatune/reports.json": "λ-Tune",
-    "test/s53/tpcds/ours/reports.json": "Ours",
-    "test/s53/tpcds/lambdatune/reports.json": "λ-Tune",
+    "test/s52/tpch/ours/reports.json": "Ours",
+    "test/s52/tpch/lambdatune/reports.json": "λ-Tune",
+    "test/s52/job/ours/reports.json": "Ours",
+    "test/s52/job/lambdatune/reports.json": "λ-Tune",
+    "test/s52/tpcds/ours/reports.json": "Ours",
+    "test/s52/tpcds/lambdatune/reports.json": "λ-Tune",
 }
 
 # Load and merge the data from all JSON files
@@ -208,6 +208,6 @@ fig.legend(
 )
 
 plt.tight_layout(rect=[0.02, 0.02, 0.98, 1.0])
-plt.savefig("s5_3.png", bbox_inches="tight")
-plt.savefig("s5_3.pdf", bbox_inches="tight")
+plt.savefig("s5_2.png", bbox_inches="tight")
+plt.savefig("s5_2.pdf", bbox_inches="tight")
 plt.show()

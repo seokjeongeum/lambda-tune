@@ -96,9 +96,9 @@ if __name__ == "__main__":
         raise Exception("Benchmark {} does not exist. Pick one from {tpch, tpcds, job}"%(benchmark))
 
     queries = queries
-
+    costs=None
     if config_gen:
-        get_configurations_with_compression(output_dir_path=llm_configs_dir,
+        costs=get_configurations_with_compression(output_dir_path=llm_configs_dir,
                                             driver=driver,
                                             queries=queries,
                                             target_db=system,
@@ -156,6 +156,7 @@ if __name__ == "__main__":
                                          continue_loop=continue_loop,
                                          exploit_index=exploit_index,
                                          order_query=order_query,
+                                         costs=costs
                                          )
 
         selector.select_configuration()

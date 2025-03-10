@@ -140,7 +140,7 @@ def extract_conditions(driver, queries):
 
         conditions[idx] = [f"{left_operand} = {right_operand}", condition[1], condition[2], condition[3]]
 
-    return conditions,[(x[0],x[1],'filter') for x in sorted(collector.filters.items(),key=lambda x:x[1],reverse=True)]
+    return conditions,[(x[0],x[1],'filter') for x in sorted(collector.filters.items(),key=lambda x:x[1],reverse=True)],{x[0]:x[2] for x in postgres_plans}
 
 
 def hide_table_column_names(compressed_columns):
@@ -261,7 +261,7 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                         queries: dict, output_dir_path: str,query_weight:bool, token_budget: int = sys.maxsize,
                                         num_configs: int=5, temperature: float=0.2,method:str='lambdatune'):
 
-    conditions,filters = extract_conditions(driver, queries)
+    conditions,filters,costs = extract_conditions(driver, queries)
     grouped_conditions = group_join_conditions(conditions)
 
     indexes = True
@@ -343,3 +343,4 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
             json.dump(doc, open(path, "w+"), indent=2)
 
             print("Done: " + output_dir)
+    return costs
