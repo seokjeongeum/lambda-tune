@@ -19,7 +19,7 @@ sudo -u postgres psql -c "CREATE DATABASE tpcds;" || { echo "Error creating data
 
 # Load schema and constraints into PostgreSQL
 echo "Loading schema and constraints into PostgreSQL..."
-sudo -u postgres psql -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds.sql || { echo "Error loading schema"; exit 1; }
+sudo -u postgres psql -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_pk.sql || { echo "Error loading schema"; exit 1; }
 sudo -u postgres psql -d tpcds -f DSGen-software-code-4.0.0_final/tools/tpcds_source.sql || { echo "Error loading source schema"; exit 1; }
 
 # Create a temporary SQL file for bulk load operations and a temporary directory for processed .dat files
