@@ -309,9 +309,6 @@ class ConfigurationSelector:
                                     queries_to_execute.insert(i, [x[0] for x in indexes.query_to_index.items() if index in x[1]])
                                     queries_to_execute = [item for sublist in queries_to_execute for item in (sublist if isinstance(sublist, list) else [sublist])]
                                     queries_to_execute = list(dict.fromkeys(queries_to_execute))
-                                    with open('queries_to_execute','a') as f:
-                                        f.write(f'''{len(queries_to_execute)}
-''')
                             else:
                                 pass
 
