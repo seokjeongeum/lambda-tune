@@ -74,7 +74,7 @@ class ConfigurationSelector:
         if costs:
             self.costs=costs
         else:
-            self.costs={x:self.get_total_cost(x) for x in self.queries}
+            self.costs=defaultdict(lambda:float('inf'),{x:self.get_total_cost(x) for x in self.queries})
 #         with open('e3_continue_loop.txt','a')as f:
 #             f.write(f'''{system} {benchmark_name}
 # ''') 

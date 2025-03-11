@@ -11,16 +11,6 @@ rm -r ./test/s51
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/s51/tpcds/lambdatune \
-    --out ./test/s51/tpcds/lambdatune \
-    --config_gen config_gen \
-    --core 16 \
-    --memory 62 \
-    --token_budget 786
-    
-.venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark tpcds\
-    --system POSTGRES \
     --configs ./lambdatune/configs/s51/tpcds/ours \
     --out ./test/s51/tpcds/ours \
     --config_gen config_gen \

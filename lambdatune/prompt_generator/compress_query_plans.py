@@ -140,7 +140,7 @@ def extract_conditions(driver, queries):
 
         conditions[idx] = [f"{left_operand} = {right_operand}", condition[1], condition[2], condition[3]]
 
-    return conditions,[(x[0],x[1],'filter') for x in sorted(collector.filters.items(),key=lambda x:x[1],reverse=True)],{x[0]:x[2] for x in postgres_plans}
+    return conditions,[(x[0],x[1],'filter') for x in sorted(collector.filters.items(),key=lambda x:x[1],reverse=True)],defaultdict(lambda: float('inf'), {x[0]: x[2] for x in postgres_plans})
 
 
 def hide_table_column_names(compressed_columns):
