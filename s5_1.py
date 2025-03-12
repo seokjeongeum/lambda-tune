@@ -5,6 +5,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Increase plot font sizes globally
+plt.rcParams.update({
+    'font.size': 14,          # General font size
+    'axes.titlesize': 16,     # Axes title font size
+    'axes.labelsize': 14,     # Axes label font size
+    'xtick.labelsize': 12,    # x tick label font size
+    'ytick.labelsize': 12,    # y tick label font size
+    'legend.fontsize': 12     # Legend font size
+})
+
 # Set the experiment and benchmarks to plot
 experiment = "s51"
 benchmarks = ["tpch", "job", "tpcds"]
@@ -119,8 +129,6 @@ plt.show()
 time_columns = [
     "round_index_creation_time",
     "round_query_execution_time",
-    "round_config_reset_time",
-    "round_reconfiguration_time",
 ]
 
 # Group by file and compute the sums for each time column.

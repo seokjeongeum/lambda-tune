@@ -6,6 +6,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
 
+# Increase global font sizes for clarity
+plt.rcParams.update({
+    'font.size': 14,          # General font size
+    'axes.titlesize': 18,     # Axes title font size
+    'axes.labelsize': 16,     # Axes label font size
+    'xtick.labelsize': 14,    # x-tick label size
+    'ytick.labelsize': 14,    # y-tick label size
+    'legend.fontsize': 14     # Legend font size
+})
+
 # Define benchmarks and file paths for the JSON reports
 benchmarks = ["TPC-H", "JOB", "TPC-DS"]
 file_paths = {
@@ -64,11 +74,11 @@ for col in required_columns:
 df["source"] = df["file"].apply(lambda fp: display_names.get(fp, fp))
 
 # Group data:
-# Total time is taken from the last reported value per (benchmark, source)
+# Total time: use the last reported value per (benchmark, source)
 total_time_grouped = (
     df.groupby(["benchmark", "source"]).last()["duration_seconds"].unstack(fill_value=0)
 )
-# Index creation time is summed over rounds per (benchmark, source)
+# Index creation time: sum over rounds per (benchmark, source)
 index_time_grouped = (
     df.groupby(["benchmark", "source"])["round_index_creation_time"]
     .sum()
@@ -88,7 +98,6 @@ index_time_grouped = index_time_grouped.reindex(benchmarks).reindex(
 remainder_grouped = total_time_grouped - index_time_grouped
 
 # Print data that are plotted:
-# The print statement below suits the overall "Time Breakdown" theme.
 print("Time Breakdown Across Benchmarks and Sources:")
 print("\nTotal Time Grouped:")
 print(total_time_grouped)
@@ -102,7 +111,6 @@ color_mapping_index = {"Ours": "#1f77b4", "λ-Tune": "#ff7f0e"}
 color_mapping_other = {"Ours": "#005792", "λ-Tune": "#d35400"}
 
 # Create vertical subplots (one for each benchmark) arranged horizontally.
-# Independent y-axes for each subplot.
 fig, axes = plt.subplots(
     nrows=1, ncols=len(benchmarks), figsize=(6 * len(benchmarks), 6), sharey=False
 )
@@ -135,8 +143,8 @@ for ax, benchmark in zip(axes, benchmarks):
         pct = (idx_time / tot_time * 100) if tot_time > 0 else 0
         idx_str = f"{idx_time:,.1f}s"
         tot_str = f"{tot_time:,.1f}s"
-        # When the index creation time is very short compared to total (e.g., in tpc-ds),
-        # reposition the index creation annotation above the dashed line.
+        
+        # Position for index time text depends on the ratio for TPC-DS
         if (
             benchmark.lower() == "tpc-ds"
             and tot_time > 0
@@ -149,7 +157,7 @@ for ax, benchmark in zip(axes, benchmarks):
                 ha="center",
                 va="bottom",
                 color="black",
-                fontsize=8,
+                fontsize=12,
             )
         else:
             ax.text(
@@ -159,7 +167,7 @@ for ax, benchmark in zip(axes, benchmarks):
                 ha="center",
                 va="center",
                 color="black",
-                fontsize=10,
+                fontsize=14,
             )
         ax.hlines(
             y=idx_time,
@@ -169,45 +177,43 @@ for ax, benchmark in zip(axes, benchmarks):
             linestyles="--",
             linewidth=1,
         )
+        # Increase offset (from 0.05 to 0.10) for the total time text to avoid overlap with the title.
         ax.text(
             x[i],
-            tot_time + 0.05 * tot_time,
+            tot_time + 0.10 * tot_time,
             tot_str,
             ha="center",
             va="bottom",
             color="black",
-            fontsize=10,
+            fontsize=14,
         )
 
-    ax.set_title(f"{benchmark.upper()} Benchmark")
+    # Increase the title padding so that the title doesn't crowd the upper data.
+    ax.set_title(f"{benchmark.upper()} Benchmark", pad=20)
     ax.set_xticks(x)
     ax.set_xticklabels(sources_order)
     ax.set_ylabel("Time (Seconds)")
     ax.grid(axis="y", linestyle="--", alpha=0.7)
+    # Set y-limit to provide extra space for annotations (10% extra space)
+    ax.set_ylim(0, max(total_vals) * 1.25)
 
-# Create one global legend and position it inside the figure near the top center.
+# Create one global legend and position it near the top center.
 legend_elements = [
     Patch(facecolor=color_mapping_index["Ours"], label="Ours - Index Creation"),
     Patch(facecolor=color_mapping_other["Ours"], label="Ours - Other Time"),
-    Patch(
-        facecolor=color_mapping_index["λ-Tune"],
-        label="λ-Tune - Index Creation",
-    ),
-    Patch(
-        facecolor=color_mapping_other["λ-Tune"], label="λ-Tune - Other Time"
-    ),
+    Patch(facecolor=color_mapping_index["λ-Tune"], label="λ-Tune - Index Creation"),
+    Patch(facecolor=color_mapping_other["λ-Tune"], label="λ-Tune - Other Time"),
 ]
-# Move the legend higher by adjusting bbox_to_anchor to (0.5, 1.10)
 fig.legend(
     handles=legend_elements,
     loc="upper center",
     bbox_to_anchor=(0.5, 1.10),
     ncol=4,
     title="Time Breakdown",
-    fontsize=10,
+    fontsize=14,
 )
 
-plt.tight_layout(rect=[0.02, 0.02, 0.98, 1.0])
+plt.tight_layout(rect=[0.02, 0.02, 0.98, 0.98])
 plt.savefig("s5_2.png", bbox_inches="tight")
 plt.savefig("s5_2.pdf", bbox_inches="tight")
 plt.show()
