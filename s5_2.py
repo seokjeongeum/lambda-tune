@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
 
-# Increase global font sizes for clarity
+# Increase global font sizes for clarity by 1.5x (original values multiplied by 1.5)
 plt.rcParams.update({
-    'font.size': 14,          # General font size
-    'axes.titlesize': 18,     # Axes title font size
-    'axes.labelsize': 16,     # Axes label font size
-    'xtick.labelsize': 14,    # x-tick label size
-    'ytick.labelsize': 14,    # y-tick label size
-    'legend.fontsize': 14     # Legend font size
+    'font.size': 21,          # Original 14 x 1.5
+    'axes.titlesize': 27,     # Original 18 x 1.5
+    'axes.labelsize': 24,     # Original 16 x 1.5
+    'xtick.labelsize': 21,    # Original 14 x 1.5
+    'ytick.labelsize': 21,    # Original 14 x 1.5
+    'legend.fontsize': 21     # Original 14 x 1.5
 })
 
 # Define benchmarks and file paths for the JSON reports
@@ -143,32 +143,15 @@ for ax, benchmark in zip(axes, benchmarks):
         pct = (idx_time / tot_time * 100) if tot_time > 0 else 0
         idx_str = f"{idx_time:,.1f}s"
         tot_str = f"{tot_time:,.1f}s"
-        
-        # Position for index time text depends on the ratio for TPC-DS
-        if (
-            benchmark.lower() == "tpc-ds"
-            and tot_time > 0
-            and (idx_time / tot_time < 0.1)
-        ):
-            ax.text(
-                x[i],
-                idx_time + 0.02 * tot_time,
-                f"{idx_str}\n({pct:.1f}%)",
-                ha="center",
-                va="bottom",
-                color="black",
-                fontsize=12,
-            )
-        else:
-            ax.text(
-                x[i],
-                idx_time / 2,
-                f"{idx_str}\n({pct:.1f}%)",
-                ha="center",
-                va="center",
-                color="black",
-                fontsize=14,
-            )
+        ax.text(
+            x[i],
+            idx_time + 0.02 * tot_time,
+            f"{idx_str}\n({pct:.1f}%)",
+            ha="center",
+            va="bottom",
+            color="black",
+            fontsize=18,
+        )
         ax.hlines(
             y=idx_time,
             xmin=x[i] - bar_width / 2,
@@ -185,7 +168,7 @@ for ax, benchmark in zip(axes, benchmarks):
             ha="center",
             va="bottom",
             color="black",
-            fontsize=14,
+            fontsize=21,
         )
 
     # Increase the title padding so that the title doesn't crowd the upper data.
@@ -207,10 +190,10 @@ legend_elements = [
 fig.legend(
     handles=legend_elements,
     loc="upper center",
-    bbox_to_anchor=(0.5, 1.10),
+    bbox_to_anchor=(0.5, 1.18),  # Adjusted upwards from (0.5, 1.10)
     ncol=4,
     title="Time Breakdown",
-    fontsize=14,
+    fontsize=21,
 )
 
 plt.tight_layout(rect=[0.02, 0.02, 0.98, 0.98])

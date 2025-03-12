@@ -5,14 +5,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Increase plot font sizes globally
+# Increase plot font sizes globally by 1.5x
 plt.rcParams.update({
-    'font.size': 14,          # General font size
-    'axes.titlesize': 16,     # Axes title font size
-    'axes.labelsize': 14,     # Axes label font size
-    'xtick.labelsize': 12,    # x tick label font size
-    'ytick.labelsize': 12,    # y tick label font size
-    'legend.fontsize': 12     # Legend font size
+    'font.size': 21,          # General font size (1.5x of 14)
+    'axes.titlesize': 24,     # Axes title font size (1.5x of 16)
+    'axes.labelsize': 21,     # Axes label font size (1.5x of 14)
+    'xtick.labelsize': 18,    # x tick label font size (1.5x of 12)
+    'ytick.labelsize': 18,    # y tick label font size (1.5x of 12)
+    'legend.fontsize': 18     # Legend font size (1.5x of 12)
 })
 
 # Set the experiment and benchmarks to plot
