@@ -1,5 +1,4 @@
 # Setup
-- If you are running CentOS 7, run centos7.sh
 - Set up dev container in Visual Studio Code or JetBrains IDEs.
 - Create virtual environment at .venv directory.
 - OPENAI_API_KEY needs to be specified at .env file.
