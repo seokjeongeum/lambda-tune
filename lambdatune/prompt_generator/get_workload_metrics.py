@@ -1,6 +1,7 @@
 import argparse
 import json
 import psycopg2
+from tqdm import tqdm  # Import the tqdm module for progress reporting
 
 from lambdatune.benchmarks.job import get_job_queries
 from lambdatune.benchmarks.tpcds import get_tpcds_queries
@@ -10,16 +11,16 @@ from lambdatune.benchmarks.tpch import get_tpch_queries
 def run_workload(dbname, user, password, host="localhost", port=5432, queries=None):
     """
     Connects to the PostgreSQL database and executes a list of predefined queries
-    to simulate a workload.
-
+    to simulate a workload and reports progress.
+    
     Parameters:
       dbname (str): The name of the database.
       user (str): The username.
       password (str): The password.
       host (str): Database host address (default 'localhost').
       port (int): Database port (default 5432).
-      queries (list of str, optional): A list of SQL queries to execute.
-
+      queries (list of str): A list of SQL queries to execute.
+      
     Returns:
       None
     """
@@ -28,8 +29,8 @@ def run_workload(dbname, user, password, host="localhost", port=5432, queries=No
     )
     cur = conn.cursor()
 
-    # Execute each predefined query and commit the transaction.
-    for query in queries:
+    # Use tqdm to wrap the queries iterator for a progress bar.
+    for query in tqdm(queries, desc="Executing Queries", unit="query"):
         cur.execute(query)
         conn.commit()
 
@@ -40,19 +41,13 @@ def run_workload(dbname, user, password, host="localhost", port=5432, queries=No
 def get_workload_metrics(dbname, user, password, host="localhost", port=5432):
     """
     Connects to the PostgreSQL database and retrieves key workload-derived metrics.
-
+    
     Metrics include:
       - xact_commit, xact_rollback: Transaction commit/rollback counts.
       - blks_read, blks_hit: Disk block I/O statistics.
       - tup_returned, tup_fetched, tup_inserted, conflicts, tup_updated, tup_deleted: Tuple counts.
-      - Disk I/O metrics derived from the above values:
-          * disk_read_count: Derived from blks_read.
-          * disk_read_bytes: blks_read multiplied by PostgreSQL's default block size.
-          * disk_write_count: Derived from buffers written (bgwriter stats).
-          * disk_write_bytes: disk_write_count multiplied by the block size.
-
-    Assumes a default PostgreSQL block size of 8192 bytes.
-
+      - Disk I/O metrics derived from the above values.
+    
     Returns:
       dict: The aggregated metrics.
     """
@@ -134,14 +129,17 @@ if __name__ == "__main__":
     host = "localhost"
     port = 5432
 
-    # Run the workload using the predefined queries.
-    # Assume queries is a list of tuples and take the second element ([1]) of each tuple.
-    run_workload(dbname, user, password, host, port, [query[1] for query in queries])
+    # Transform queries list assuming each query is contained in a tuple,
+    # and the second element ([1]) is the SQL query string.
+    query_list = [query[1] for query in queries]
+
+    # Run the workload and display a progress bar while executing the queries.
+    run_workload(dbname, user, password, host, port, query_list)
 
     # Retrieve metrics after running the workload.
     metrics = get_workload_metrics(dbname, user, password, host, port)
 
-    # Save the metrics to a file with the benchmark name in the filename.
+    # Save the metrics to a JSON file with the benchmark name.
     filename = f"{benchmark}_metrics.json"
     with open(filename, "w") as f:
         json.dump(metrics, f, indent=2)
