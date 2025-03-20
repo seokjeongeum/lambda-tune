@@ -28,8 +28,6 @@
                 // "--continue_loop",
                 "--token_budget",
                 "786",
-                // "--default",
-                // "default",
                 "--exploit_index",
                 "exploit_index",
                 "--order_query",

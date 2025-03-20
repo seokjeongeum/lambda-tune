@@ -34,8 +34,6 @@ if __name__ == "__main__":
 
     parser.add_argument("--token_budget", type=int,default=sys.maxsize)
 
-    parser.add_argument("--default", type=bool, default=False)
-
     parser.add_argument("--exploit_index", type=bool, default=False)
 
     parser.add_argument("--order_query", type=bool, default=False)
@@ -60,8 +58,6 @@ if __name__ == "__main__":
     continue_loop=args.continue_loop
 
     token_budget=args.token_budget
-
-    default=args.default
 
     exploit_index=args.exploit_index
 
@@ -117,25 +113,6 @@ if __name__ == "__main__":
                                             does_use_workload_statistics=workload_statistics,
                                             does_use_internal_metrics=internal_metrics,
                                             )
-    if default:
-        with open(f'{llm_configs_dir}/config.json','w') as f:
-            f.write('''{
-    "prompt": "",
-    "response": {
-        "choices": [
-            {
-                "message": {
-                    "role": "assistant",
-                    "content": "```python\\n{\\n    \\"commands\\": []\\n}\\n```"
-                },
-                "delta": {
-                    "role": "assistant",
-                    "content": ""
-                }
-            }
-        ]
-    }
-}''')
 
     timeouts = [10]
 

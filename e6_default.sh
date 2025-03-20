@@ -18,7 +18,7 @@ rm -r ./test/e6
     --memory 31 \
     --token_budget 786\
     --method lambdatune\
-    --default default
+    
     
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpch\
@@ -30,5 +30,5 @@ rm -r ./test/e6
     --memory 31 \
     --token_budget 786\
     --method lambdatune\
-    --default default
+    
     
