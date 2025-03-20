@@ -1,18 +1,23 @@
 import argparse
 import json
+import logging
+import os
+import platform
+import time
 import psycopg2
 from tqdm import tqdm  # Import the tqdm module for progress reporting
 
 from lambdatune.benchmarks.job import get_job_queries
 from lambdatune.benchmarks.tpcds import get_tpcds_queries
 from lambdatune.benchmarks.tpch import get_tpch_queries
+from lambdatune.drivers.postgres import PostgresDriver
 
 
 def run_workload(dbname, user, password, host="localhost", port=5432, queries=None):
     """
     Connects to the PostgreSQL database and executes a list of predefined queries
     to simulate a workload and reports progress.
-    
+
     Parameters:
       dbname (str): The name of the database.
       user (str): The username.
@@ -20,7 +25,7 @@ def run_workload(dbname, user, password, host="localhost", port=5432, queries=No
       host (str): Database host address (default 'localhost').
       port (int): Database port (default 5432).
       queries (list of str): A list of SQL queries to execute.
-      
+
     Returns:
       None
     """
@@ -28,6 +33,31 @@ def run_workload(dbname, user, password, host="localhost", port=5432, queries=No
         dbname=dbname, user=user, password=password, host=host, port=port
     )
     cur = conn.cursor()
+    conn.autocommit = True
+    cur.execute("ALTER SYSTEM RESET ALL;")
+    if platform.system() == "Darwin":
+        restart_cmd = "brew services restart postgresql"
+    elif platform.system() == "Linux":
+        restart_cmd = "echo dbbert | sudo -S service postgresql restart"
+    else:
+        raise Exception(f"System {platform.system()} is not supported.")
+    print("Restarting Postgres")
+    os.popen(restart_cmd).read()
+    print("Done!")
+    while True:
+        try:
+            conn = psycopg2.connect(
+                dbname=dbname, user=user, password=password, host=host, port=port
+            )
+            break
+        except Exception as e:
+            c += 1
+            if c > 6:
+                raise e
+            time.sleep(10)
+
+    cur = conn.cursor()
+    cur.connection.autocommit = True
 
     # Use tqdm to wrap the queries iterator for a progress bar.
     for query in tqdm(queries, desc="Executing Queries", unit="query"):
@@ -41,13 +71,13 @@ def run_workload(dbname, user, password, host="localhost", port=5432, queries=No
 def get_workload_metrics(dbname, user, password, host="localhost", port=5432):
     """
     Connects to the PostgreSQL database and retrieves key workload-derived metrics.
-    
+
     Metrics include:
       - xact_commit, xact_rollback: Transaction commit/rollback counts.
       - blks_read, blks_hit: Disk block I/O statistics.
       - tup_returned, tup_fetched, tup_inserted, conflicts, tup_updated, tup_deleted: Tuple counts.
       - Disk I/O metrics derived from the above values.
-    
+
     Returns:
       dict: The aggregated metrics.
     """
@@ -108,7 +138,12 @@ def get_workload_metrics(dbname, user, password, host="localhost", port=5432):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script to run benchmarks.")
-    parser.add_argument("--benchmark", type=str, required=True, help="Benchmark type (tpch, tpcds, or job)")
+    parser.add_argument(
+        "--benchmark",
+        type=str,
+        required=True,
+        help="Benchmark type (tpch, tpcds, or job)",
+    )
     args = parser.parse_args()
     benchmark = args.benchmark.lower()
     queries = None
