@@ -43,6 +43,7 @@ def get_config_recommendations_with_compression(dst_system,
                            hints=None,
                            filters:list=None,
                            workload_statistics:dict=None,
+                           internal_metrics:dict=None,
                            ):
     """
     Generate a prompt for the user to provide configuration recommendations for a system. The prompt includes
@@ -89,6 +90,11 @@ def get_config_recommendations_with_compression(dst_system,
 
         for cond in filters:
             prompt += f"{cond}\n"
+
+    if internal_metrics:
+        prompt += f"\nThe internal metrics are the following:\n"
+        for metric in internal_metrics:
+            prompt += f"{metric}: {internal_metrics[metric]}\n"
 
     if system_specs:
         prompt += f"\nThe workload runs on a system with the following specs:"

@@ -359,11 +359,15 @@ def analyze_sql_queries(queries):
     }
 
 def get_configurations_with_compression(target_db: str, benchmark: str, memory_gb: int, num_cores: int, driver: Driver,
-                                        queries: dict, output_dir_path: str,query_weight:bool,does_use_workload_statistics:bool, token_budget: int = sys.maxsize,
+                                        queries: dict, output_dir_path: str,query_weight:bool,does_use_workload_statistics:bool,does_use_internal_metrics:bool, token_budget: int = sys.maxsize,
                                         num_configs: int=5, temperature: float=0.2):
     workload_statistics=None
     if does_use_workload_statistics:
         workload_statistics=analyze_sql_queries([query[1] for query in queries])
+    internal_metrics=None
+    if does_use_internal_metrics:
+        with open(f"{benchmark}_metrics.json", "r") as f:
+            internal_metrics = json.load(f)
 
     conditions,filters,costs = extract_conditions(driver, queries)
     grouped_conditions = group_join_conditions(conditions)
@@ -411,7 +415,9 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                                         system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
                                                         #   indexes_only=True,
                                                         indexes=True,
-                                                        workload_statistics=workload_statistics)
+                                                        workload_statistics=workload_statistics,
+                                                        internal_metrics=internal_metrics,
+                                                        )
 
         path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
         json.dump(doc, open(path, "w+"), indent=2)
