@@ -12,13 +12,13 @@
             "console": "integratedTerminal",
             "args": [
                 "--benchmark",
-                "tpcds",
+                "job",
                 "--system",
                 "POSTGRES",
                 "--configs",
-                "./lambdatune/configs/0310",
+                "./lambdatune/configs/0320",
                 "--out",
-                "./test/0310",
+                "./test/0320",
                 "--config_gen",
                 "config_gen",
                 "--cores",
@@ -28,8 +28,6 @@
                 // "--continue_loop",
                 "--token_budget",
                 "786",
-                "--method",
-                "lambdatune",
                 // "--default",
                 // "default",
                 "--exploit_index",
@@ -37,7 +35,9 @@
                 "--order_query",
                 "order_query",
                 "--query_weight",
-                "query_weight"
+                "query_weight",
+                "--workload_statistics",
+                "workload_statistics"
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

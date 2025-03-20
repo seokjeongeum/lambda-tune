@@ -41,7 +41,9 @@ def get_config_recommendations_with_compression(dst_system,
                            indexes: bool = False,
                            indexes_only: bool = False,
                            hints=None,
-                           filters:list=list()):
+                           filters:list=None,
+                           workload_statistics:dict=None,
+                           ):
     """
     Generate a prompt for the user to provide configuration recommendations for a system. The prompt includes
     @param dst_system: The system for which the recommendations are requested
@@ -62,6 +64,11 @@ def get_config_recommendations_with_compression(dst_system,
             prompt += "Do not include index recommendations."
     else:
         prompt = "Give me index recommendations for the following input workload. The index names should be unique.\n"
+
+    if workload_statistics:
+        prompt += f"\nThe workload statistics are the following:\n"
+        for stat in workload_statistics:
+            prompt += f"{stat}: {workload_statistics[stat]}\n"
 
     if relations:
         prompt += f"\nThe relations and their occurrences in the workload are the following:\n"
