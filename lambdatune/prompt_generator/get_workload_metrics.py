@@ -1,71 +1,35 @@
 import argparse
 import json
-import logging
-import os
-import platform
-import time
 import psycopg2
 from tqdm import tqdm  # Import the tqdm module for progress reporting
 
 from lambdatune.benchmarks.job import get_job_queries
 from lambdatune.benchmarks.tpcds import get_tpcds_queries
 from lambdatune.benchmarks.tpch import get_tpch_queries
-from lambdatune.drivers.postgres import PostgresDriver
+from lambdatune.utils import get_dbms_driver
 
 
-def run_workload(dbname, user, password, host="localhost", port=5432, queries=None):
+def run_workload(benchmark):
     """
     Connects to the PostgreSQL database and executes a list of predefined queries
     to simulate a workload and reports progress.
-
-    Parameters:
-      dbname (str): The name of the database.
-      user (str): The username.
-      password (str): The password.
-      host (str): Database host address (default 'localhost').
-      port (int): Database port (default 5432).
-      queries (list of str): A list of SQL queries to execute.
-
-    Returns:
-      None
     """
-    conn = psycopg2.connect(
-        dbname=dbname, user=user, password=password, host=host, port=port
-    )
-    cur = conn.cursor()
-    conn.autocommit = True
-    cur.execute("ALTER SYSTEM RESET ALL;")
-    if platform.system() == "Darwin":
-        restart_cmd = "brew services restart postgresql"
-    elif platform.system() == "Linux":
-        restart_cmd = "echo dbbert | sudo -S service postgresql restart"
-    else:
-        raise Exception(f"System {platform.system()} is not supported.")
-    print("Restarting Postgres")
-    os.popen(restart_cmd).read()
-    print("Done!")
-    while True:
-        try:
-            conn = psycopg2.connect(
-                dbname=dbname, user=user, password=password, host=host, port=port
-            )
-            break
-        except Exception as e:
-            c += 1
-            if c > 6:
-                raise e
-            time.sleep(10)
+    driver = get_dbms_driver("POSTGRES", db=benchmark)
+    driver.reset_configuration()
 
-    cur = conn.cursor()
-    cur.connection.autocommit = True
-
+    queries = None
+    if benchmark == "tpch":
+        queries = get_tpch_queries()
+    elif benchmark == "tpcds":
+        queries = get_tpcds_queries()
+    elif benchmark == "job":
+        queries = get_job_queries()
+    # Transform queries list assuming each query is contained in a tuple,
+    # and the second element ([1]) is the SQL query string.
+    query_list = [query[1] for query in queries]
     # Use tqdm to wrap the queries iterator for a progress bar.
-    for query in tqdm(queries, desc="Executing Queries", unit="query"):
-        cur.execute(query)
-        conn.commit()
-
-    cur.close()
-    conn.close()
+    for query in tqdm(query_list, desc="Executing Queries", unit="query"):
+        driver.explain(query)
 
 
 def get_workload_metrics(dbname, user, password, host="localhost", port=5432):
@@ -146,17 +110,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     benchmark = args.benchmark.lower()
-    queries = None
-
-    if benchmark == "tpch":
-        queries = get_tpch_queries()
-    elif benchmark == "tpcds":
-        queries = get_tpcds_queries()
-    elif benchmark == "job":
-        queries = get_job_queries()
-    else:
-        raise ValueError("Unsupported benchmark type. Choose from tpch, tpcds, or job.")
-
     # Replace with your actual PostgreSQL connection details.
     dbname = benchmark
     user = "postgres"
@@ -164,12 +117,8 @@ if __name__ == "__main__":
     host = "localhost"
     port = 5432
 
-    # Transform queries list assuming each query is contained in a tuple,
-    # and the second element ([1]) is the SQL query string.
-    query_list = [query[1] for query in queries]
-
     # Run the workload and display a progress bar while executing the queries.
-    run_workload(dbname, user, password, host, port, query_list)
+    run_workload(benchmark)
 
     # Retrieve metrics after running the workload.
     metrics = get_workload_metrics(dbname, user, password, host, port)
