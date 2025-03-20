@@ -128,7 +128,7 @@ if __name__ == "__main__":
         raise ValueError("Unsupported benchmark type. Choose from tpch, tpcds, or job.")
 
     # Replace with your actual PostgreSQL connection details.
-    dbname = "postgres"
+    dbname = benchmark
     user = "postgres"
     password = "your_new_password"
     host = "localhost"
