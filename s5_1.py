@@ -6,16 +6,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Increase plot font sizes globally by 1.5x
-plt.rcParams.update({
-    'font.size': 21,          # General font size (1.5x of 14)
-    'axes.titlesize': 24,     # Axes title font size (1.5x of 16)
-    'axes.labelsize': 21,     # Axes label font size (1.5x of 14)
-    'xtick.labelsize': 18,    # x tick label font size (1.5x of 12)
-    'ytick.labelsize': 18,    # y tick label font size (1.5x of 12)
-    'legend.fontsize': 18     # Legend font size (1.5x of 12)
-})
+plt.rcParams.update(
+    {
+        "font.size": 21,  # General font size (1.5x of 14)
+        "axes.titlesize": 24,  # Axes title font size (1.5x of 16)
+        "axes.labelsize": 21,  # Axes label font size (1.5x of 14)
+        "xtick.labelsize": 18,  # x tick label font size (1.5x of 12)
+        "ytick.labelsize": 18,  # y tick label font size (1.5x of 12)
+        "legend.fontsize": 18,  # Legend font size (1.5x of 12)
+    }
+)
 
-# Set the experiment and benchmarks to plot
+# Set the experiment and benchmarks
 experiment = "s51"
 benchmarks = ["tpch", "job", "tpcds"]
 
@@ -32,7 +34,7 @@ for benchmark in benchmarks:
             with open(fp, "r") as f:
                 reports = json.load(f)
                 for report in reports:
-                    report["file"] = fp      # Tag the source file
+                    report["file"] = fp  # Tag the source file
                     report["benchmark"] = benchmark  # Tag the benchmark
                 data.extend(reports)
         else:
@@ -59,11 +61,12 @@ if missing_columns:
 df["best_execution_time"] = pd.to_numeric(df["best_execution_time"], errors="coerce")
 df["duration_seconds"] = pd.to_numeric(df["duration_seconds"], errors="coerce")
 
-# Define display name mapping and colors for each source file, including benchmark info.
+# Define display name mapping and colors for each source file (without benchmark prefix for legend).
 display_names = {}
+print_names = {}  # New dictionary for printing with benchmark names
 colors = {}
 for benchmark in benchmarks:
-    # Determine friendly benchmark title.
+    # Convert benchmark name to proper title format
     if benchmark.lower() == "tpch":
         bench_title = "TPC-H"
     elif benchmark.lower() == "job":
@@ -75,15 +78,24 @@ for benchmark in benchmarks:
 
     ours_fp = f"test/{experiment}/{benchmark}/ours/reports.json"
     lambdatune_fp = f"test/{experiment}/{benchmark}/lambdatune/reports.json"
-    display_names[ours_fp] = f"{bench_title}: Ours"
-    display_names[lambdatune_fp] = f"{bench_title}: λ-Tune"
+
+    # For legend - only method name
+    display_names[ours_fp] = "Ours"
+    display_names[lambdatune_fp] = "λ-Tune"
+
+    # For printing - method name with benchmark
+    print_names[ours_fp] = f"{bench_title}: Ours"
+    print_names[lambdatune_fp] = f"{bench_title}: λ-Tune"
+
     colors[ours_fp] = "blue"
     colors[lambdatune_fp] = "green"
 
 # --- Plotting ---
 # Create one subplot per benchmark and combine them in one overall figure.
 num_benchmarks = len(benchmarks)
-fig, axes = plt.subplots(nrows=1, ncols=num_benchmarks, figsize=(6*num_benchmarks, 6), sharey=False)
+fig, axes = plt.subplots(
+    nrows=1, ncols=num_benchmarks, figsize=(6 * num_benchmarks, 6), sharey=False
+)
 
 # Ensure axes is always an iterable.
 if num_benchmarks == 1:
@@ -115,13 +127,31 @@ for ax, benchmark in zip(axes, benchmarks):
     ax.set_xlabel("Duration (Seconds)")
     ax.set_ylabel("Best Execution Time")
     ax.grid(True)
-    ax.legend(title="Source")
+
+# Create a single combined legend for the entire figure, positioned upward.
+handles = []
+labels = []
+for ax in axes:
+    h, l = ax.get_legend_handles_labels()
+    for handle, label in zip(h, l):
+        if label not in labels:
+            handles.append(handle)
+            labels.append(label)
+
+fig.legend(
+    handles,
+    labels,
+    loc="upper center",
+    bbox_to_anchor=(0.5, 1.15),
+    ncol=len(labels),
+    title="Source",
+)
 
 print("Scatter Plot: Duration vs Best Execution Time by Source for Each Benchmark")
-plt.tight_layout(rect=[0, 0, 1, 0.93])
+plt.tight_layout(rect=[0, 0, 1, 0.92])
 plot_filename = "s5_1_combined"
-plt.savefig(f"{plot_filename}.png")
-plt.savefig(f"{plot_filename}.pdf")
+plt.savefig(f"{plot_filename}.png", bbox_inches="tight")
+plt.savefig(f"{plot_filename}.pdf", bbox_inches="tight")
 print(f"Scatter plot saved as {plot_filename}")
 plt.show()
 
@@ -137,7 +167,7 @@ grouped_sums = df.groupby("file")[time_columns].sum()
 print("\nFormatted Time Sums per Source with Percentages:\n")
 for source, row in grouped_sums.iterrows():
     total = row.sum()
-    disp_name = display_names.get(source, source)
+    disp_name = print_names.get(source, source)  # Use print_names for printing
     print(disp_name)
     for metric in time_columns:
         value = row[metric]
@@ -150,7 +180,7 @@ print("\nBest Execution Time per Source (aggregated):\n")
 # Aggregate only the minimum for best_execution_time.
 grouped_best = df.groupby("file")["best_execution_time"].agg(["min"])
 for source, stats in grouped_best.iterrows():
-    disp_name = display_names.get(source, source)
+    disp_name = print_names.get(source, source)  # Use print_names for printing
     # If the value is infinite, replace it with NaN so that "inf" isn't printed.
     min_val = stats["min"] if not np.isinf(stats["min"]) else float("nan")
     print(f"{disp_name} -> Min: {min_val:.6f}")
