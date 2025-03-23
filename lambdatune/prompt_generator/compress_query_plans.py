@@ -366,7 +366,7 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
         workload_statistics=analyze_sql_queries([query[1] for query in queries])
     internal_metrics=None
     if does_use_internal_metrics:
-        with open(f"{benchmark}_metrics.json", "r") as f:
+        with open(f"{benchmark}_metrics_delta.json", "r") as f:
             internal_metrics = json.load(f)
 
     conditions,filters,costs = extract_conditions(driver, queries)
