@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import pprint
 
 # Increase plot font sizes globally by 1.5x
 plt.rcParams.update(
@@ -19,7 +20,7 @@ plt.rcParams.update(
 
 # Set the experiment and benchmarks
 experiment = "e9"
-benchmarks = ["job", "tpcds"]
+benchmarks = ["tpch", "job", "tpcds"]
 
 # Load and merge the data from all JSON files for each benchmark,
 # tagging each record with its source and benchmark.
@@ -61,9 +62,9 @@ if missing_columns:
 df["best_execution_time"] = pd.to_numeric(df["best_execution_time"], errors="coerce")
 df["duration_seconds"] = pd.to_numeric(df["duration_seconds"], errors="coerce")
 
-# Define display name mapping and colors for each source file (without benchmark prefix for legend).
+# Define display name mapping and colors for each source file.
 display_names = {}
-print_names = {}  # New dictionary for printing with benchmark names
+print_names = {}  # For printing with benchmark names
 colors = {}
 for benchmark in benchmarks:
     # Convert benchmark name to proper title format
@@ -191,25 +192,53 @@ config_directories = [
     "lambdatune/configs/e9/job/lambdatune",
     "lambdatune/configs/e9/job/ours",
 ]
+# --- Print Config ID, Total Query Execution Time, and Source for Every Entry ---
+print("\nConfig ID, Total Query Execution Time, and Source for every entry:\n")
+pp = pprint.PrettyPrinter(indent=4)
+for idx, row in df.iterrows():
+    # Retrieve config_id and total_query_execution_time; default to "N/A" if missing.
+    config_id = row.get("config_id", "N/A")
+    total_qet = row.get("total_query_execution_time", "N/A")
+    file_val = row.get("file", "N/A")
+    # Using the display_names mapping to determine if record is from "λ-Tune" or "Ours"
+    source_label = display_names.get(file_val, file_val)
 
-print("\nPrompts from Config JSON directories:\n")
-for config_dir in config_directories:
-    if os.path.exists(config_dir) and os.path.isdir(config_dir):
-        for file_name in os.listdir(config_dir):
-            file_path = os.path.join(config_dir, file_name)
-            if os.path.isfile(file_path) and file_path.endswith(".json"):
-                with open(file_path, "r") as f:
-                    try:
-                        config_data = json.load(f)
-                    except json.JSONDecodeError:
-                        print(f"Error decoding JSON from {file_path}")
-                        continue
-                    prompt_text = config_data.get("prompt")
-                    if prompt_text:
-                        print(f"Prompt from {file_path}:")
-                        print(prompt_text)
-                        print()
-                    else:
-                        print(f"No 'prompt' key found in {file_path}.")
+    print(
+        f"Config ID: {config_id}, Total Query Execution Time: {total_qet}, Source: {source_label}"
+    )
+
+    # Process lambda_tune_config
+    lambda_tune_config = row.get("lambda_tune_config", "N/A")
+    if isinstance(lambda_tune_config, dict):
+        sorted_lambda = {
+            key: lambda_tune_config[key] for key in sorted(lambda_tune_config)
+        }
+        print("lambda_tune_config:")
+        pp.pprint(sorted_lambda)
+    elif isinstance(lambda_tune_config, list):
+        try:
+            sorted_lambda = sorted(lambda_tune_config)
+        except Exception:
+            sorted_lambda = lambda_tune_config
+        print("lambda_tune_config:")
+        pp.pprint(sorted_lambda)
     else:
-        print(f"Warning: Directory {config_dir} not found or not a directory.")
+        print(f"lambda_tune_config: {lambda_tune_config}")
+
+    # Process created_indexes
+    created_indexes = row.get("created_indexes", "N/A")
+    if isinstance(created_indexes, dict):
+        sorted_indexes = {key: created_indexes[key] for key in sorted(created_indexes)}
+        print("created_indexes:")
+        pp.pprint(sorted_indexes)
+    elif isinstance(created_indexes, list):
+        try:
+            sorted_indexes = sorted(created_indexes)
+        except Exception:
+            sorted_indexes = created_indexes
+        print("created_indexes:")
+        pp.pprint(sorted_indexes)
+    else:
+        print(f"created_indexes: {created_indexes}")
+
+    print("\n" + "-" * 40 + "\n")
