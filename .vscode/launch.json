@@ -12,13 +12,13 @@
             "console": "integratedTerminal",
             "args": [
                 "--benchmark",
-                "job",
+                "tpch",
                 "--system",
                 "POSTGRES",
                 "--configs",
-                "./lambdatune/configs/0324",
+                "./lambdatune/configs/0325",
                 "--out",
-                "./test/0324",
+                "./test/0325",
                 "--config_gen",
                 "config_gen",
                 "--cores",
@@ -36,8 +36,8 @@
                 "query_weight",
                 "--workload_statistics",
                 "workload_statistics",
-                "--internal_metrics",
-                "internal_metrics",
+                // "--internal_metrics",
+                // "internal_metrics",
             ],
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"

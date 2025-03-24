@@ -19,6 +19,7 @@ def get_response(text: str, temperature: float):
             {"role": "user", "content": text}
         ],
         temperature=temperature,
+        web_search_options={"search_context_size": "low"},
     )
 
     return response
