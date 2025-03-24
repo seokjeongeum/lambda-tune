@@ -17,7 +17,8 @@
 	"runArgs": [
 		"--shm-size=1g",
 		"--network",
-		"host"
+		"host",
+		"--memory=128gb"
 	]
 	// Configure tool-specific properties.
 	// "customizations": {},

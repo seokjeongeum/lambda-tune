@@ -14,8 +14,8 @@ set +o allexport
     --configs ./lambdatune/configs/e8/tpch \
     --out ./test/e8/tpch/lambdatune \
     --config_gen config_gen \
-    --core 16 \
-    --memory 62 \
+    --core 64 \
+    --memory 128 \
     --token_budget 786\
     --method lambdatune\
     
@@ -24,8 +24,8 @@ set +o allexport
     --system POSTGRES \
     --configs ./lambdatune/configs/e8/tpch \
     --out ./test/e8/tpch/order_query \
-    --core 16 \
-    --memory 62 \
+    --core 64 \
+    --memory 128 \
     --token_budget 786\
     --method lambdatune\
     --order_query order_query

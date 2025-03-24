@@ -14,8 +14,8 @@ set +o allexport
     --configs ./lambdatune/configs/e8/job \
     --out ./test/e8/job/lambdatune \
     --config_gen config_gen \
-    --core 22 \
-    --memory 31 \
+    --core 64 \
+    --memory 128 \
     --token_budget 786\
     --method lambdatune\
     
@@ -24,8 +24,8 @@ set +o allexport
     --system POSTGRES \
     --configs ./lambdatune/configs/e8/job \
     --out ./test/e8/job/order_query \
-    --core 22 \
-    --memory 31 \
+    --core 64 \
+    --memory 128 \
     --token_budget 786\
     --method lambdatune\
     --order_query order_query

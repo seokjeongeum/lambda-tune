@@ -14,8 +14,8 @@ rm -r ./test/e6
     --configs ./lambdatune/configs/e6/tpcds \
     --out ./test/e6/tpcds \
     --config_gen config_gen \
-    --core 22 \
-    --memory 31 \
+    --core 64 \
+    --memory 128 \
     --token_budget 786\
     --method lambdatune\
     
@@ -26,8 +26,8 @@ rm -r ./test/e6
     --configs ./lambdatune/configs/e6/tpch \
     --out ./test/e6/tpch \
     --config_gen config_gen \
-    --core 22 \
-    --memory 31 \
+    --core 64 \
+    --memory 128 \
     --token_budget 786\
     --method lambdatune\
     

@@ -14,8 +14,8 @@ rm -r ./test/s51
     --configs ./lambdatune/configs/s51/tpcds/ours \
     --out ./test/s51/tpcds/ours \
     --config_gen config_gen \
-    --core 16 \
-    --memory 62 \
+    --core 64 \
+    --memory 128 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
