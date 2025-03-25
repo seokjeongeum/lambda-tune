@@ -277,7 +277,7 @@ class ConfigurationSelector:
                         continue
                     query_indexes = indexes.get_query_indexes(query_id)
                     
-                    if self.exploit_index and remaining_time <= 0 and query_indexes.isdisjoint(indexes_created):
+                    if self.exploit_index and remaining_time <= 0 and (query_indexes.isdisjoint(indexes_created)or best_execution_time < float('inf')):
                         completed = False
                         break
 
