@@ -20,6 +20,7 @@ plt.rcParams.update(
 
 # Set the experiment and benchmarks
 experiment = "e9"
+system = "cluster"
 benchmarks = ["tpch", "job", "tpcds"]
 
 # Load and merge the data from all JSON files for each benchmark,
@@ -27,8 +28,8 @@ benchmarks = ["tpch", "job", "tpcds"]
 data = []
 for benchmark in benchmarks:
     file_paths = [
-        f"test/{experiment}/{benchmark}/ours/reports.json",
-        f"test/{experiment}/{benchmark}/lambdatune/reports.json",
+        f"test/{experiment}/{system}/{benchmark}/ours/reports.json",
+        f"test/{experiment}/{system}/{benchmark}/lambdatune/reports.json",
     ]
     for fp in file_paths:
         if os.path.exists(fp):
@@ -77,8 +78,8 @@ for benchmark in benchmarks:
     else:
         bench_title = benchmark.upper()
 
-    ours_fp = f"test/{experiment}/{benchmark}/ours/reports.json"
-    lambdatune_fp = f"test/{experiment}/{benchmark}/lambdatune/reports.json"
+    ours_fp = f"test/{experiment}/{system}/{benchmark}/ours/reports.json"
+    lambdatune_fp = f"test/{experiment}/{system}/{benchmark}/lambdatune/reports.json"
 
     # For legend - only method name
     display_names[ours_fp] = "Ours"
@@ -186,29 +187,30 @@ for source, stats in grouped_best.iterrows():
     min_val = stats["min"] if not np.isinf(stats["min"]) else float("nan")
     print(f"{disp_name} -> Min: {min_val:.6f}")
 
-# --- Print "prompt" from configuration JSON files in directories ---
-# These paths are directories containing JSON files with a "prompt" key.
-config_directories = [
-    "lambdatune/configs/e9/job/lambdatune",
-    "lambdatune/configs/e9/job/ours",
-]
-# --- Print Config ID, Total Query Execution Time, and Source for Every Entry ---
-print("\nConfig ID, Total Query Execution Time, and Source for every entry:\n")
+# --- Print Config ID, Total Query Execution Time, and Source for Last Entry per Config ID ---
+print(
+    "\nConfig ID, Total Query Execution Time, and Source for last entry per config id:\n"
+)
 pp = pprint.PrettyPrinter(indent=4)
-for idx, row in df.iterrows():
-    # Retrieve config_id and total_query_execution_time; default to "N/A" if missing.
-    config_id = row.get("config_id", "N/A")
-    total_qet = row.get("total_query_execution_time", "N/A")
-    file_val = row.get("file", "N/A")
-    # Using the display_names mapping to determine if record is from "λ-Tune" or "Ours"
+
+# Group by config_id to process each config_id separately
+grouped_by_config = df.groupby("config_id")
+
+for config_id, group in grouped_by_config:
+    # Get the last row for this config_id
+    last_row = group.iloc[-1]
+
+    # Extract information from the last row
+    total_qet = last_row.get("total_query_execution_time", "N/A")
+    file_val = last_row.get("file", "N/A")
     source_label = display_names.get(file_val, file_val)
 
     print(
         f"Config ID: {config_id}, Total Query Execution Time: {total_qet}, Source: {source_label}"
     )
 
-    # Process lambda_tune_config
-    lambda_tune_config = row.get("lambda_tune_config", "N/A")
+    # Process lambda_tune_config from the last row
+    lambda_tune_config = last_row.get("lambda_tune_config", "N/A")
     if isinstance(lambda_tune_config, dict):
         sorted_lambda = {
             key: lambda_tune_config[key] for key in sorted(lambda_tune_config)
@@ -225,20 +227,55 @@ for idx, row in df.iterrows():
     else:
         print(f"lambda_tune_config: {lambda_tune_config}")
 
-    # Process created_indexes
-    created_indexes = row.get("created_indexes", "N/A")
-    if isinstance(created_indexes, dict):
-        sorted_indexes = {key: created_indexes[key] for key in sorted(created_indexes)}
-        print("created_indexes:")
+    # For created_indexes, concatenate all indexes from all rows with this config_id
+    # First, determine the type of created_indexes
+    index_type = None
+    for idx, row in group.iterrows():
+        created_indexes = row.get("created_indexes", None)
+        if created_indexes is not None:
+            if isinstance(created_indexes, dict):
+                index_type = "dict"
+                break
+            elif isinstance(created_indexes, list):
+                index_type = "list"
+                break
+
+    # Concatenate based on the type
+    if index_type == "dict":
+        # For dictionaries, merge them
+        all_indexes = {}
+        for idx, row in group.iterrows():
+            indexes = row.get("created_indexes", {})
+            if isinstance(indexes, dict):
+                all_indexes.update(indexes)
+
+        # Sort the concatenated dict by keys
+        sorted_indexes = {key: all_indexes[key] for key in sorted(all_indexes)}
+        print("created_indexes (concatenated):")
         pp.pprint(sorted_indexes)
-    elif isinstance(created_indexes, list):
+
+    elif index_type == "list":
+        # For lists, concatenate them and avoid duplicates manually
+        all_indexes = []
+        for idx, row in group.iterrows():
+            indexes = row.get("created_indexes", [])
+            if isinstance(indexes, list):
+                # Add each index to all_indexes if it's not already there
+                for index in indexes:
+                    if index not in all_indexes:
+                        all_indexes.append(index)
+
+        # Sort if possible
         try:
-            sorted_indexes = sorted(created_indexes)
-        except Exception:
-            sorted_indexes = created_indexes
-        print("created_indexes:")
-        pp.pprint(sorted_indexes)
+            all_indexes.sort()
+        except:
+            pass
+
+        print("created_indexes (concatenated):")
+        pp.pprint(all_indexes)
+
     else:
-        print(f"created_indexes: {created_indexes}")
+        # If we couldn't determine a consistent type, just print 'N/A'
+        print("created_indexes (concatenated): N/A")
 
     print("\n" + "-" * 40 + "\n")
