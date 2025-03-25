@@ -14,8 +14,8 @@ rm -r ./test/s51
     --configs ./lambdatune/configs/s51/job/lambdatune \
     --out ./test/s51/job/lambdatune \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786
     
 .venv/bin/python lambdatune/run_lambdatune.py \
@@ -24,8 +24,8 @@ rm -r ./test/s51
     --configs ./lambdatune/configs/s51/job/ours \
     --out ./test/s51/job/ours \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\

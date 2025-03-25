@@ -18,8 +18,8 @@ bash .devcontainer/tpch.sh 1
     --configs ./lambdatune/configs/e3/tpch1 \
     --out ./test/e3/tpch1 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --continue_loop
 
 # Run the next batch of tests
@@ -30,8 +30,8 @@ bash .devcontainer/tpch.sh 10
     --configs ./lambdatune/configs/e3/tpch10 \
     --out ./test/e3/tpch10 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --continue_loop 
 
 # Run tests for other benchmarks
@@ -41,8 +41,8 @@ bash .devcontainer/tpch.sh 10
     --configs ./lambdatune/configs/e3/tpcds \
     --out ./test/e3/tpcds \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --continue_loop 
 
 .venv/bin/python lambdatune/run_lambdatune.py \
@@ -51,6 +51,6 @@ bash .devcontainer/tpch.sh 10
     --configs ./lambdatune/configs/e3/job \
     --out ./test/e3/job \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --continue_loop 

@@ -9,13 +9,42 @@ rm -r ./lambdatune/configs/e9
 rm -r ./test/e9
     
 .venv/bin/python lambdatune/run_lambdatune.py \
+    --benchmark tpch\
+    --system POSTGRES \
+    --configs ./lambdatune/configs/e9/tpch/lambdatune \
+    --out ./test/e9/tpch/lambdatune \
+    --config_gen config_gen \
+    --core 16 \
+    --memory 62 \
+    --token_budget 786\
+    --exploit_index exploit_index\
+    --order_query order_query\
+    --query_weight query_weight\
+    
+    
+.venv/bin/python lambdatune/run_lambdatune.py \
+    --benchmark tpch\
+    --system POSTGRES \
+    --configs ./lambdatune/configs/e9/tpch/ours \
+    --out ./test/e9/tpch/ours \
+    --config_gen config_gen \
+    --core 16 \
+    --memory 62 \
+    --token_budget 786\
+    --exploit_index exploit_index\
+    --order_query order_query\
+    --query_weight query_weight\
+    --workload_statistics workload_statistics\
+
+    
+.venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark job\
     --system POSTGRES \
     --configs ./lambdatune/configs/e9/job/lambdatune \
     --out ./test/e9/job/lambdatune \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
@@ -28,8 +57,8 @@ rm -r ./test/e9
     --configs ./lambdatune/configs/e9/job/ours \
     --out ./test/e9/job/ours \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
