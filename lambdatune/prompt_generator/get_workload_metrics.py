@@ -8,7 +8,7 @@ from lambdatune.benchmarks.job import get_job_queries
 from lambdatune.benchmarks.tpcds import get_tpcds_queries
 from lambdatune.benchmarks.tpch import get_tpch_queries
 from lambdatune.utils import get_dbms_driver
-import decimal
+
 
 def run_workload(benchmark):
     """
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         "--benchmark",
         type=str,
         required=True,
-        help="Benchmark type (tpch, tpcds, or job)"
+        help="Benchmark type (tpch, tpcds, or job)",
     )
     args = parser.parse_args()
     benchmark = args.benchmark.lower()
@@ -140,9 +140,6 @@ if __name__ == "__main__":
     # 4. Compute the difference (delta) between post-workload and baseline metrics.
     delta_metrics = subtract_metrics(post_metrics, baseline_metrics)
 
-    filename = f"{benchmark}_metrics_baseline.json"
-    with open(filename, "w") as f:
-        json.dump(baseline_metrics, f, indent=2, default=str)
     # Save the delta metrics to a JSON file named after the benchmark.
     filename = f"{benchmark}_metrics_delta.json"
     with open(filename, "w") as f:
