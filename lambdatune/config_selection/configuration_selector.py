@@ -179,8 +179,11 @@ class ConfigurationSelector:
 
         while rounds_ran < self.max_rounds:
             round_results: set = {}
-
-            for current_configuration in configs:
+            
+            j=0
+            while j <(len(configs)):
+                current_configuration=configs[j]
+                j+=1
                 config_start = time.time()
 
                 # Indexes created in this configuration
@@ -346,6 +349,13 @@ class ConfigurationSelector:
                                   f"Total Indexes: {len(config.get_indexes())}")
 
                     completed_configs.append([config_id, total_query_execution_time_per_config[config_id]])
+                    j=len(completed_configs)
+                    configs = sorted(configs, key=lambda x: -len(completed_queries[x[0].split(".json")[0]]))
+
+                    logging.info("New config order")
+                    for cfg_idx in dict(configs):
+                        throughput = round_completed_queries
+                        logging.info(f"{cfg_idx}: {throughput}")
 
                 report = {
                     "config_id": config_id,

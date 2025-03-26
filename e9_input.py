@@ -20,7 +20,7 @@ plt.rcParams.update(
 
 # Set the experiment and benchmarks
 experiment = "e9"
-system = "cluster"
+system = "gpu"
 benchmarks = ["tpch", "job", "tpcds"]
 
 # Load and merge the data from all JSON files for each benchmark,
@@ -151,7 +151,7 @@ fig.legend(
 
 print("Scatter Plot: Duration vs Best Execution Time by Source for Each Benchmark")
 plt.tight_layout(rect=[0, 0, 1, 0.92])
-plot_filename = "e9_input"
+plot_filename = f"e9_input_{system}"
 plt.savefig(f"{plot_filename}.png", bbox_inches="tight")
 plt.savefig(f"{plot_filename}.pdf", bbox_inches="tight")
 print(f"Scatter plot saved as {plot_filename}")
