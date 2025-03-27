@@ -35,6 +35,7 @@ rm -r ./test/e9
     --order_query order_query\
     --query_weight query_weight\
     --workload_statistics workload_statistics\
+    --internal_metrics internal_metrics\
 
     
 .venv/bin/python lambdatune/run_lambdatune.py \

@@ -19,7 +19,6 @@ rm -r ./test/e10
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
-    --query_weight query_weight\
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
@@ -50,7 +49,6 @@ rm -r ./test/e10
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
-    --query_weight query_weight\
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
