@@ -24,3 +24,4 @@ rm -r ./test/e10
     --internal_metrics internal_metrics\
     --query_plan query_plan\
     
+    
