@@ -1,6 +1,7 @@
 import openai
 import json
 import os
+import re # Import the regular expression module
 
 import tiktoken
 
@@ -64,8 +65,8 @@ def output_format():
     format = """{\n\tcommands: [list of the SQL commands]\n}"""
     return (f"Your response should strictly consist of a python-compatible JSON response of the following schema. "
             f"Do not include any additional text in the prompt, such as descriptions or intros. Return just a"
-            f"python-compatible list only."
-            "**Do NOT wrap individual commands in their own JSON objects (like {{\"command\": \"...\"}}).** Just include the command strings directly in the list."
+            f"python-compatible list only. "
+            "**Do NOT wrap individual commands in their own JSON objects (like {{\"command\": \"...\"}}).** Just include the command strings directly in the list. "
             f"\n{format}")
 
 
@@ -156,7 +157,71 @@ def get_config_recommendations_with_compression(dst_system,
     resp = None
 
     if retrieve_response:
-        resp = get_response(prompt, temperature=temperature)
+        resp_raw = get_response(prompt, temperature=temperature)
+
+        # Check if the response is an error string
+        if isinstance(resp_raw, str) and resp_raw.startswith("Error:"):
+             print(f"LLM call failed: {resp_raw}")
+             resp = resp_raw # Keep the error message
+        elif isinstance(resp_raw, dict) and "choices" in resp_raw and resp_raw["choices"]:
+            resp = resp_raw # Start with the raw response structure
+            try:
+                message_content_str = resp["choices"][0]["message"]["content"]
+
+                # Attempt to parse the JSON content from the LLM
+                parsed_content = json.loads(message_content_str)
+
+                # Check if the parsed content has the expected structure
+                if isinstance(parsed_content, dict) and "commands" in parsed_content:
+                    original_commands = parsed_content.get("commands", [])
+                    modified_commands = []
+
+                    # Process only if commands is a list
+                    if isinstance(original_commands, list):
+                        for cmd in original_commands:
+                            if isinstance(cmd, str) and cmd.strip().upper().startswith("CREATE INDEX"):
+                                # Use re.sub for case-insensitive replacement of " IF NOT EXISTS "
+                                # Pattern: space, "IF", space, "NOT", space, "EXISTS", space
+                                # Replace with just a single space to maintain formatting
+                                modified_cmd = re.sub(r'\s+IF\s+NOT\s+EXISTS\s+', ' ', cmd, flags=re.IGNORECASE)
+                                modified_commands.append(modified_cmd.strip()) # .strip() removes potential leading/trailing whitespace
+                            elif isinstance(cmd, str):
+                                modified_commands.append(cmd) # Keep other string commands
+                            # Else: If cmd is not a string, skip or handle as needed. Here we skip.
+                    else:
+                         # If 'commands' key exists but isn't a list, something is wrong with LLM output
+                         print(f"Warning: Expected 'commands' to be a list, but got {type(original_commands)}. Keeping original content.")
+                         # Keep resp as it was from get_response in this case
+
+                    # Only update if modification was potentially successful (commands was a list)
+                    if isinstance(original_commands, list):
+                         # Rebuild the JSON content string with modified commands
+                         modified_content_dict = {"commands": modified_commands}
+                         # Use separators=(',', ':') for compact JSON string value if needed, but indent=2 is fine for readability
+                         modified_content_string = json.dumps(modified_content_dict, indent=2)
+
+                         # Update the response dictionary content
+                         resp["choices"][0]["message"]["content"] = modified_content_string
+                         print("\n--- MODIFIED LLM CONTENT ---")
+                         print(modified_content_string)
+                         print("----------------------------")
+
+                else:
+                    # Parsed content wasn't the expected {"commands": [...] } dict
+                    print("Warning: LLM response JSON did not contain the expected 'commands' key at the top level. Cannot remove 'IF NOT EXISTS'.")
+                    # Keep original resp
+
+            except json.JSONDecodeError:
+                print("Warning: LLM response content was not valid JSON. Cannot remove 'IF NOT EXISTS'. Raw content:")
+                print(message_content_str)
+                # Keep original resp (which contains the non-JSON string)
+            except Exception as e:
+                print(f"Warning: Error processing LLM response content for modification: {e}")
+                # Keep original resp
+        else:
+            # get_response returned something unexpected (not error string, not valid dict)
+            print(f"Warning: Unexpected return value from get_response: {resp_raw}")
+            resp = str(resp_raw) # Convert to string as a fallback
         # resp = json.loads(str(resp))
 
     # num_tokens = len(encoding.encode(prompt))
