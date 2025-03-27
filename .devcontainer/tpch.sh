@@ -24,7 +24,7 @@ pushd "${TPCH_DIR}" > /dev/null
 make clean
 make
 # Generate data with force flag
-./dbgen -s 1 -vf
+./dbgen -s 10 -vf
 popd > /dev/null
 
 # Drop and create database
