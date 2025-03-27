@@ -73,3 +73,5 @@ yarl==1.9.4
 setuptools
 mysql-connector-python
 matplotlib
+google-genai
+google-generativeai

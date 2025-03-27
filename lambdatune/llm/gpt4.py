@@ -5,13 +5,48 @@ import os
 import tiktoken
 
 from lambdatune.utils import get_llm, get_openai_key
-
+import google.generativeai as genai
 encoding = tiktoken.encoding_for_model(get_llm())
 openai.api_key = os.getenv("OPENAI_API_KEY")
 openai.api_base = "https://api.perplexity.ai"
 
 
-def get_response(text: str, temperature: float):    
+def get_response(text: str, temperature: float):
+    try:
+        # Ensure API key is configured (place configuration outside the function
+        # or ensure it's run once before calling this function multiple times)
+        genai.configure(api_key=os.getenv("GOOGLE_API_KEY")) # Uncomment if needed here
+        
+        system_instruction = "You are a helpful Database Administrator."
+        gemini_model_name = "gemini-2.5-pro-exp-03-25" # Or your preferred model
+
+        model = genai.GenerativeModel(
+            model_name=gemini_model_name,
+            system_instruction=system_instruction
+        )
+
+        messages = [{'role': 'user', 'parts': [text]}]
+
+        generation_config = genai.types.GenerationConfig(
+            temperature=temperature
+        )
+
+        response = model.generate_content(
+            messages,
+            generation_config=generation_config
+        )
+        return {
+            "choices": [
+                {
+                    "message": {
+                        "content": response.text,
+                    }
+                }
+            ]
+        }
+    except Exception as e:
+        print(f"An error occurred during Gemini API call: {e}")
+        return f"Error: {e}"
     response = openai.ChatCompletion.create(
         model="sonar",
         messages=[
@@ -30,6 +65,7 @@ def output_format():
     return (f"Your response should strictly consist of a python-compatible JSON response of the following schema. "
             f"Do not include any additional text in the prompt, such as descriptions or intros. Return just a"
             f"python-compatible list only."
+            "**Do NOT wrap individual commands in their own JSON objects (like {{\"command\": \"...\"}}).** Just include the command strings directly in the list."
             f"\n{format}")
 
 
@@ -45,6 +81,8 @@ def get_config_recommendations_with_compression(dst_system,
                            filters:list=None,
                            workload_statistics:dict=None,
                            internal_metrics:dict=None,
+                           query_plan:bool=False,
+                           plans:list=list(),
                            ):
     """
     Generate a prompt for the user to provide configuration recommendations for a system. The prompt includes
@@ -77,13 +115,16 @@ def get_config_recommendations_with_compression(dst_system,
         for rel in relations:
             prompt += f"{rel}, {relations[rel]}\n"
 
-    if join_conditions:
+    if query_plan:
+        prompt += f"\n\nThe query plan is the following:\n"
+        for plan in plans:
+            prompt += f"{(json.dumps(plans[0][1].root.info,indent=2))}\n"
+    elif join_conditions:
         prompt += (f"\n\nEach row in the following list has the following format:\n"
                    f"{{a join key A}}:{{all the joins with A in the workload}}.\n\n")
         before=(len(prompt))
         for cond in join_conditions:
             prompt += f"{cond}: {join_conditions[cond]}\n"
-        print(len(prompt)-before)
 
     if filters:
         prompt += (f"\n\nEach row in the following list has the following format:\n"
@@ -116,7 +157,7 @@ def get_config_recommendations_with_compression(dst_system,
 
     if retrieve_response:
         resp = get_response(prompt, temperature=temperature)
-        resp = json.loads(str(resp))
+        # resp = json.loads(str(resp))
 
     # num_tokens = len(encoding.encode(prompt))
 
