@@ -318,7 +318,7 @@ class ConfigurationSelector:
                     query_exec_start = time.time()
                     r = self.driver.explain(query_str,
                                             execute=True,
-                                            timeout=(best_execution_time if self.exploit_index else remaining_time)*1000,
+                                            timeout=(remaining_time if not self.exploit_index or best_execution_time<float('inf') else float('inf'))*1000,
                                             results_path=f"{config_path}/{query_id}.json")
                     query_exec_time = time.time() - query_exec_start
                     round_query_execution_time += query_exec_time
