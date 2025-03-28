@@ -19,5 +19,6 @@ rm -r ./test/s51
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
-    --query_weight query_weight
+    --query_weight query_weight\
+    --workload_statistics workload_statistics\
     
