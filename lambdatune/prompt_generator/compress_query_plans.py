@@ -409,6 +409,7 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     for i in range(0, num_configs):
+        t=time.time()
         doc = get_config_recommendations_with_compression(dst_system=target_db,
                                                         relations=None,
                                                         temperature=temperature,
@@ -427,4 +428,5 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
         json.dump(doc, open(path, "w+"), indent=2)
 
         print("Done: " + output_dir)
+        time.sleep(30-(time.time()-t))#Gemini 2.5 Pro Experimental RPM is 2
     return costs
