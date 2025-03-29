@@ -17,7 +17,7 @@ rm -r ./test/s52
     --core 64 \
     --memory 128 \
     --token_budget 786\
-    --method lambdatune\
+    
     
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpcds\
@@ -27,7 +27,7 @@ rm -r ./test/s52
     --core 64 \
     --memory 128 \
     --token_budget 786\
-    --method lambdatune\
     --order_query order_query\
     --exploit_index exploit_index
+    
     

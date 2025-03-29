@@ -18,7 +18,7 @@ plt.rcParams.update(
 )
 
 # Set the experiment and benchmarks
-experiment = "e10"
+experiment = "s51"
 benchmarks = ["tpch", "job", "tpcds"]
 
 # Load and merge the data
