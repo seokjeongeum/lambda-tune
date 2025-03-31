@@ -5,14 +5,14 @@ set -o allexport
 source .env
 set +o allexport
 
-rm -r ./lambdatune/configs/s51
-rm -r ./test/s51
+rm -r ./lambdatune/configs/e9
+rm -r ./test/e9
     
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/s51/tpcds/ours \
-    --out ./test/s51/tpcds/ours \
+    --configs ./lambdatune/configs/e9/tpcds/lambdatune \
+    --out ./test/e9/tpcds/lambdatune \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -20,5 +20,4 @@ rm -r ./test/s51
     --exploit_index exploit_index\
     --order_query order_query\
     --query_weight query_weight\
-    --workload_statistics workload_statistics\
     

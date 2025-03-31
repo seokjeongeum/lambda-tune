@@ -179,8 +179,11 @@ class ConfigurationSelector:
 
         while rounds_ran < self.max_rounds:
             round_results: set = {}
-
-            for current_configuration in configs:
+            
+            j=0
+            while j <(len(configs)):
+                current_configuration=configs[j]
+                j+=1
                 config_start = time.time()
 
                 # Indexes created in this configuration
@@ -277,7 +280,7 @@ class ConfigurationSelector:
                         continue
                     query_indexes = indexes.get_query_indexes(query_id)
                     
-                    if self.exploit_index and remaining_time <= 0 and query_indexes.isdisjoint(indexes_created):
+                    if self.exploit_index and remaining_time <= 0 and (query_indexes.isdisjoint(indexes_created)or best_execution_time < float('inf')):
                         completed = False
                         break
 
@@ -315,7 +318,7 @@ class ConfigurationSelector:
                     query_exec_start = time.time()
                     r = self.driver.explain(query_str,
                                             execute=True,
-                                            timeout=(best_execution_time if self.exploit_index else remaining_time)*1000,
+                                            timeout=(remaining_time if not self.exploit_index or best_execution_time<float('inf') else float('inf'))*1000,
                                             results_path=f"{config_path}/{query_id}.json")
                     query_exec_time = time.time() - query_exec_start
                     round_query_execution_time += query_exec_time
@@ -346,6 +349,13 @@ class ConfigurationSelector:
                                   f"Total Indexes: {len(config.get_indexes())}")
 
                     completed_configs.append([config_id, total_query_execution_time_per_config[config_id]])
+                    j=len(completed_configs)
+                    configs = sorted(configs, key=lambda x: -len(completed_queries[x[0].split(".json")[0]]))
+
+                    logging.info("New config order")
+                    for cfg_idx in dict(configs):
+                        throughput = round_completed_queries
+                        logging.info(f"{cfg_idx}: {throughput}")
 
                 report = {
                     "config_id": config_id,

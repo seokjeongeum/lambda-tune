@@ -6,8 +6,8 @@ bash .devcontainer/tpch.sh 1
     --config_gen true \
     --configs ./lambdatune/configs \
     --out ./test \
-    --core 22 \
-    --memory 31 \
+    --core 16 \
+    --memory 62 \
     --system POSTGRES \
     --benchmark tpch
 
@@ -16,8 +16,8 @@ bash .devcontainer/tpch.sh 10
     --config_gen true \
     --configs ./lambdatune/configs \
     --out ./test \
-    --core 22 \
-    --memory 31 \
+    --core 16 \
+    --memory 62 \
     --system POSTGRES \
     --benchmark tpch
     
@@ -25,8 +25,8 @@ bash .devcontainer/tpch.sh 10
     --config_gen true \
     --configs ./lambdatune/configs \
     --out ./test \
-    --core 22 \
-    --memory 31 \
+    --core 16 \
+    --memory 62 \
     --system POSTGRES \
     --benchmark tpcds
     
@@ -34,8 +34,8 @@ bash .devcontainer/tpch.sh 10
     --config_gen true \
     --configs ./lambdatune/configs \
     --out ./test \
-    --core 22 \
-    --memory 31 \
+    --core 16 \
+    --memory 62 \
     --system POSTGRES \
     --benchmark job
     

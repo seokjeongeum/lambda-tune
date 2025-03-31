@@ -6,11 +6,11 @@
 	},
 	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
 	"runArgs": [
-	  "--shm-size=1g",
-	  "--network",
-	  "host"
+		"--shm-size=1g",
+		"--network",
+		"host",
+		"--memory=128gb"
 	]
 	// Uncomment the following line to connect as root if needed.
 	// "remoteUser": "root"
-  }
-  
+}

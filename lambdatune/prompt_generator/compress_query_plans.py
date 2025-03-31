@@ -140,7 +140,7 @@ def extract_conditions(driver, queries):
 
         conditions[idx] = [f"{left_operand} = {right_operand}", condition[1], condition[2], condition[3]]
 
-    return conditions,[(x[0],x[1],'filter') for x in sorted(collector.filters.items(),key=lambda x:x[1],reverse=True)],defaultdict(lambda: float('inf'), {x[0]: x[2] for x in postgres_plans})
+    return conditions,[(x[0],x[1],'filter') for x in sorted(collector.filters.items(),key=lambda x:x[1],reverse=True)],defaultdict(lambda: float('inf'), {x[0]: x[2] for x in postgres_plans}),postgres_plans
 
 
 def hide_table_column_names(compressed_columns):
@@ -256,12 +256,123 @@ def get_configurations_with_compression_hidden_columns():
 
                 print("Done: " + path)
 
+import re
+
+def analyze_sql_queries(queries):
+    """
+    Analyze a list of SQL query strings to compute several metrics.
+
+    Metrics computed:
+      - Table access frequency: counts the occurrences of each table in FROM, JOIN, and INTO clauses.
+      - Total number of SQL statements.
+      - Read and write operation counts and read/write ratio:
+          Read operations are assumed to be queries starting with 'SELECT'
+          Write operations are assumed to be queries starting with 'INSERT', 'UPDATE', 'DELETE', or 'MERGE'.
+      - Average number of predicates per SQL query (for queries with a WHERE clause).
+      - Proportion (percentage) of queries using key operators:
+          ORDER BY, GROUP BY, and common aggregation functions (COUNT, SUM, AVG, MIN, MAX).
+
+    Parameters:
+      queries (list of str): A list of SQL query strings.
+    
+    Returns:
+      dict: A dictionary containing the computed metrics.
+    """
+    
+    # Initialize counters and accumulators
+    table_freq = {}
+    read_count = 0
+    write_count = 0
+    total_predicates = 0
+    predicate_query_count = 0  # Count of queries that have a WHERE clause
+    order_by_count = 0
+    group_by_count = 0
+    agg_func_count = 0
+
+    # Precompiled regex patterns for performance and clarity.
+    table_pattern = re.compile(r'\b(?:FROM|JOIN|INTO)\s+([\w\.\[\]]+)', re.IGNORECASE)
+    # The WHERE pattern captures the clause till GROUP BY, ORDER BY, HAVING or end-of-string.
+    where_pattern = re.compile(r'\bWHERE\s+(.*?)(?:\bGROUP\s+BY\b|\bORDER\s+BY\b|\bHAVING\b|$)', re.IGNORECASE)
+    agg_pattern = re.compile(r'\b(COUNT|SUM|AVG|MIN|MAX)\s*\(', re.IGNORECASE)
+    orderby_pattern = re.compile(r'\bORDER\s+BY\b', re.IGNORECASE)
+    groupby_pattern = re.compile(r'\bGROUP\s+BY\b', re.IGNORECASE)
+
+    # Process each query
+    for query in queries:
+        # Count table accesses (FROM, JOIN, INTO)
+        tables = table_pattern.findall(query)
+        for table in tables:
+            table = table.strip()
+            table_freq[table] = table_freq.get(table, 0) + 1
+
+        # Determine if the query is a read or write operation
+        query_strip = query.lstrip().upper()
+        if query_strip.startswith("SELECT"):
+            read_count += 1
+        elif any(query_strip.startswith(keyword) for keyword in ["INSERT", "UPDATE", "DELETE", "MERGE"]):
+            write_count += 1
+
+        # Count predicate conditions in the WHERE clause, if present
+        where_match = where_pattern.search(query)
+        if where_match:
+            where_clause = where_match.group(1).strip()
+            if where_clause:
+                # Each occurrence of AND/OR (plus one initial condition) represents a predicate.
+                preds = re.findall(r'\bAND\b|\bOR\b', where_clause, flags=re.IGNORECASE)
+                num_preds = len(preds) + 1
+                total_predicates += num_preds
+                predicate_query_count += 1
+
+        # Check for usage of key SQL operators and aggregation functions.
+        if orderby_pattern.search(query):
+            order_by_count += 1
+        if groupby_pattern.search(query):
+            group_by_count += 1
+        if agg_pattern.search(query):
+            agg_func_count += 1
+
+    # Count of total SQL queries
+    total_queries = len(queries)
+
+    # Compute read/write ratio (reads/writes)
+    read_write_ratio = (read_count / write_count) if write_count else None
+
+    # Compute average number of predicates per query (considering only queries with a WHERE clause)
+    average_predicates = (total_predicates / predicate_query_count) if predicate_query_count else 0
+
+    # Compute the proportion (percentage) of queries using key operators relative to total queries
+    order_by_prop = (order_by_count / total_queries) * 100 if total_queries else 0
+    group_by_prop = (group_by_count / total_queries) * 100 if total_queries else 0
+    agg_func_prop = (agg_func_count / total_queries) * 100 if total_queries else 0
+
+    # Return all computed metrics in a dictionary
+    return {
+        "total_sql_statements": total_queries,
+        "read_operations": read_count,
+        "write_operations": write_count,
+        "read_write_ratio": read_write_ratio,
+        "table_access_frequency": table_freq,
+        "average_predicates": average_predicates,
+        "order_by_proportion": order_by_prop,
+        "group_by_proportion": group_by_prop,
+        "aggregation_function_proportion": agg_func_prop,
+    }
 
 def get_configurations_with_compression(target_db: str, benchmark: str, memory_gb: int, num_cores: int, driver: Driver,
-                                        queries: dict, output_dir_path: str,query_weight:bool, token_budget: int = sys.maxsize,
-                                        num_configs: int=5, temperature: float=0.2,method:str='lambdatune'):
+                                        queries: dict, output_dir_path: str,query_weight:bool,does_use_workload_statistics:bool,does_use_internal_metrics:bool,query_plan:bool, token_budget: int = sys.maxsize,
+                                        num_configs: int=5, temperature: float=0.2):
+    driver.drop_all_non_pk_indexes()
+    driver.reset_configuration()
+    workload_statistics=None
+    if does_use_workload_statistics:
+        workload_statistics=analyze_sql_queries([query[1] for query in queries])
+    internal_metrics=None
+    if does_use_internal_metrics:
+        system='gpu'
+        with open(f"{benchmark}_metrics_{system}.json", "r") as f:
+            internal_metrics = json.load(f)
 
-    conditions,filters,costs = extract_conditions(driver, queries)
+    conditions,filters,costs,plans = extract_conditions(driver, queries)
     grouped_conditions = group_join_conditions(conditions)
 
     indexes = True
@@ -297,50 +408,25 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+    for i in range(0, num_configs):
+        t=time.time()
+        doc = get_config_recommendations_with_compression(dst_system=target_db,
+                                                        relations=None,
+                                                        temperature=temperature,
+                                                        retrieve_response=True,
+                                                        join_conditions=optimized_with_dependencies,
+                                                        system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
+                                                        #   indexes_only=True,
+                                                        indexes=True,
+                                                        workload_statistics=workload_statistics,
+                                                        internal_metrics=internal_metrics,
+                                                        query_plan=query_plan,
+                                                        plans=plans,
+                                                        )
 
-    if method=='lambdatune':
-        for i in range(0, num_configs):
-            doc = get_config_recommendations_with_compression(dst_system=target_db,
-                                                            relations=None,
-                                                            temperature=temperature,
-                                                            retrieve_response=True,
-                                                            join_conditions=optimized_with_dependencies,
-                                                            system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
-                                                            #   indexes_only=True,
-                                                            indexes=True)
+        path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
+        json.dump(doc, open(path, "w+"), indent=2)
 
-            path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
-            json.dump(doc, open(path, "w+"), indent=2)
-
-            print("Done: " + output_dir)
-
-    if method=='naive':
-        for i in range(0, num_configs):
-            doc = get_config_recommendations_with_compression(dst_system=target_db,
-                                                            relations=None,
-                                                            temperature=temperature,
-                                                            retrieve_response=True,
-                                                            join_conditions=join_conditions,
-                                                            system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
-                                                            #   indexes_only=True,
-                                                            indexes=True,
-                                                            filters=filters)
-
-            path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
-            json.dump(doc, open(path, "w+"), indent=2)
-
-            print("Done: " + output_dir)
-
-    if method=='query':
-        for i in range(0, num_configs):
-            doc = get_config_recommendations_with_full_queries(dst_system=target_db,
-                                                               queries=[query[1] for query in queries],
-                                                            temperature=temperature,
-                                                            retrieve_response=True,
-                                                            system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores})
-
-            path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")
-            json.dump(doc, open(path, "w+"), indent=2)
-
-            print("Done: " + output_dir)
+        print("Done: " + output_dir)
+        time.sleep(max(0,30-(time.time()-t)))#Gemini 2.5 Pro Experimental RPM is 2
     return costs

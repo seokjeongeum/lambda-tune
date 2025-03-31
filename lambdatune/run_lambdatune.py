@@ -33,15 +33,18 @@ if __name__ == "__main__":
     parser.add_argument("--continue_loop", type=bool, default=False)
 
     parser.add_argument("--token_budget", type=int,default=sys.maxsize)
-    parser.add_argument("--method", type=str,default='lambdatune')
-
-    parser.add_argument("--default", type=bool, default=False)
 
     parser.add_argument("--exploit_index", type=bool, default=False)
 
     parser.add_argument("--order_query", type=bool, default=False)
 
     parser.add_argument("--query_weight", type=bool, default=False)
+
+    parser.add_argument("--workload_statistics", type=bool, default=False)
+
+    parser.add_argument("--internal_metrics", type=bool, default=False)
+
+    parser.add_argument("--query_plan", type=bool, default=False)
 
     args = parser.parse_args()
 
@@ -57,15 +60,18 @@ if __name__ == "__main__":
     continue_loop=args.continue_loop
 
     token_budget=args.token_budget
-    method=args.method
-
-    default=args.default
 
     exploit_index=args.exploit_index
 
     order_query=args.order_query
 
     query_weight=args.query_weight
+
+    workload_statistics=args.workload_statistics
+
+    internal_metrics=args.internal_metrics
+
+    query_plan=args.query_plan
 
     args = parser.parse_args()
 
@@ -107,28 +113,11 @@ if __name__ == "__main__":
                                             num_cores=cores,
                                             num_configs=5,
                                             token_budget=token_budget,
-                                            method=method,
                                             query_weight=query_weight,
+                                            does_use_workload_statistics=workload_statistics,
+                                            does_use_internal_metrics=internal_metrics,
+                                            query_plan=query_plan,
                                             )
-    if default:
-        with open(f'{llm_configs_dir}/config.json','w') as f:
-            f.write('''{
-    "prompt": "",
-    "response": {
-        "choices": [
-            {
-                "message": {
-                    "role": "assistant",
-                    "content": "```python\\n{\\n    \\"commands\\": []\\n}\\n```"
-                },
-                "delta": {
-                    "role": "assistant",
-                    "content": ""
-                }
-            }
-        ]
-    }
-}''')
 
     timeouts = [10]
 

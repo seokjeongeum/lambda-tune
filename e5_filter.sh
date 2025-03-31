@@ -14,8 +14,8 @@ set +o allexport
     --configs ./lambdatune/configs/e5/1572 \
     --out ./test/e5/1572 \
     --config_gen true \
-    --core 22 \
-    --memory 31 \
+    --core 16 \
+    --memory 62 \
     --token_budget 1572\
     --method lambdatune
     
@@ -25,8 +25,8 @@ set +o allexport
 #     --configs ./lambdatune/configs/e5/1572 \
 #     --out ./test/e5/1572 \
 #     --config_gen true \
-#     --core 22 \
-#     --memory 31 \
+#     --core 16 \
+#     --memory 62 \
 #     --token_budget 1572\
 #     --method naive
     
@@ -36,8 +36,8 @@ set +o allexport
     --configs ./lambdatune/configs/e5/9223372036854775807 \
     --out ./test/e5/9223372036854775807 \
     --config_gen true \
-    --core 22 \
-    --memory 31 \
+    --core 16 \
+    --memory 62 \
     --token_budget 9223372036854775807\
     --method lambdatune
     
@@ -47,8 +47,8 @@ set +o allexport
 #     --configs ./lambdatune/configs/e5/9223372036854775807 \
 #     --out ./test/e5/9223372036854775807 \
 #     --config_gen true \
-#     --core 22 \
-#     --memory 31 \
+#     --core 16 \
+#     --memory 62 \
 #     --token_budget 9223372036854775807\
 #     --method naive
     

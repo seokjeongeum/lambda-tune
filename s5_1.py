@@ -5,22 +5,23 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Increase plot font sizes globally
-plt.rcParams.update({
-    'font.size': 14,          # General font size
-    'axes.titlesize': 16,     # Axes title font size
-    'axes.labelsize': 14,     # Axes label font size
-    'xtick.labelsize': 12,    # x tick label font size
-    'ytick.labelsize': 12,    # y tick label font size
-    'legend.fontsize': 12     # Legend font size
-})
+# Increase plot font sizes globally by 1.5x
+plt.rcParams.update(
+    {
+        "font.size": 21,
+        "axes.titlesize": 24,
+        "axes.labelsize": 21,
+        "xtick.labelsize": 18,
+        "ytick.labelsize": 18,
+        "legend.fontsize": 18,
+    }
+)
 
-# Set the experiment and benchmarks to plot
+# Set the experiment and benchmarks
 experiment = "s51"
 benchmarks = ["tpch", "job", "tpcds"]
 
-# Load and merge the data from all JSON files for each benchmark,
-# tagging each record with its source and benchmark.
+# Load and merge the data
 data = []
 for benchmark in benchmarks:
     file_paths = [
@@ -32,16 +33,16 @@ for benchmark in benchmarks:
             with open(fp, "r") as f:
                 reports = json.load(f)
                 for report in reports:
-                    report["file"] = fp      # Tag the source file
-                    report["benchmark"] = benchmark  # Tag the benchmark
+                    report["file"] = fp
+                    report["benchmark"] = benchmark
                 data.extend(reports)
         else:
             print(f"Warning: File {fp} not found.")
 
-# Create a DataFrame with all collected data.
+# Create DataFrame
 df = pd.DataFrame(data)
 
-# List of required columns
+# Check required columns
 required_columns = [
     "duration_seconds",
     "best_execution_time",
@@ -55,15 +56,24 @@ missing_columns = [col for col in required_columns if col not in df.columns]
 if missing_columns:
     raise ValueError(f"Missing columns: {missing_columns}")
 
-# Convert numeric columns; non-numeric entries become NaN.
+# Convert numeric columns
 df["best_execution_time"] = pd.to_numeric(df["best_execution_time"], errors="coerce")
 df["duration_seconds"] = pd.to_numeric(df["duration_seconds"], errors="coerce")
 
-# Define display name mapping and colors for each source file, including benchmark info.
+# Filter out rows representing timeouts BEFORE plotting
+df_valid_runs_for_plot = df[
+    df["timeout"] >= 0
+].copy()  # Keep only non-timeout runs for plotting
+print(
+    f"Original data points: {len(df)}, Points for plotting (non-timeout): {len(df_valid_runs_for_plot)}"
+)
+
+
+# Define display name mapping and colors
 display_names = {}
+print_names = {}
 colors = {}
 for benchmark in benchmarks:
-    # Determine friendly benchmark title.
     if benchmark.lower() == "tpch":
         bench_title = "TPC-H"
     elif benchmark.lower() == "job":
@@ -75,24 +85,37 @@ for benchmark in benchmarks:
 
     ours_fp = f"test/{experiment}/{benchmark}/ours/reports.json"
     lambdatune_fp = f"test/{experiment}/{benchmark}/lambdatune/reports.json"
-    display_names[ours_fp] = f"{bench_title}: Ours"
-    display_names[lambdatune_fp] = f"{bench_title}: λ-Tune"
+
+    display_names[ours_fp] = "Ours"
+    display_names[lambdatune_fp] = "λ-Tune"
+    print_names[ours_fp] = f"{bench_title}: Ours"
+    print_names[lambdatune_fp] = f"{bench_title}: λ-Tune"
     colors[ours_fp] = "blue"
     colors[lambdatune_fp] = "green"
 
 # --- Plotting ---
-# Create one subplot per benchmark and combine them in one overall figure.
 num_benchmarks = len(benchmarks)
-fig, axes = plt.subplots(nrows=1, ncols=num_benchmarks, figsize=(6*num_benchmarks, 6), sharey=False)
-
-# Ensure axes is always an iterable.
+fig, axes = plt.subplots(
+    nrows=1, ncols=num_benchmarks, figsize=(6 * num_benchmarks, 6), sharey=False
+)
 if num_benchmarks == 1:
     axes = [axes]
 
 for ax, benchmark in zip(axes, benchmarks):
-    # Filter DataFrame for the current benchmark.
-    sub_df = df[df["benchmark"] == benchmark]
-    # For each source ('ours' and 'lambdatune'), plot the scatter and connecting line.
+    # Use the PRE-FILTERED data (valid runs only)
+    sub_df = df_valid_runs_for_plot[df_valid_runs_for_plot["benchmark"] == benchmark]
+
+    if sub_df.empty:
+        print(
+            f"Warning: No valid runs (non-timeout) found for benchmark '{benchmark}'. Skipping plot."
+        )
+        title = benchmark.upper().replace("TPCH", "TPC-H").replace("TPCDS", "TPC-DS")
+        ax.set_title(f"{title} Benchmark (No Valid Data)")
+        ax.set_xlabel("Duration (Seconds)")
+        ax.set_ylabel("Best Execution Time")
+        ax.grid(True)
+        continue
+
     for source, group in sub_df.groupby("file"):
         group = group.sort_values("duration_seconds")
         ax.scatter(
@@ -109,48 +132,84 @@ for ax, benchmark in zip(axes, benchmarks):
             linestyle="--",
             alpha=0.7,
         )
-    # Convert benchmark name to proper title format: "tpch" -> "TPC-H", "tpcds" -> "TPC-DS"
     title = benchmark.upper().replace("TPCH", "TPC-H").replace("TPCDS", "TPC-DS")
     ax.set_title(f"{title} Benchmark")
     ax.set_xlabel("Duration (Seconds)")
     ax.set_ylabel("Best Execution Time")
     ax.grid(True)
-    ax.legend(title="Source")
 
-print("Scatter Plot: Duration vs Best Execution Time by Source for Each Benchmark")
-plt.tight_layout(rect=[0, 0, 1, 0.93])
-plot_filename = "s5_1_combined"
-plt.savefig(f"{plot_filename}.png")
-plt.savefig(f"{plot_filename}.pdf")
-print(f"Scatter plot saved as {plot_filename}")
+# Create combined legend
+handles, labels = [], []
+for ax_orig in fig.axes:
+    h, l = ax_orig.get_legend_handles_labels()
+    for handle, label in zip(h, l):
+        if label not in labels:
+            handles.append(handle)
+            labels.append(label)
+
+if handles and labels:
+    fig.legend(
+        handles,
+        labels,
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.15),
+        ncol=len(labels),
+    )
+
+print("\nScatter Plot: Duration vs Best Execution Time (excluding timeouts) by Source")
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plot_filename = "s5_1_combined_valid_runs"  # Updated filename
+plt.savefig(f"{plot_filename}.png", bbox_inches="tight")
+plt.savefig(f"{plot_filename}.pdf", bbox_inches="tight")
+print(f"Plot excluding timeouts saved as {plot_filename}")
 plt.show()
 
-# --- Compute and Print Sums for Time Components per Source with Percentages ---
+# --- Compute and Print Sums for Time Components ---
+# Use the original df for time component sums
 time_columns = [
     "round_index_creation_time",
     "round_query_execution_time",
 ]
+for col in time_columns:
+    df[col] = pd.to_numeric(df[col], errors="coerce")
 
-# Group by file and compute the sums for each time column.
-grouped_sums = df.groupby("file")[time_columns].sum()
+df_for_sums = df.dropna(subset=time_columns).copy()
+grouped_sums = df_for_sums.groupby("file")[time_columns].sum()
 
-print("\nFormatted Time Sums per Source with Percentages:\n")
-for source, row in grouped_sums.iterrows():
-    total = row.sum()
-    disp_name = display_names.get(source, source)
-    print(disp_name)
-    for metric in time_columns:
-        value = row[metric]
-        pct = (value / total * 100) if total > 0 else 0
-        print(f"{metric}: {value:.6f} ({pct:.2f}%)")
-    print(f"sum: {total:.6f}\n")
+print("\nFormatted Time Sums per Source (Based on valid time entries):\n")
+if not grouped_sums.empty:
+    for source, row in grouped_sums.iterrows():
+        total = row.sum()
+        disp_name = print_names.get(source, source)
+        print(disp_name)
+        for metric in time_columns:
+            value = row[metric]
+            pct = (value / total * 100) if total > 0 else 0
+            print(f"{metric}: {value:.6f} ({pct:.2f}%)")
+        print(f"sum: {total:.6f}\n")
+else:
+    print("No valid time data found for summing.")
 
-# --- Compute and Print Best Execution Time Statistics per Source ---
-print("\nBest Execution Time per Source (aggregated):\n")
-# Aggregate only the minimum for best_execution_time.
-grouped_best = df.groupby("file")["best_execution_time"].agg(["min"])
-for source, stats in grouped_best.iterrows():
-    disp_name = display_names.get(source, source)
-    # If the value is infinite, replace it with NaN so that "inf" isn't printed.
-    min_val = stats["min"] if not np.isinf(stats["min"]) else float("nan")
-    print(f"{disp_name} -> Min: {min_val:.6f}")
+# --- Compute and Print Best Execution Time Statistics ---
+# Use df_valid_runs_for_plot for Min Best Execution Time (among successful runs)
+print("\nBest Execution Time per Source (aggregated, excluding timeouts):\n")
+if not df_valid_runs_for_plot.empty:
+    # Calculate min only on valid (non-timeout) runs
+    grouped_best_valid = df_valid_runs_for_plot.groupby("file")[
+        "best_execution_time"
+    ].agg(["min"])
+    for source, stats in grouped_best_valid.iterrows():
+        disp_name = print_names.get(source, source)
+        min_val = stats["min"]
+        print(f"{disp_name} -> Min (non-timeout): {min_val:.6f}")
+
+    # Optionally, show the count of timeouts if needed
+    timeout_counts = df[df["best_execution_time"] < 0].groupby("file").size()
+    if not timeout_counts.empty:
+        print("\nTimeout Counts per Source:")
+        for source, count in timeout_counts.items():
+            disp_name = print_names.get(source, source)
+            print(f"{disp_name} -> Timeouts: {count}")
+
+else:
+    print("No valid execution time data (>=0) found for aggregation.")
