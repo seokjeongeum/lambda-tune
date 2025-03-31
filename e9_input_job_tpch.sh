@@ -14,8 +14,8 @@ rm -r ./test/e9
     --configs ./lambdatune/configs/e9/tpch/lambdatune \
     --out ./test/e9/tpch/lambdatune \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
@@ -28,8 +28,8 @@ rm -r ./test/e9
     --configs ./lambdatune/configs/e9/tpch/ours \
     --out ./test/e9/tpch/ours \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
@@ -44,8 +44,8 @@ rm -r ./test/e9
     --configs ./lambdatune/configs/e9/job/lambdatune \
     --out ./test/e9/job/lambdatune \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\
@@ -58,8 +58,8 @@ rm -r ./test/e9
     --configs ./lambdatune/configs/e9/job/ours \
     --out ./test/e9/job/ours \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\

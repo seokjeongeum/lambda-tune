@@ -14,8 +14,8 @@ rm -r ./test/e10
     --configs ./lambdatune/configs/e10/tpcds/ours \
     --out ./test/e10/tpcds/ours \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --exploit_index exploit_index\
     --order_query order_query\

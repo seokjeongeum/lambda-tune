@@ -14,8 +14,8 @@ rm -r ./test/s52
     --configs ./lambdatune/configs/s52/job \
     --out ./test/s52/job/lambdatune \
     --config_gen config_gen \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     
     
@@ -24,8 +24,8 @@ rm -r ./test/s52
     --system POSTGRES \
     --configs ./lambdatune/configs/s52/job \
     --out ./test/s52/job/ours \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --order_query order_query\
     --exploit_index exploit_index

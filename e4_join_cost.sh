@@ -14,8 +14,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/196 \
     --out ./test/e4/196 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 196\
     --method lambdatune
 
@@ -25,8 +25,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/196 \
     --out ./test/e4/196 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 196\
     --method naive
     
@@ -36,8 +36,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/251 \
     --out ./test/e4/251 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 251\
     --method lambdatune
     
@@ -47,8 +47,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/251 \
     --out ./test/e4/251 \
     # --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 251\
     --method naive
     
@@ -58,8 +58,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/355 \
     --out ./test/e4/355 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 355\
     --method lambdatune
     
@@ -69,8 +69,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/355 \
     --out ./test/e4/355 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 355\
     --method naive
     
@@ -80,8 +80,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/618 \
     --out ./test/e4/618 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 618\
     --method lambdatune
     
@@ -91,8 +91,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/618 \
     --out ./test/e4/618 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 618\
     --method naive
     
@@ -102,8 +102,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/786 \
     --out ./test/e4/786 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --method lambdatune
     
@@ -113,8 +113,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/786 \
     --out ./test/e4/786 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 786\
     --method naive
     
@@ -124,8 +124,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/9223372036854775807 \
     --out ./test/e4/9223372036854775807 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 9223372036854775807\
     --method lambdatune
     
@@ -135,8 +135,8 @@ set +o allexport
     --configs ./lambdatune/configs/e4/9223372036854775807 \
     --out ./test/e4/9223372036854775807 \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --token_budget 9223372036854775807\
     --method naive
     
@@ -146,7 +146,7 @@ set +o allexport
     --configs ./lambdatune/configs/e4/query \
     --out ./test/e4/query \
     --config_gen true \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --method query
     

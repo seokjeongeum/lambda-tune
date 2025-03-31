@@ -16,8 +16,8 @@ bash .devcontainer/tpch.sh 1
     --config_gen true \
     --configs ./lambdatune/configs/e2/tpch1 \
     --out ./test/e2/tpch1 \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --system POSTGRES \
     --benchmark tpch
 
@@ -27,8 +27,8 @@ bash .devcontainer/tpch.sh 10
     --config_gen true \
     --configs ./lambdatune/configs/e2/tpch10 \
     --out ./test/e2/tpch10 \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --system POSTGRES \
     --benchmark tpch
 
@@ -37,8 +37,8 @@ bash .devcontainer/tpch.sh 10
     --config_gen true \
     --configs ./lambdatune/configs/e2/tpcds \
     --out ./test/e2/tpcds \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --system POSTGRES \
     --benchmark tpcds
 
@@ -46,7 +46,7 @@ bash .devcontainer/tpch.sh 10
     --config_gen true \
     --configs ./lambdatune/configs/e2/job \
     --out ./test/e2/job \
-    --core 64 \
-    --memory 128 \
+    --core 16 \
+    --memory 62 \
     --system POSTGRES \
     --benchmark job
