@@ -13,7 +13,7 @@ execute.
 The user has to provide the credentials of the target database system (Postgres or MySQL) in the `config.ini` file.
 
 ### Install Dependencies
-## MacOS
+#### MacOS
 
 
 ```bash
