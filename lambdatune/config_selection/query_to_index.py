@@ -28,7 +28,7 @@ def queries_to_index(queries: list[str], create_index_commands: list[str]):
 
     for index in create_index_commands:
         index_name = index.split(" ")[2].strip()
-        table_column = index.split("ON ")[1].strip()
+        table_column = index.split(" ON ")[1].strip()
         table_name = table_column.split("(")[0].strip()
         column_name = table_column.split("(")[1].split(")")[0].strip()
 

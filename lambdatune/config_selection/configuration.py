@@ -8,7 +8,7 @@ class Configuration:
         for command in config_commands:
             if "CREATE INDEX" in command:
                 print(command)
-                index_id = command.split("ON ")[1].strip().replace(";", "")
+                index_id = command.split(" ON ")[1].strip().replace(";", "")
                 index_name = command.split(" ")[2]
                 indexes[index_id] = f"CREATE INDEX {index_name}_{Configuration.idx} ON {index_id};"
                 Configuration.idx += 1
