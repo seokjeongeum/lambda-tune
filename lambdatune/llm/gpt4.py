@@ -146,7 +146,7 @@ def get_response(text: str, temperature: float):
         return f"Error: {e}"
 
 
-# --- output_format function remains the same ---
+# --- Refined output_format ---
 def output_format():
     format_schema = '{\n  "commands": ["SQL command 1", "SQL command 2", ...]\n}'
     return (
@@ -154,7 +154,10 @@ def output_format():
         f"Do not include any text before or after the JSON object, including markdown fences (```json ... ```).\n\n"
         f"Schema:\n{format_schema}\n\n"
         f"Ensure each element in the 'commands' list is a string containing a complete SQL command. "
+        f"The commands should primarily be for configuration settings (e.g., `ALTER SYSTEM SET parameter = value`) or creating indexes (`CREATE INDEX`). "
         f"Do not include any SQL comments (`--` or `/* */`) in the command strings. "
+        # *** MODIFIED LINE: Be specific about ADD PRIMARY KEY ***
+        f"**Crucially, do not include commands that add primary key constraints (e.g., `ALTER TABLE ... ADD PRIMARY KEY ...` or `ALTER TABLE ... ADD CONSTRAINT ... PRIMARY KEY ...`).** "
         f'Do **not** wrap individual commands in their own JSON objects (e.g., do not use {{"command": "..."}}).'
     )
 
