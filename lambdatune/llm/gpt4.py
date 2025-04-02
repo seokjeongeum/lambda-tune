@@ -257,6 +257,7 @@ def get_config_recommendations_with_compression(
     internal_metrics: dict = None,
     query_plan: bool = False,
     plans: list = list(),
+    data_definition_language:str=None,
 ):
     """
     Generate a prompt for recommendations, process the response to handle different
@@ -274,7 +275,9 @@ def get_config_recommendations_with_compression(
              prompt += " Do not include index recommendations."
     else:
         prompt = f"Give me index recommendations for the following input workload for {dst_system}. The index names should be unique.\n"
-
+    if data_definition_language:        
+        prompt += "The workload contains the following DDL statements:\n"
+        prompt += f"{data_definition_language}\n"
     if workload_statistics:
         prompt += "\nThe workload statistics are the following:\n" + "\n".join(f"{stat}: {workload_statistics[stat]}" for stat in workload_statistics)
     if relations:

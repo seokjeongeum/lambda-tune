@@ -359,7 +359,7 @@ def analyze_sql_queries(queries):
     }
 
 def get_configurations_with_compression(target_db: str, benchmark: str, memory_gb: int, num_cores: int, driver: Driver,
-                                        queries: dict, output_dir_path: str,query_weight:bool,does_use_workload_statistics:bool,does_use_internal_metrics:bool,query_plan:bool, token_budget: int = sys.maxsize,
+                                        queries: dict, output_dir_path: str,query_weight:bool,does_use_workload_statistics:bool,does_use_internal_metrics:bool,query_plan:bool,does_use_data_definition_language:bool, token_budget: int = sys.maxsize,
                                         num_configs: int=5, temperature: float=0.2):
     driver.drop_all_non_pk_indexes()
     driver.reset_configuration()
@@ -371,7 +371,19 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
         system='gpu'
         with open(f"{benchmark}_metrics_{system}.json", "r") as f:
             internal_metrics = json.load(f)
-
+    data_definition_language=None
+    if does_use_data_definition_language:
+        if benchmark == "job":
+            with open('job/schema.sql') as f:
+                data_definition_language = f.read()
+        elif benchmark == "tpch":
+            with open('TPC-H V3.0.1/dbgen/dss.ddl') as f:
+                data_definition_language = f.read()
+        elif benchmark == "tpcds":
+            with open('DSGen-software-code-4.0.0_final/tools/tpcds.sql') as f1:
+                with open('DSGen-software-code-4.0.0_final/tools/tpcds_source.sql') as f2:
+                    data_definition_language = f'''{f1.read()}
+{f2.read()}'''
     conditions,filters,costs,plans = extract_conditions(driver, queries)
     grouped_conditions = group_join_conditions(conditions)
 
@@ -422,6 +434,7 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                                         internal_metrics=internal_metrics,
                                                         query_plan=query_plan,
                                                         plans=plans,
+                                                        data_definition_language=data_definition_language,
                                                         )
 
         path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")

@@ -249,9 +249,9 @@ for ax, benchmark in zip(axes, benchmarks):
 # Create one global legend and position it near the top center.
 legend_elements = [
     Patch(facecolor=color_mapping_index["Ours"], label="Ours - Index Creation"),
-    Patch(facecolor=color_mapping_query["Ours"], label="Ours - Query Execution"),
+    Patch(facecolor=color_mapping_query["Ours"], label="Ours - Total Duration"),
     Patch(facecolor=color_mapping_index["λ-Tune"], label="λ-Tune - Index Creation"),
-    Patch(facecolor=color_mapping_query["λ-Tune"], label="λ-Tune - Query Execution"),
+    Patch(facecolor=color_mapping_query["λ-Tune"], label="λ-Tune - Total Duration"),
 ]
 fig.legend(
     handles=legend_elements,

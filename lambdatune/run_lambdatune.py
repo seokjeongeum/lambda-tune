@@ -46,6 +46,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--query_plan", type=bool, default=False)
 
+    parser.add_argument("--data_definition_language", type=bool, default=False)
+
     args = parser.parse_args()
 
     llm_configs_dir = args.configs
@@ -72,6 +74,8 @@ if __name__ == "__main__":
     internal_metrics=args.internal_metrics
 
     query_plan=args.query_plan
+
+    data_definition_language=args.data_definition_language
 
     args = parser.parse_args()
 
@@ -117,6 +121,7 @@ if __name__ == "__main__":
                                             does_use_workload_statistics=workload_statistics,
                                             does_use_internal_metrics=internal_metrics,
                                             query_plan=query_plan,
+                                            does_use_data_definition_language=data_definition_language,
                                             )
 
     timeouts = [10]
