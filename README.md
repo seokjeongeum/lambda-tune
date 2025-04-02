@@ -17,7 +17,17 @@ execute.
 The user has to provide the credentials of the target database system (Postgres or MySQL) in the `config.ini` file.
 
 ### Install Dependencies
-`pip install -r requirements.txt`
+#### MacOS
+
+
+```bash
+brew install pkg-config
+brew install mysql-client
+
+export PKG_CONFIG_PATH="/opt/homebrew/opt/mysql-client/lib/pkgconfig"
+
+pip install -r requirements.txt
+```
 
 ## Usage
 
