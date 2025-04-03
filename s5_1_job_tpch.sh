@@ -32,6 +32,7 @@ rm -r ./test/s51
     --order_query order_query\
     --query_weight query_weight\
     --workload_statistics workload_statistics\
+    --data_definition_language data_definition_language\
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
@@ -58,5 +59,6 @@ rm -r ./test/s51
     --order_query order_query\
     --query_weight query_weight\
     --workload_statistics workload_statistics\
+    --data_definition_language data_definition_language\
 
     
