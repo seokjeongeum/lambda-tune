@@ -17,6 +17,9 @@ rm -r ./test/s52
     --core 16 \
     --memory 62 \
     --token_budget 786\
+    --query_weight query_weight\
+    --workload_statistics workload_statistics\
+    --data_definition_language data_definition_language\
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
@@ -28,6 +31,9 @@ rm -r ./test/s52
     --memory 62 \
     --token_budget 786\
     --order_query order_query\
-    --exploit_index exploit_index
+    --exploit_index exploit_index\
+    --query_weight query_weight\
+    --workload_statistics workload_statistics\
+    --data_definition_language data_definition_language\
     
     
