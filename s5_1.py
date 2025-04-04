@@ -1,215 +1,245 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import json
+import math
 import os
-import pandas as pd
+import pathlib  # Using pathlib for easier path manipulation
+from collections import defaultdict  # Useful for nested dictionaries
+
 import matplotlib.pyplot as plt
-import numpy as np
 
-# Increase plot font sizes globally by 1.5x
-plt.rcParams.update(
-    {
-        "font.size": 21,
-        "axes.titlesize": 24,
-        "axes.labelsize": 21,
-        "xtick.labelsize": 18,
-        "ytick.labelsize": 18,
-        "legend.fontsize": 18,
-    }
-)
+try:
+    from adjustText import adjust_text
+except ImportError:
+    print("Error: The 'adjustText' library is not installed.")
+    print("Please install it using: pip install adjustText")
+    exit()  # Exit if the required library is not found
 
-# Set the experiment and benchmarks
-experiment = "s51"
-benchmarks = ["tpch", "job", "tpcds"]
-
-# Load and merge the data
-data = []
-for benchmark in benchmarks:
-    file_paths = [
-        f"test/{experiment}/{benchmark}/ours/reports.json",
-        f"test/{experiment}/{benchmark}/lambdatune/reports.json",
-    ]
-    for fp in file_paths:
-        if os.path.exists(fp):
-            with open(fp, "r") as f:
-                reports = json.load(f)
-                for report in reports:
-                    report["file"] = fp
-                    report["benchmark"] = benchmark
-                data.extend(reports)
-        else:
-            print(f"Warning: File {fp} not found.")
-
-# Create DataFrame
-df = pd.DataFrame(data)
-
-# Check required columns
-required_columns = [
-    "duration_seconds",
-    "best_execution_time",
-    "round_index_creation_time",
-    "round_query_execution_time",
-    "round_config_reset_time",
-    "round_reconfiguration_time",
-    "file",
+# --- Configuration ---
+# (Same as before)
+base_dir = "test"
+file_paths_to_process = [
+    pathlib.Path(base_dir, "s51", "job", "lambdatune", "reports.json"),
+    pathlib.Path(base_dir, "s51", "job", "ours", "reports.json"),
+    pathlib.Path(base_dir, "s51", "tpcds", "lambdatune", "reports.json"),
+    pathlib.Path(base_dir, "s51", "tpcds", "ours", "reports.json"),
+    pathlib.Path(base_dir, "s51", "tpch", "lambdatune", "reports.json"),
+    pathlib.Path(base_dir, "s51", "tpch", "ours", "reports.json"),
 ]
-missing_columns = [col for col in required_columns if col not in df.columns]
-if missing_columns:
-    raise ValueError(f"Missing columns: {missing_columns}")
+benchmark_order = ["job", "tpcds", "tpch"]
+num_benchmarks = len(benchmark_order)
+output_filename_base = "s5_1"
+output_formats = ["png", "pdf"]
+title_map = {"job": "JOB", "tpcds": "TPC-DS", "tpch": "TPC-H"}
+legend_label_map = {"lambdatune": "λ-Tune", "ours": "Ours"}
+grouped_plot_data = defaultdict(lambda: defaultdict(list))
 
-# Convert numeric columns
-df["best_execution_time"] = pd.to_numeric(df["best_execution_time"], errors="coerce")
-df["duration_seconds"] = pd.to_numeric(df["duration_seconds"], errors="coerce")
-
-# Filter out rows representing timeouts BEFORE plotting
-df_valid_runs_for_plot = df[
-    df["timeout"] >= 0
-].copy()  # Keep only non-timeout runs for plotting
-print(
-    f"Original data points: {len(df)}, Points for plotting (non-timeout): {len(df_valid_runs_for_plot)}"
-)
-
-
-# Define display name mapping and colors
-display_names = {}
-print_names = {}
-colors = {}
-for benchmark in benchmarks:
-    if benchmark.lower() == "tpch":
-        bench_title = "TPC-H"
-    elif benchmark.lower() == "job":
-        bench_title = "JOB"
-    elif benchmark.lower() == "tpcds":
-        bench_title = "TPC-DS"
-    else:
-        bench_title = benchmark.upper()
-
-    ours_fp = f"test/{experiment}/{benchmark}/ours/reports.json"
-    lambdatune_fp = f"test/{experiment}/{benchmark}/lambdatune/reports.json"
-
-    display_names[ours_fp] = "Ours"
-    display_names[lambdatune_fp] = "λ-Tune"
-    print_names[ours_fp] = f"{bench_title}: Ours"
-    print_names[lambdatune_fp] = f"{bench_title}: λ-Tune"
-    colors[ours_fp] = "blue"
-    colors[lambdatune_fp] = "green"
-
-# --- Plotting ---
-num_benchmarks = len(benchmarks)
-fig, axes = plt.subplots(
-    nrows=1, ncols=num_benchmarks, figsize=(6 * num_benchmarks, 6), sharey=False
-)
-if num_benchmarks == 1:
-    axes = [axes]
-
-for ax, benchmark in zip(axes, benchmarks):
-    # Use the PRE-FILTERED data (valid runs only)
-    sub_df = df_valid_runs_for_plot[df_valid_runs_for_plot["benchmark"] == benchmark]
-
-    if sub_df.empty:
+# --- Data Processing Loop for Each File ---
+# (Same as before - code omitted for brevity)
+for file_path in file_paths_to_process:
+    print(f"--- Processing file: {file_path} ---")
+    try:
+        benchmark_name = file_path.parts[-3]
+        method_name = file_path.parts[-2]
+        if benchmark_name not in benchmark_order:
+            print(
+                f"Warning: Benchmark '{benchmark_name}' from path not in defined order. Skipping file: {file_path}"
+            )
+            continue
+        print(f"    Benchmark: {benchmark_name}, Method: {method_name}")
+    except IndexError:
         print(
-            f"Warning: No valid runs (non-timeout) found for benchmark '{benchmark}'. Skipping plot."
+            f"Warning: Could not determine benchmark/method from path structure: {file_path}"
         )
-        title = benchmark.upper().replace("TPCH", "TPC-H").replace("TPCDS", "TPC-DS")
-        ax.set_title(f"{title} Benchmark (No Valid Data)")
-        ax.set_xlabel("Duration (Seconds)")
-        ax.set_ylabel("Best Execution Time")
-        ax.grid(True)
+        continue
+    try:
+        with open(file_path, "r") as f:
+            content = f.read()
+            if not content:
+                continue
+            reports_data = json.loads(content)
+            if not isinstance(reports_data, list):
+                continue
+            if not reports_data:
+                continue
+    except FileNotFoundError:
+        print(f"Error: File not found: {file_path}")
+        continue
+    except json.JSONDecodeError as e:
+        print(f"Error: Could not decode JSON from {file_path}: {e}")
+        continue
+    except Exception as e:
+        print(f"An unexpected error occurred while reading {file_path}: {e}")
         continue
 
-    for source, group in sub_df.groupby("file"):
-        group = group.sort_values("duration_seconds")
-        ax.scatter(
-            group["duration_seconds"],
-            group["best_execution_time"],
-            label=display_names.get(source, source),
-            color=colors.get(source, "black"),
-            alpha=0.7,
+    processed_configs = set()
+    first_valid_points_in_file = {}
+    for report in reports_data:
+        config_id = report.get("config_id")
+        best_time = report.get("best_execution_time")
+        duration = report.get("duration_seconds")
+        if not config_id or best_time is None or duration is None:
+            continue
+        if config_id not in processed_configs:
+            if isinstance(best_time, (int, float)) and best_time != float("inf"):
+                first_valid_points_in_file[config_id] = (duration, best_time)
+                processed_configs.add(config_id)
+
+    points_added = 0
+    for duration, best_time in first_valid_points_in_file.values():
+        grouped_plot_data[benchmark_name][method_name].append((duration, best_time))
+        points_added += 1
+
+    if points_added > 0:
+        print(
+            f"    Found {points_added} unique first valid points for {benchmark_name}/{method_name}."
         )
-        ax.plot(
-            group["duration_seconds"],
-            group["best_execution_time"],
-            color=colors.get(source, "black"),
-            linestyle="--",
-            alpha=0.7,
+    else:
+        print(f"    No suitable first valid data points found in {file_path}.")
+
+
+# --- Plotting Section (Implementing Option 2: adjustText for TPC-DS with TUNING) ---
+print("\n--- Generating Plots ---")
+
+if not grouped_plot_data:
+    print("No data found from any file to plot.")
+else:
+    # Increase figure width slightly more
+    fig, axes = plt.subplots(
+        1, num_benchmarks, figsize=(8 * num_benchmarks, 6)
+    )  # Increased width factor from 7 to 8
+    if num_benchmarks == 1:
+        axes = [axes]
+
+    legend_info = {}
+
+    for i, benchmark_name in enumerate(benchmark_order):
+        ax = axes[i]
+        print(f"\nGenerating subplot for benchmark: {benchmark_name} (Axis {i})")
+        plot_title = title_map.get(benchmark_name, benchmark_name.upper())
+
+        if benchmark_name not in grouped_plot_data:
+            print(f"  No data found for benchmark: {benchmark_name}")
+            ax.set_title(f"{plot_title} (No Data)")
+            ax.text(
+                0.5,
+                0.5,
+                "No data available",
+                ha="center",
+                va="center",
+                transform=ax.transAxes,
+            )
+            ax.grid(False)
+            continue
+
+        methods_data = grouped_plot_data[benchmark_name]
+        plot_successful_for_benchmark = False
+        plot_method_order = ["lambdatune", "ours"]
+        texts_for_adjust = []
+
+        for method_name in plot_method_order:
+            if method_name not in methods_data:
+                continue
+            points = methods_data[method_name]
+            if not points:
+                continue
+
+            try:
+                sorted_points = sorted(points, key=lambda item: item[0])
+            except TypeError as e:
+                print(
+                    f"Error sorting points for {benchmark_name}/{method_name}: {e}. Points: {points}"
+                )
+                continue
+
+            x_vals = [p[0] for p in sorted_points]
+            y_vals = [p[1] for p in sorted_points]
+            if not x_vals:
+                continue
+
+            mapped_label = legend_label_map.get(method_name, method_name)
+            (line,) = ax.plot(
+                x_vals,
+                y_vals,
+                marker="o",
+                linestyle="-",
+                markersize=5,
+                label=mapped_label,
+            )
+            print(
+                f"  Plotting line for: {method_name} (as '{mapped_label}') ({len(x_vals)} points)"
+            )
+            plot_successful_for_benchmark = True
+
+            # --- Store Text Annotations for TPC-DS ONLY ---
+            if benchmark_name == "tpcds":
+                for x, y in zip(x_vals, y_vals):
+                    # Use smaller font size
+                    texts_for_adjust.append(
+                        ax.text(
+                            x, y, f"{y:.2f}", fontsize=7
+                        )  # Reduced fontsize from 8 to 7
+                    )
+
+            if mapped_label not in legend_info:
+                legend_info[mapped_label] = line
+
+        # --- Apply adjust_text AFTER plotting lines for the TPC-DS subplot with TUNED parameters ---
+        if benchmark_name == "tpcds" and texts_for_adjust:
+            print(
+                f"  Applying adjust_text to {len(texts_for_adjust)} labels for TPC-DS (Tuned)..."
+            )
+            try:
+                adjust_text(
+                    texts_for_adjust,
+                    ax=ax,
+                    # Increase force parameters and iterations
+                    force_points=(0.2, 0.2),  # Increase repulsion from points
+                    force_text=(
+                        0.3,
+                        0.5,
+                    ),  # Increase repulsion between texts (more vertically)
+                    expand_points=(
+                        1.3,
+                        1.3,
+                    ),  # Slightly larger exclusion zone around points
+                    lim=500,  # Increase iteration limit
+                    arrowprops=dict(arrowstyle="-", color="grey", lw=0.5),
+                )
+                print("  adjust_text applied.")
+            except Exception as e:
+                print(f"  Error applying adjust_text: {e}")
+
+        # Configure subplot
+        ax.set_title(plot_title)
+        ax.set_xlabel("Duration (s)")
+        ax.set_ylabel("Best Time (s)")
+        ax.grid(True, linestyle="--", alpha=0.6)
+
+    # Configure figure
+    if legend_info:
+        sorted_labels = sorted(legend_info.keys())
+        sorted_handles = [legend_info[lbl] for lbl in sorted_labels]
+        fig.legend(
+            sorted_handles,
+            sorted_labels,
+            title="Method",
+            loc="upper center",
+            bbox_to_anchor=(0.5, 0.03),
+            ncol=len(sorted_labels),
         )
-    title = benchmark.upper().replace("TPCH", "TPC-H").replace("TPCDS", "TPC-DS")
-    ax.set_title(f"{title} Benchmark")
-    ax.set_xlabel("Duration (Seconds)")
-    ax.set_ylabel("Best Execution Time")
-    ax.grid(True)
 
-# Create combined legend
-handles, labels = [], []
-for ax_orig in fig.axes:
-    h, l = ax_orig.get_legend_handles_labels()
-    for handle, label in zip(h, l):
-        if label not in labels:
-            handles.append(handle)
-            labels.append(label)
+    plt.tight_layout(rect=[0, 0.08, 1, 0.95])
 
-if handles and labels:
-    fig.legend(
-        handles,
-        labels,
-        loc="upper center",
-        bbox_to_anchor=(0.5, 1.15),
-        ncol=len(labels),
-    )
+    # Save plots
+    print("\n--- Saving Plots ---")
+    for fmt in output_formats:
+        output_filename = f"{output_filename_base}.{fmt}"
+        try:
+            plt.savefig(output_filename, format=fmt, bbox_inches="tight", dpi=300)
+            print(f"Saved plot to: {output_filename}")
+        except Exception as e:
+            print(f"Error saving plot to {output_filename}: {e}")
 
-print("\nScatter Plot: Duration vs Best Execution Time (excluding timeouts) by Source")
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-plot_filename = "s5_1_combined_valid_runs"  # Updated filename
-plt.savefig(f"{plot_filename}.png", bbox_inches="tight")
-plt.savefig(f"{plot_filename}.pdf", bbox_inches="tight")
-print(f"Plot excluding timeouts saved as {plot_filename}")
-plt.show()
+    plt.show()
 
-# --- Compute and Print Sums for Time Components ---
-# Use the original df for time component sums
-time_columns = [
-    "round_index_creation_time",
-    "round_query_execution_time",
-]
-for col in time_columns:
-    df[col] = pd.to_numeric(df[col], errors="coerce")
-
-df_for_sums = df.dropna(subset=time_columns).copy()
-grouped_sums = df_for_sums.groupby("file")[time_columns].sum()
-
-print("\nFormatted Time Sums per Source (Based on valid time entries):\n")
-if not grouped_sums.empty:
-    for source, row in grouped_sums.iterrows():
-        total = row.sum()
-        disp_name = print_names.get(source, source)
-        print(disp_name)
-        for metric in time_columns:
-            value = row[metric]
-            pct = (value / total * 100) if total > 0 else 0
-            print(f"{metric}: {value:.6f} ({pct:.2f}%)")
-        print(f"sum: {total:.6f}\n")
-else:
-    print("No valid time data found for summing.")
-
-# --- Compute and Print Best Execution Time Statistics ---
-# Use df_valid_runs_for_plot for Min Best Execution Time (among successful runs)
-print("\nBest Execution Time per Source (aggregated, excluding timeouts):\n")
-if not df_valid_runs_for_plot.empty:
-    # Calculate min only on valid (non-timeout) runs
-    grouped_best_valid = df_valid_runs_for_plot.groupby("file")[
-        "best_execution_time"
-    ].agg(["min"])
-    for source, stats in grouped_best_valid.iterrows():
-        disp_name = print_names.get(source, source)
-        min_val = stats["min"]
-        print(f"{disp_name} -> Min (non-timeout): {min_val:.6f}")
-
-    # Optionally, show the count of timeouts if needed
-    timeout_counts = df[df["best_execution_time"] < 0].groupby("file").size()
-    if not timeout_counts.empty:
-        print("\nTimeout Counts per Source:")
-        for source, count in timeout_counts.items():
-            disp_name = print_names.get(source, source)
-            print(f"{disp_name} -> Timeouts: {count}")
-
-else:
-    print("No valid execution time data (>=0) found for aggregation.")
+print("\n--- Script Finished ---")
