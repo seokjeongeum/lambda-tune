@@ -22,6 +22,10 @@ brew install mysql-client
 
 export PKG_CONFIG_PATH="/opt/homebrew/opt/mysql-client/lib/pkgconfig"
 
+# Create a Virtual Environment
+virtualenv .venv
+source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
