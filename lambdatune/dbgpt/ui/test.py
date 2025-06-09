@@ -112,7 +112,3 @@ def prompt_single_plan(plan_1: str, system: str, temperature: float = 0):
     print(data)
 
     return json.loads(data.choices[0]["message"]["content"])
-
-
-if __name__ == "__main__":
-    print(prompt(get_sample_plan_1(), get_sample_plan_2(), "postgres", fake_it=True, temperature=0.35))

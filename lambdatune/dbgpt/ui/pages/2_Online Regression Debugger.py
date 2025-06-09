@@ -31,6 +31,7 @@ with st.sidebar:
     selected_query = st.sidebar.selectbox('Choose a Query', query_ids, key='selected_query',
                                           format_func=lambda x: f"{executed_queries[x][0].query_name} ({executed_queries[x][0].tag})")
 
+failed = False
 if selected_query:
     # Check last execution instance
     last_execution = executed_queries[selected_query][-1]
