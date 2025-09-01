@@ -1,4 +1,3 @@
-import os
 import time
 
 import streamlit as st
@@ -25,7 +24,7 @@ with st.sidebar:
     driver = get_dbms_driver(selected_dbms.upper(), db=selected_tag.lower())
     cursor = driver.cursor
 
-    # Chose a Query
+    # Choose a Query
     queries = [(d[1], d) for d in handler.get_queries_by_tag(selected_tag)]
     queries = dict(queries)
     selected_query = st.sidebar.selectbox('Choose a Query', queries.keys(), key='selected_query')
