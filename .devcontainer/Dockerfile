@@ -4,10 +4,11 @@ FROM ubuntu:20.04
 ENV LANG=en_US.UTF-8 \
     LANGUAGE=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8 \
-    PGPASSWORD=your_new_password
+    PGPASSWORD=your_new_password \
+    DEBIAN_FRONTEND=noninteractive
 
 # Create a non-root user and grant sudo permissions
-RUN apt-get update && apt-get install -y sudo && \
+RUN apt-get update && apt-get install -y sudo python3.9-venv git && \
     useradd -m -s /bin/bash vscode && \
     echo "vscode ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
