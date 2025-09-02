@@ -4,8 +4,8 @@
 	  "dockerfile": "Dockerfile",
 	  "context": "."
 	},
-	"onCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-	"postCreateCommand": "sudo bash .devcontainer/postCreateCommand.sh",
+	"onCreateCommand": "chown -R vscode:vscode ${containerWorkspaceFolder} && git config --global --add safe.directory ${containerWorkspaceFolder}",
+	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
 	"runArgs": [
 		"--shm-size=1g",
 		"--network",
