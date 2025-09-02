@@ -48,8 +48,8 @@ apt-get install -y \
     mysql-server-8.0 mysql-client 
 
 # Create, activate virtual environment and install python packages
-python3.9 -m venv /opt/venv
-source /opt/venv/bin/activate
+python3.9 -m venv .venv
+source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
@@ -132,4 +132,4 @@ echo "Running TPCH loading script..."
 bash .devcontainer/tpch.sh || echo "TPCH script failed."
 
 # Add venv activation to .bashrc
-echo "source /opt/venv/bin/activate" >> ~/.bashrc
+echo "source .venv/bin/activate" >> ~/.bashrc
