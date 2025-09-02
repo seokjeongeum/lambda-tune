@@ -75,3 +75,4 @@ mysql-connector-python
 matplotlib
 google-genai
 google-generativeai
+adjustText

@@ -50,6 +50,10 @@ if __name__ == "__main__":
     parser.add_argument("--data_definition_language", type=bool, default=False)
     # --- Proposed methodology END ---
 
+    parser.add_argument("--model", type=str, default="gemini-2.5-pro",
+                        choices=["gemini-2.5-flash", "gemini-2.5-pro"],
+                        help="The Gemini model to use for generating configurations.")
+
     args = parser.parse_args()
 
     llm_configs_dir = args.configs
@@ -79,9 +83,8 @@ if __name__ == "__main__":
     query_plan=args.query_plan
 
     data_definition_language=args.data_definition_language
+    model = args.model
     # --- Proposed methodology END ---
-
-    args = parser.parse_args()
 
     # Parse config file
     config_parser = configparser.ConfigParser()
@@ -129,6 +132,7 @@ if __name__ == "__main__":
                                             does_use_internal_metrics=internal_metrics,
                                             query_plan=query_plan,
                                             does_use_data_definition_language=data_definition_language,
+                                            model=model
                                             )
         # --- Proposed methodology END ---
 

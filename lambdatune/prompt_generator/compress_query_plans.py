@@ -359,7 +359,7 @@ def analyze_sql_queries(queries):
     }
 
 def get_configurations_with_compression(target_db: str, benchmark: str, memory_gb: int, num_cores: int, driver: Driver,
-                                        queries: dict, output_dir_path: str,query_weight:bool,does_use_workload_statistics:bool,does_use_internal_metrics:bool,query_plan:bool,does_use_data_definition_language:bool, token_budget: int = sys.maxsize,
+                                        queries: dict, output_dir_path: str,query_weight:bool,does_use_workload_statistics:bool,does_use_internal_metrics:bool,query_plan:bool,does_use_data_definition_language:bool, model: str, token_budget: int = sys.maxsize,
                                         num_configs: int=5, temperature: float=0.2):
     driver.drop_all_non_pk_indexes()
     driver.reset_configuration()
@@ -442,6 +442,7 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                                         query_plan=query_plan,
                                                         plans=plans,
                                                         data_definition_language=data_definition_language,
+                                                        model=model
                                                         # --- Proposed methodology END ---
                                                         )
 
