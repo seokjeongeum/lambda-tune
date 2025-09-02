@@ -1,11 +1,14 @@
 {
 	"name": "Ubuntu",
 	"build": {
-	  "dockerfile": "Dockerfile",
-	  "context": "."
+		"dockerfile": "Dockerfile",
+		"context": ".",
+		"args": {
+			"WORKSPACE": "/workspaces/${localWorkspaceFolderBasename}"
+		}
 	},
-	"onCreateCommand": "chown -R vscode:vscode ${containerWorkspaceFolder} && git config --global --add safe.directory ${containerWorkspaceFolder}",
-	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
+	"onCreateCommand": "chmod -R a+rwx ${containerWorkspaceFolder}",
+	"postCreateCommand": "sudo bash .devcontainer/postCreateCommand.sh",
 	"runArgs": [
 		"--shm-size=1g",
 		"--network",
