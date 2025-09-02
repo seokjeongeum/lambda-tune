@@ -10,7 +10,7 @@
 		"--shm-size=1g",
 		"--network",
 		"host",
-		"--memory=128gb"
+		"--memory=62gb"
 	],
 	"updateRemoteUserUID": false,
 

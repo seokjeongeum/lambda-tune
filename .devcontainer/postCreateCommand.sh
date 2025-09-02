@@ -1,5 +1,7 @@
 #!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
+git config --global user.email "jeseok@dblab.postech.ac.kr"
+git config --global user.name "Jeongeum Seok"
 
 # Update and install basic prerequisites
 apt-get update && apt-get install -y \
