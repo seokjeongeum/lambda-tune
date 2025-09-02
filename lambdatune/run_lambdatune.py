@@ -30,6 +30,7 @@ if __name__ == "__main__":
     parser.add_argument("--cores", type=int, help="The number of cores of the system")
     parser.add_argument("--memory", type=int, help="The amount of memory (GB) of the system")
 
+    # --- Proposed methodology START ---
     parser.add_argument("--continue_loop", type=bool, default=False)
 
     parser.add_argument("--token_budget", type=int,default=sys.maxsize)
@@ -47,6 +48,7 @@ if __name__ == "__main__":
     parser.add_argument("--query_plan", type=bool, default=False)
 
     parser.add_argument("--data_definition_language", type=bool, default=False)
+    # --- Proposed methodology END ---
 
     args = parser.parse_args()
 
@@ -59,6 +61,7 @@ if __name__ == "__main__":
     memory = args.memory
     cores = args.cores
 
+    # --- Proposed methodology START ---
     continue_loop=args.continue_loop
 
     token_budget=args.token_budget
@@ -76,6 +79,7 @@ if __name__ == "__main__":
     query_plan=args.query_plan
 
     data_definition_language=args.data_definition_language
+    # --- Proposed methodology END ---
 
     args = parser.parse_args()
 
@@ -106,8 +110,11 @@ if __name__ == "__main__":
         raise Exception("Benchmark {} does not exist. Pick one from {tpch, tpcds, job}"%(benchmark))
 
     queries = queries
+    # --- Proposed methodology START ---
     costs=None
+    # --- Proposed methodology END ---
     if config_gen:
+        # --- Proposed methodology START ---
         costs=get_configurations_with_compression(output_dir_path=llm_configs_dir,
                                             driver=driver,
                                             queries=queries,
@@ -123,6 +130,7 @@ if __name__ == "__main__":
                                             query_plan=query_plan,
                                             does_use_data_definition_language=data_definition_language,
                                             )
+        # --- Proposed methodology END ---
 
     timeouts = [10]
 
@@ -147,10 +155,12 @@ if __name__ == "__main__":
                                          system=system,
                                          adaptive_timeout=adaptive_timeout,
                                          output_dir=output_dir,
+                                         # --- Proposed methodology START ---
                                          continue_loop=continue_loop,
                                          exploit_index=exploit_index,
                                          order_query=order_query,
                                          costs=costs
+                                         # --- Proposed methodology END ---
                                          )
 
         selector.select_configuration()

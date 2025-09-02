@@ -363,6 +363,7 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                         num_configs: int=5, temperature: float=0.2):
     driver.drop_all_non_pk_indexes()
     driver.reset_configuration()
+    # --- Proposed methodology START ---
     workload_statistics=None
     if does_use_workload_statistics:
         workload_statistics=analyze_sql_queries([query[1] for query in queries])
@@ -385,11 +386,13 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                     data_definition_language = f'''{f1.read()}
 {f2.read()}'''
     conditions,filters,costs,plans = extract_conditions(driver, queries)
+    # --- Proposed methodology END ---
     grouped_conditions = group_join_conditions(conditions)
 
     indexes = True
     solver = ILPSolver(query_weight)
 
+    # --- Proposed methodology START ---
     sorted_conditions=sorted([(c[0],c[2],'join') for c in conditions]+filters,key=lambda x:x[1],reverse=True)
     # start_time = time.time()
     optimized_with_dependencies,lambda_tune_cost = solver.optimize_with_dependencies(grouped_conditions, token_budget)
@@ -415,13 +418,16 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
             join_conditions[s[0]].append(s[1])
         if cond[2]=='filter':
             filters.append(cond[0])
+    # --- Proposed methodology END ---
         
     output_dir = os.path.join(output_dir_path)
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     for i in range(0, num_configs):
+        # --- Proposed methodology START ---
         t=time.time()
+        # --- Proposed methodology END ---
         doc = get_config_recommendations_with_compression(dst_system=target_db,
                                                         relations=None,
                                                         temperature=temperature,
@@ -430,11 +436,13 @@ def get_configurations_with_compression(target_db: str, benchmark: str, memory_g
                                                         system_specs={"memory": f"{memory_gb}GiB", "cores": num_cores},
                                                         #   indexes_only=True,
                                                         indexes=True,
+                                                        # --- Proposed methodology START ---
                                                         workload_statistics=workload_statistics,
                                                         internal_metrics=internal_metrics,
                                                         query_plan=query_plan,
                                                         plans=plans,
                                                         data_definition_language=data_definition_language,
+                                                        # --- Proposed methodology END ---
                                                         )
 
         path = os.path.join(output_dir, f"config_{benchmark}_tokens_{token_budget}_{temperature}_{int(time.time())}.json")

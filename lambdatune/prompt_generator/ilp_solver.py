@@ -48,17 +48,23 @@ class ILPSolver:
     def __init__(self,query_weight):
         self.key_to_idx = defaultdict(list)
         self.idx_to_key = dict()
+        # --- Proposed methodology START ---
         self.query_weight=query_weight
+        # --- Proposed methodology END ---
 
     def extract_dependencies(self, conditions: dict):
         dependencies = defaultdict(set)
 
+        # --- Proposed methodology START ---
         conditions = conditions.items()
+        # --- Proposed methodology END ---
         idx = 0
 
         values = list()
         costs = list()
+        # --- Proposed methodology START ---
         query_values=list()
+        # --- Proposed methodology END ---
 
         # Keeps track of the added conditions taking into account symmetry (a=b == b=a)
         added_conditions = set()
@@ -83,7 +89,9 @@ class ILPSolver:
 
             # The value of the left key alone is zero
             values.append(0)
+            # --- Proposed methodology START ---
             query_values.append(0)
+            # --- Proposed methodology END ---
 
             # The cost of the left key is its number of tokens
             # costs.append(len(encoding.encode(left_key)))
@@ -94,7 +102,9 @@ class ILPSolver:
             for pair in right_keys:
                 key = pair[0]
                 value = pair[1]
+                # --- Proposed methodology START ---
                 query_value=pair[2]
+                # --- Proposed methodology END ---
 
                 right_key_idx = idx
                 self.key_to_idx[key].append(idx)
@@ -104,17 +114,23 @@ class ILPSolver:
                 dependencies[left_key_idx].add(right_key_idx)
 
                 values.append(value)
+                # --- Proposed methodology START ---
                 query_values.append(query_value)
                 # costs.append(len(encoding.encode(key)))
                 costs.append(len(key))
+                # --- Proposed methodology END ---
 
+        # --- Proposed methodology START ---
         return dependencies, costs, values,query_values
+        # --- Proposed methodology END ---
 
     def optimize_with_dependencies(self, conditions: dict, token_budget: int):
         # Reset key_to_idx
         self.key_to_idx = defaultdict(list)
 
+        # --- Proposed methodology START ---
         dependencies, weights, values,query_values = self.extract_dependencies(conditions)
+        # --- Proposed methodology END ---
 
         m = Model("knapsack")
         m.setParam("OutputFlag", 0)
@@ -123,9 +139,11 @@ class ILPSolver:
         x = m.addVars(len(weights), vtype=GRB.BINARY, name="x")
 
         # Set the objective: maximize the total value
+        # --- Proposed methodology START ---
         alpha=1
         beta=1 if self.query_weight else 0
         m.setObjective(alpha*sum(values[i] * x[i] for i in range(len(values)))+beta*sum(query_values[i] * x[i] for i in range(len(values))), GRB.MAXIMIZE)
+        # --- Proposed methodology END ---
 
         # Add constraint: the sum of the weights should be less than or equal to the max_weight
         m.addConstr(
@@ -168,6 +186,7 @@ class ILPSolver:
 
         key_counter = defaultdict(int)
 
+        # --- Proposed methodology START ---
         for dep_key in dependencies:
             left_key=self.idx_to_key[dep_key]
             if x[dep_key].x == 1:
@@ -178,22 +197,23 @@ class ILPSolver:
 
         # for condition_set in conditions.items():
         #     left_key = condition_set[0]
-
+        #
         #     kc = key_counter[left_key]
         #     left_key_idx = self.key_to_idx[left_key][kc]
         #     key_counter[left_key] += 1
-
+        #
         #     if x[left_key_idx].x == 1:
         #         right_keys = sorted(condition_set[1], key=lambda x: x[0])
         #         for pair in right_keys:
         #             key = pair[0]
         #             cost = pair[1]
-
+        #
         #             kc = key_counter[key]
         #             right_key_idx = self.key_to_idx[key][kc]
         #             key_counter[key] += 1
-
+        #
         #             if x[right_key_idx].x == 1:
         #                 selected_conditions[left_key].append(key)
         #                 total_cost+=cost
         return selected_conditions,sum(values[i] * x[i] for i in range(len(values))).getValue()
+        # --- Proposed methodology END ---
