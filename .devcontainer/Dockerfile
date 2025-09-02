@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y sudo python3.9-venv git && \
 USER vscode
 
 RUN git config --global --add safe.directory ${WORKSPACE}
+RUN git config --global user.email "jeseok@dblab.postech.ac.kr"
+RUN git config --global user.name "Jeongeum Seok"
 
 # Keep the container running by tailing /dev/null indefinitely.
 CMD ["tail", "-f", "/dev/null"]

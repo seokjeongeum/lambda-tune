@@ -7,7 +7,7 @@
 			"WORKSPACE": "/workspaces/${localWorkspaceFolderBasename}"
 		}
 	},
-	"onCreateCommand": "chmod -R a+rwx ${containerWorkspaceFolder}",
+	"onCreateCommand": "sudo chmod -R a+rwx ${containerWorkspaceFolder}",
 	"postCreateCommand": "sudo bash .devcontainer/postCreateCommand.sh",
 	"runArgs": [
 		"--shm-size=1g",
