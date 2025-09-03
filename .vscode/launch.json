@@ -5,20 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File with Arguments",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "args": [
-                "--benchmark",
-                "tpch",
-            ],
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-        },
-        {
             "name": "Lambdatune",
             "type": "debugpy",
             "request": "launch",
@@ -26,19 +12,19 @@
             "console": "integratedTerminal",
             "args": [
                 "--benchmark",
-                "tpch",
+                "job",
                 "--system",
                 "POSTGRES",
                 "--configs",
-                "./lambdatune/configs/0407",
+                "./lambdatune/configs/0902",
                 "--out",
-                "./test/0407",
+                "./test/0902",
                 "--config_gen",
                 "config_gen",
                 "--cores",
-                "22",
+                "16",
                 "--memory",
-                "31",
+                "62",
                 // "--continue_loop",
                 "--token_budget",
                 "786",

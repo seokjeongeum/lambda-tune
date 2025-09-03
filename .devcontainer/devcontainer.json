@@ -1,16 +1,22 @@
 {
 	"name": "Ubuntu",
 	"build": {
-	  "dockerfile": "Dockerfile",
-	  "context": "."
+		"dockerfile": "Dockerfile",
+		"context": ".",
+		"args": {
+			"WORKSPACE": "/workspaces/${localWorkspaceFolderBasename}"
+		}
 	},
-	"postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
+	"onCreateCommand": "sudo chmod -R a+rwx ${containerWorkspaceFolder}",
+	"postCreateCommand": "sudo bash .devcontainer/postCreateCommand.sh",
 	"runArgs": [
 		"--shm-size=1g",
 		"--network",
 		"host",
-		"--memory=128gb"
-	]
+		"--memory=62gb"
+	],
+	"updateRemoteUserUID": false,
+
 	// Uncomment the following line to connect as root if needed.
-	// "remoteUser": "root"
+	"remoteUser": "vscode"
 }

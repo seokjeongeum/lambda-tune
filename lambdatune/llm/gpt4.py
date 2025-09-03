@@ -25,7 +25,7 @@ import google.generativeai as genai
 
 
 # --- get_response function remains the same ---
-def get_response(text: str, temperature: float):
+def get_response(text: str, temperature: float, model_name: str):
     """
     Calls the Gemini API and returns a dictionary mimicking OpenAI's structure,
     or an error string.
@@ -41,7 +41,7 @@ def get_response(text: str, temperature: float):
         # Define system instruction and model
         system_instruction = "You are a helpful Database Administrator."
         # DO NOT CHANGE THIS LINE
-        gemini_model_name = "gemini-2.5-pro-exp-03-25"  # DO NOT CHANGE THIS LINE
+        gemini_model_name = model_name  # DO NOT CHANGE THIS LINE
         # DO NOT CHANGE THIS LINE
         model = genai.GenerativeModel(
             model_name=gemini_model_name, system_instruction=system_instruction
@@ -351,6 +351,7 @@ def get_config_recommendations_with_compression(
     query_plan: bool = False,
     plans: list = list(),
     data_definition_language: str = None,
+    model: str = "gemini-2.5-pro",
 ):
     """
     Generate a prompt for recommendations, process the response to handle different
@@ -510,7 +511,7 @@ def get_config_recommendations_with_compression(
     resp = None
 
     if retrieve_response:
-        resp_raw = get_response(prompt, temperature=temperature)
+        resp_raw = get_response(prompt, temperature=temperature, model_name=model)
 
         # Handle error string from get_response
         if isinstance(resp_raw, str) and resp_raw.startswith("Error:"):
@@ -749,7 +750,7 @@ def get_config_recommendations_with_compression(
 # --- get_config_recommendations_with_full_queries remains the same ---
 # (Though it also calls get_response and might benefit from similar error handling/JSON parsing logic)
 def get_config_recommendations_with_full_queries(
-    dst_system, queries, temperature, retrieve_response: bool = False, system_specs=None
+    dst_system, queries, temperature, retrieve_response: bool = False, system_specs=None, model: str = "gemini-2.5-pro"
 ):
 
     prompt = (
@@ -788,7 +789,7 @@ def get_config_recommendations_with_full_queries(
     final_response_content = None
 
     if retrieve_response:
-        resp_raw = get_response(prompt, temperature=temperature)
+        resp_raw = get_response(prompt, temperature=temperature, model_name=model)
 
         # Process the response similarly to the other function
         if isinstance(resp_raw, str) and resp_raw.startswith("Error:"):

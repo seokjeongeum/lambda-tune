@@ -68,6 +68,7 @@ class ConfigurationSelector:
         self.timeout_interval = timeout_interval
         self.results_dir = output_dir
         self.table_cardinalities = self.driver.get_table_cardinalities()
+        # --- Proposed methodology ---
         self.continue_loop=continue_loop
         self.exploit_index=exploit_index
         self.order_query=order_query
@@ -75,6 +76,7 @@ class ConfigurationSelector:
             self.costs=costs
         else:
             self.costs=defaultdict(lambda:float('inf'),{x:self.get_total_cost(x) for x in self.queries})
+        # --- Proposed methodology ---
 #         with open('e3_continue_loop.txt','a')as f:
 #             f.write(f'''{system} {benchmark_name}
 # ''') 
@@ -136,6 +138,7 @@ class ConfigurationSelector:
 
         return clusters
     
+    # --- Proposed methodology START ---
     def get_total_cost(self,query):
         plan = self.driver.explain(self.queries[query], False, explain_json=True)['plan']
         if isinstance(plan, dict):  
@@ -144,6 +147,7 @@ class ConfigurationSelector:
             return float('inf')
         # Optional: handle unexpected types if needed.
         return float('inf')
+    # --- Proposed methodology END ---
 
     def select_configuration(self):
         rounds_ran = 0
@@ -229,10 +233,12 @@ class ConfigurationSelector:
                     clusters = self.sort_query_clusters(clusters)
 
                     for cluster in clusters:
+                        # --- Proposed methodology START ---
                         if self.order_query:
                             queries_to_execute.extend(sorted(cluster.get_queries(), key=lambda x:self.costs[x]))
                         else:
                             queries_to_execute.extend(cluster.get_queries())
+                        # --- Proposed methodology END ---
                         logging.debug(f"Cluster: {cluster.get_cluster_id()}, #Indexes: {[str(index) for index in cluster.get_indexes()]}, "
                                       f"Queries: {cluster.get_queries()}")
 
@@ -269,10 +275,12 @@ class ConfigurationSelector:
 
                 round_completed_query_times = dict()
 
+                # --- Proposed methodology START ---
                 i=0
                 while i<len(queries_to_execute):
                     query_id=queries_to_execute[i]
                     i+=1
+                # --- Proposed methodology END ---
                 # for query_id in queries_to_execute:
                     query_str = self.queries[query_id]
 
@@ -280,9 +288,11 @@ class ConfigurationSelector:
                         continue
                     query_indexes = indexes.get_query_indexes(query_id)
                     
+                    # --- Proposed methodology ---
                     if self.exploit_index and remaining_time <= 0 and (query_indexes.isdisjoint(indexes_created)or best_execution_time < float('inf')):
                         completed = False
                         break
+                    # --- Proposed methodology ---
 
                     logging.info(f"Running query: {query_id} with timeout: {remaining_time}")
 
@@ -308,17 +318,21 @@ class ConfigurationSelector:
                                 indexes_created_per_config[config_id].add(index)
                                 indexes_created.add(index)
 
+                                # --- Proposed methodology START ---
                                 if self.exploit_index:
                                     queries_to_execute.insert(i, [x[0] for x in indexes.query_to_index.items() if index in x[1]])
                                     queries_to_execute = [item for sublist in queries_to_execute for item in (sublist if isinstance(sublist, list) else [sublist])]
                                     queries_to_execute = list(dict.fromkeys(queries_to_execute))
+                                # --- Proposed methodology END ---
                             else:
                                 pass
 
                     query_exec_start = time.time()
                     r = self.driver.explain(query_str,
                                             execute=True,
+                                            # --- Proposed methodology ---
                                             timeout=(remaining_time if not self.exploit_index or best_execution_time<float('inf') else float('inf'))*1000,
+                                            # --- Proposed methodology ---
                                             results_path=f"{config_path}/{query_id}.json")
                     query_exec_time = time.time() - query_exec_start
                     round_query_execution_time += query_exec_time
@@ -326,9 +340,11 @@ class ConfigurationSelector:
                     # Remaining time for the rest of the queries
                     remaining_time -= query_exec_time
 
+                    # --- Proposed methodology ---
                     if not self.exploit_index and(remaining_time <= 0 or r["execTime"] == "TIMEOUT"):
                         completed = False
                         break
+                    # --- Proposed methodology ---
 
                     round_completed_query_times[query_id] = query_exec_time
                     completed_queries[config_id].append(query_id)
@@ -349,6 +365,7 @@ class ConfigurationSelector:
                                   f"Total Indexes: {len(config.get_indexes())}")
 
                     completed_configs.append([config_id, total_query_execution_time_per_config[config_id]])
+                    # --- Proposed methodology START ---
                     j=len(completed_configs)
                     configs = sorted(configs, key=lambda x: -len(completed_queries[x[0].split(".json")[0]]))
 
@@ -356,6 +373,7 @@ class ConfigurationSelector:
                     for cfg_idx in dict(configs):
                         throughput = round_completed_queries
                         logging.info(f"{cfg_idx}: {throughput}")
+                    # --- Proposed methodology END ---
 
                 report = {
                     "config_id": config_id,
@@ -409,7 +427,9 @@ class ConfigurationSelector:
                 if best_execution_time < float('inf'):
                     current_timeout = best_execution_time
 
+            # --- Proposed methodology ---
             configs = sorted(configs, key=lambda x: -len(completed_queries[x[0].split(".json")[0]]))
+            # --- Proposed methodology ---
 
             logging.info("New config order")
             for cfg_idx in dict(configs):
@@ -430,8 +450,8 @@ class ConfigurationSelector:
             
         self.reset_configuration(restart_system=True, drop_indexes=self.drop_indexes)
 
-        # self.evaluate(reports_output)    
-    
+        # self.evaluate(reports_output)
+
     def evaluate(self, reports_output):
         logging.info("Evaluating Completed Configurations")
 

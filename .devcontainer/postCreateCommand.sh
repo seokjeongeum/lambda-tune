@@ -35,7 +35,6 @@ apt-get install -y \
     libssl-dev \
     libcurl4-openssl-dev \
     libjson-c-dev \
-    git \
     pkg-config \
     libpq-dev \
     postgresql-12=12.2-4 \
@@ -47,6 +46,12 @@ apt-get install -y \
     sudo \
     libmysqlclient-dev \
     mysql-server-8.0 mysql-client 
+
+# Create, activate virtual environment and install python packages
+python3.9 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 
 # Fix locale issues
 echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
@@ -112,15 +117,8 @@ FLUSH PRIVILEGES;
 EOF
 
 rm /usr/sbin/policy-rc.d  # Remove policy override after configuration is complete
-
-#------------------------------------------------------------------------------
-# Configure Git settings:
-#------------------------------------------------------------------------------
-echo "Configuring Git..."
-git config --global --add safe.directory /workspaces/lambda-tune
 git config --global user.email "jeseok@dblab.postech.ac.kr"
 git config --global user.name "Jeongeum Seok"
-
 #------------------------------------------------------------------------------
 # Run additional scripts:
 #------------------------------------------------------------------------------
@@ -132,3 +130,6 @@ bash .devcontainer/job.sh || echo "JOB script failed."
 
 echo "Running TPCH loading script..."
 bash .devcontainer/tpch.sh || echo "TPCH script failed."
+
+# Add venv activation to .bashrc
+echo "source .venv/bin/activate" >> ~/.bashrc

@@ -8,3 +8,4 @@ lambdatune/configs/
 test
 *.tbl
 DSGen-software-code-4.0.0_final/tools/.ctags_updated
+.venv
