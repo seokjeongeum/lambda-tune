@@ -5,8 +5,8 @@ set -o allexport
 source .env
 set +o allexport
 
-# rm -r ./lambdatune/configs/1_main
-# rm -r ./test/1_main
+rm -r ./lambdatune/configs/1_main/tpch/ours
+rm -r ./test/1_main/tpch/ours
     
 # .venv/bin/python lambdatune/run_lambdatune.py \
 #     --benchmark job\
@@ -35,15 +35,15 @@ set +o allexport
 #     --data_definition_language data_definition_language\
     
     
-.venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark tpch\
-    --system POSTGRES \
-    --configs ./lambdatune/configs/1_main/tpch/lambdatune \
-    --out ./test/1_main/tpch/lambdatune \
-    --config_gen config_gen \
-    --core 16 \
-    --memory 62 \
-    --token_budget 786
+# .venv/bin/python lambdatune/run_lambdatune.py \
+#     --benchmark tpch\
+#     --system POSTGRES \
+#     --configs ./lambdatune/configs/1_main/tpch/lambdatune \
+#     --out ./test/1_main/tpch/lambdatune \
+#     --config_gen config_gen \
+#     --core 16 \
+#     --memory 62 \
+#     --token_budget 786
 
     
 .venv/bin/python lambdatune/run_lambdatune.py \

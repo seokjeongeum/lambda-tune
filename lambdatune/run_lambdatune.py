@@ -13,6 +13,10 @@ from lambdatune.config_selection.configuration_selector import ConfigurationSele
 from lambdatune.prompt_generator.compress_query_plans import get_configurations_with_compression
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
     parser = argparse.ArgumentParser(description='Script to run benchmarks.')
     parser.add_argument('--benchmark', type=str, default='tpch',
                         help='Name of the benchmark to run. Default is "tpch".')
