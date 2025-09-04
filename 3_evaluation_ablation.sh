@@ -12,9 +12,8 @@ rm -r ./test/3_evaluation_ablation
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark job\
     --system POSTGRES \
-    --configs ./lambdatune/configs/3_evaluation_ablation/exploit_index_ablated \
+    --configs ./lambdatune/configs/1_main/job/ours \
     --out ./test/3_evaluation_ablation/exploit_index_ablated \
-    --config_gen config_gen \
     --core 16 \
     --memory 62 \
     --token_budget 786\
@@ -27,9 +26,8 @@ rm -r ./test/3_evaluation_ablation
 .venv/bin/python lambdatune/run_lambdatune.py \
     --benchmark job\
     --system POSTGRES \
-    --configs ./lambdatune/configs/3_evaluation_ablation/order_query_ablated \
+    --configs ./lambdatune/configs/1_main/job/ours \
     --out ./test/3_evaluation_ablation/order_query_ablated \
-    --config_gen config_gen \
     --core 16 \
     --memory 62 \
     --token_budget 786\
@@ -38,3 +36,16 @@ rm -r ./test/3_evaluation_ablation
     --workload_statistics workload_statistics\
     --data_definition_language data_definition_language\
     
+    
+    
+.venv/bin/python lambdatune/run_lambdatune.py \
+    --benchmark job\
+    --system POSTGRES \
+    --configs ./lambdatune/configs/1_main/job/ours \
+    --out ./test/3_evaluation_ablation/ei_oq_ablated \
+    --core 16 \
+    --memory 62 \
+    --token_budget 786\
+    --query_weight query_weight\
+    --workload_statistics workload_statistics\
+    --data_definition_language data_definition_language\
