@@ -64,6 +64,13 @@ export LC_ALL=en_US.UTF-8
 dpkg-reconfigure --frontend=noninteractive locales || true
 
 #------------------------------------------------------------------------------
+# Configure PostgreSQL permissions for SSL
+#------------------------------------------------------------------------------
+echo "Fixing SSL permissions for PostgreSQL..."
+chmod g+x /etc/ssl/private
+chmod g+r /etc/ssl/private/ssl-cert-snakeoil.key
+
+#------------------------------------------------------------------------------
 # Configure PostgreSQL authentication for psycopg2:
 #------------------------------------------------------------------------------
 echo "Configuring PostgreSQL authentication..."

@@ -10,10 +10,10 @@ rm -r ./test/2_prompt_ablation
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpch\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/query_weight_ablated \
-    --out ./test/2_prompt_ablation/query_weight_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpch/query_weight_ablated \
+    --out ./test/2_prompt_ablation/tpch/query_weight_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -26,10 +26,10 @@ rm -r ./test/2_prompt_ablation
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpch\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/workload_statistics_ablated \
-    --out ./test/2_prompt_ablation/workload_statistics_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpch/workload_statistics_ablated \
+    --out ./test/2_prompt_ablation/tpch/workload_statistics_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -42,10 +42,10 @@ rm -r ./test/2_prompt_ablation
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpch\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/data_definition_language_ablated \
-    --out ./test/2_prompt_ablation/data_definition_language_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpch/data_definition_language_ablated \
+    --out ./test/2_prompt_ablation/tpch/data_definition_language_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -57,10 +57,10 @@ rm -r ./test/2_prompt_ablation
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpch\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/ws_ddl_ablated \
-    --out ./test/2_prompt_ablation/ws_ddl_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpch/ws_ddl_ablated \
+    --out ./test/2_prompt_ablation/tpch/ws_ddl_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -71,10 +71,10 @@ rm -r ./test/2_prompt_ablation
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpch\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/qw_ddl_ablated \
-    --out ./test/2_prompt_ablation/qw_ddl_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpch/qw_ddl_ablated \
+    --out ./test/2_prompt_ablation/tpch/qw_ddl_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -85,10 +85,10 @@ rm -r ./test/2_prompt_ablation
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpch\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/qw_ws_ablated \
-    --out ./test/2_prompt_ablation/qw_ws_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpch/qw_ws_ablated \
+    --out ./test/2_prompt_ablation/tpch/qw_ws_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
