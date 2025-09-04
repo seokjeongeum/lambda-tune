@@ -13,7 +13,7 @@ rm -r ./test/3_evaluation_ablation
     --benchmark job\
     --system POSTGRES \
     --configs ./lambdatune/configs/1_main/job/ours \
-    --out ./test/3_evaluation_ablation/exploit_index_ablated \
+    --out ./test/3_evaluation_ablation/job/exploit_index_ablated \
     --core 16 \
     --memory 62 \
     --token_budget 786\
@@ -27,7 +27,7 @@ rm -r ./test/3_evaluation_ablation
     --benchmark job\
     --system POSTGRES \
     --configs ./lambdatune/configs/1_main/job/ours \
-    --out ./test/3_evaluation_ablation/order_query_ablated \
+    --out ./test/3_evaluation_ablation/job/order_query_ablated \
     --core 16 \
     --memory 62 \
     --token_budget 786\
@@ -42,7 +42,7 @@ rm -r ./test/3_evaluation_ablation
     --benchmark job\
     --system POSTGRES \
     --configs ./lambdatune/configs/1_main/job/ours \
-    --out ./test/3_evaluation_ablation/ei_oq_ablated \
+    --out ./test/3_evaluation_ablation/job/ei_oq_ablated \
     --core 16 \
     --memory 62 \
     --token_budget 786\
