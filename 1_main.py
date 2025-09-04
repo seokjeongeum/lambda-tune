@@ -4,13 +4,7 @@ import pathlib  # Using pathlib for easier path manipulation
 from collections import defaultdict  # Useful for nested dictionaries
 
 import matplotlib.pyplot as plt
-
-try:
-    from adjustText import adjust_text
-except ImportError:
-    print("Error: The 'adjustText' library is not installed.")
-    print("Please install it using: pip install adjustText")
-    exit()  # Exit if the required library is not found
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 
 # --- Configuration ---
 base_dir = "test"
@@ -113,19 +107,19 @@ else:
     # Set larger default font sizes for plot elements
     plt.rcParams.update(
         {
-            "font.size": 12,  # Default text size
-            "axes.titlesize": 16,  # Subplot title size
-            "axes.labelsize": 14,  # X and Y axis label size
-            "xtick.labelsize": 12,  # X-axis tick label size
-            "ytick.labelsize": 12,  # Y-axis tick label size
-            "legend.fontsize": 12,  # Legend item text size
-            "legend.title_fontsize": 13,  # Legend title size
+            "font.size": 16,  # Default text size
+            "axes.titlesize": 22,  # Subplot title size
+            "axes.labelsize": 20,  # X and Y axis label size
+            "xtick.labelsize": 16,  # X-axis tick label size
+            "ytick.labelsize": 16,  # Y-axis tick label size
+            "legend.fontsize": 16,  # Legend item text size
+            "legend.title_fontsize": 18,  # Legend title size
         }
     )
     # >>>--- END: Added Font Size Configuration --- >>>
 
-    # Increase figure width slightly more
-    fig, axes = plt.subplots(1, num_benchmarks, figsize=(8 * num_benchmarks, 6))
+    # Create a vertical stack of subplots
+    fig, axes = plt.subplots(num_benchmarks, 1, figsize=(10, 4 * num_benchmarks))
     if num_benchmarks == 1:
         axes = [axes]
 
@@ -154,7 +148,8 @@ else:
         methods_data = grouped_plot_data[benchmark_name]
         plot_successful_for_benchmark = False
         plot_method_order = ["lambdatune", "ours"]
-        texts_for_adjust = []
+        ours_data_for_inset = None
+        ours_line_for_inset = None
 
         for method_name in plot_method_order:
             if method_name not in methods_data:
@@ -190,44 +185,43 @@ else:
             )
             plot_successful_for_benchmark = True
 
-            # --- Store Text Annotations for TPC-DS ONLY ---
-            if benchmark_name == "tpcds":
-                for x, y in zip(x_vals, y_vals):
-                    # <<<--- MODIFIED: Increased fontsize for annotations ---<<<
-                    texts_for_adjust.append(
-                        ax.text(x, y, f"{y:.2f}", fontsize=10)  # Increased from 7
-                    )
-                    # >>>--------------------------------------------------- >>>
+            if method_name == "ours":
+                ours_data_for_inset = (x_vals, y_vals)
+                ours_line_for_inset = line
 
             if mapped_label not in legend_info:
                 legend_info[mapped_label] = line
 
-        # --- Apply adjust_text AFTER plotting lines for the TPC-DS subplot ---
-        if benchmark_name == "tpcds" and texts_for_adjust:
-            # (Existing adjust_text call - no font changes needed here)
-            print(
-                f"  Applying adjust_text to {len(texts_for_adjust)} labels for TPC-DS (Tuned)..."
-            )
-            try:
-                adjust_text(
-                    texts_for_adjust,
-                    ax=ax,
-                    force_points=(0.2, 0.2),
-                    force_text=(0.3, 0.5),
-                    expand_points=(1.3, 1.3),
-                    lim=500,
-                    arrowprops=dict(arrowstyle="-", color="grey", lw=0.5),
-                )
-                print("  adjust_text applied.")
-            except Exception as e:
-                print(f"  Error applying adjust_text: {e}")
+        if benchmark_name == "tpcds" and ours_data_for_inset and ours_line_for_inset:
+            x_vals, y_vals = ours_data_for_inset
+            if x_vals and y_vals:
+                axins = ax.inset_axes([0.1, 0.1, 0.45, 0.45])
+                axins.plot(x_vals, y_vals, marker="o", linestyle="-", color=ours_line_for_inset.get_color(), markersize=6)
+                x_min, x_max = min(x_vals), max(x_vals)
+                y_min, y_max = min(y_vals), max(y_vals)
+                x_padding = (x_max - x_min) * 0.2 if (x_max - x_min) > 0 else 100
+                y_padding = (y_max - y_min) * 0.4 if (y_max - y_min) > 0 else 10
+                axins.set_xlim(x_min - x_padding, x_max + x_padding)
+                axins.set_ylim(y_min - y_padding, y_max + y_padding)
+                axins.tick_params(axis='x', labelsize=plt.rcParams["xtick.labelsize"] * 0.7)
+                axins.tick_params(axis='y', labelsize=plt.rcParams["ytick.labelsize"] * 0.7)
+                axins.grid(True, linestyle="--", alpha=0.6)
+                mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.6", lw=1.5)
 
         # Configure subplot (Titles and labels will now use the rcParams sizes)
         ax.set_title(plot_title)  # Fontsize set by 'axes.titlesize' in rcParams
-        ax.set_xlabel("Duration (s)")  # Fontsize set by 'axes.labelsize' in rcParams
-        ax.set_ylabel("Best Time (s)")  # Fontsize set by 'axes.labelsize' in rcParams
         ax.grid(True, linestyle="--", alpha=0.6)
         # Tick label sizes are set by 'xtick.labelsize' and 'ytick.labelsize'
+
+    # Add a single, centered y-axis label for the entire figure
+    fig.supylabel("Best Time (s)", fontsize=plt.rcParams["axes.labelsize"])
+    # Add a single, centered x-axis label for the entire figure
+    fig.supxlabel("Duration (s)", fontsize=plt.rcParams["axes.labelsize"])
+
+    # Move tight_layout before the legend to position plots and labels first
+    plt.tight_layout(
+        rect=[0, 0.05, 1, 0.95]
+    )  # Adjust rect to make space at the bottom
 
     # Configure figure legend (Fontsize set by 'legend.fontsize' and 'legend.title_fontsize')
     if legend_info:
@@ -237,15 +231,10 @@ else:
             sorted_handles,
             sorted_labels,
             title="Method",  # Title fontsize set by 'legend.title_fontsize'
-            loc="upper center",
-            bbox_to_anchor=(0.5, 0.03),
+            loc="lower right",
             ncol=len(sorted_labels),
             # fontsize parameter could be added here to override rcParams if needed
         )
-
-    plt.tight_layout(
-        rect=[0, 0.08, 1, 0.95]
-    )  # Adjust rect slightly if legend overlaps more
 
     # Save plots
     print("\n--- Saving Plots ---")

@@ -1,16 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 import pathlib  # Using pathlib for easier path manipulation
-from collections import defaultdict  # Useful for nested dictionaries
-
-import matplotlib.pyplot as plt
-
-try:
-    from adjustText import adjust_text
-except ImportError:
-    print("Error: The 'adjustText' library is not installed.")
-    print("Please install it using: pip install adjustText")
-    exit()  # Exit if the required library is not found
 
 # --- Configuration ---
 base_dir = pathlib.Path("test")
