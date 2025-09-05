@@ -5,15 +5,15 @@ set -o allexport
 source .env
 set +o allexport
 
-rm -r ./lambdatune/configs/2_prompt_ablation/job
-rm -r ./test/2_prompt_ablation/job
+rm -r ./lambdatune/configs/2_prompt_ablation/tpcds
+rm -r ./test/2_prompt_ablation/tpcds
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/job/query_weight_ablated \
-    --out ./test/2_prompt_ablation/job/query_weight_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpcds/query_weight_ablated \
+    --out ./test/2_prompt_ablation/tpcds/query_weight_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -26,10 +26,10 @@ rm -r ./test/2_prompt_ablation/job
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/job/workload_statistics_ablated \
-    --out ./test/2_prompt_ablation/job/workload_statistics_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpcds/workload_statistics_ablated \
+    --out ./test/2_prompt_ablation/tpcds/workload_statistics_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -42,10 +42,10 @@ rm -r ./test/2_prompt_ablation/job
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/job/data_definition_language_ablated \
-    --out ./test/2_prompt_ablation/job/data_definition_language_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpcds/data_definition_language_ablated \
+    --out ./test/2_prompt_ablation/tpcds/data_definition_language_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -57,10 +57,10 @@ rm -r ./test/2_prompt_ablation/job
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/job/ws_ddl_ablated \
-    --out ./test/2_prompt_ablation/job/ws_ddl_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpcds/ws_ddl_ablated \
+    --out ./test/2_prompt_ablation/tpcds/ws_ddl_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -71,10 +71,10 @@ rm -r ./test/2_prompt_ablation/job
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/job/qw_ddl_ablated \
-    --out ./test/2_prompt_ablation/job/qw_ddl_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpcds/qw_ddl_ablated \
+    --out ./test/2_prompt_ablation/tpcds/qw_ddl_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \
@@ -85,10 +85,10 @@ rm -r ./test/2_prompt_ablation/job
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark job\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/2_prompt_ablation/job/qw_ws_ablated \
-    --out ./test/2_prompt_ablation/job/qw_ws_ablated \
+    --configs ./lambdatune/configs/2_prompt_ablation/tpcds/qw_ws_ablated \
+    --out ./test/2_prompt_ablation/tpcds/qw_ws_ablated \
     --config_gen config_gen \
     --core 16 \
     --memory 62 \

@@ -19,22 +19,28 @@ plt.rcParams.update(
 )
 
 # Define benchmarks and file paths for the JSON reports
-benchmarks = ["JOB"]
+benchmarks = ["JOB", "TPCH"]
 file_paths = {
     "JOB": [
         "test/1_main/job/ours/reports.json",
-        "test/3_evaluation_ablation/exploit_index_ablated/reports.json",
-        "test/3_evaluation_ablation/order_query_ablated/reports.json",
-        "test/3_evaluation_ablation/ei_oq_ablated/reports.json",
+        "test/3_evaluation_ablation/job/exploit_index_ablated/reports.json",
+        "test/3_evaluation_ablation/job/ei_oq_ablated/reports.json",
+    ],
+    "TPCH": [
+        "test/1_main/tpch/ours/reports.json",
+        "test/3_evaluation_ablation/tpch/exploit_index_ablated/reports.json",
+        "test/3_evaluation_ablation/tpch/ei_oq_ablated/reports.json",
     ],
 }
 
 # Mapping for nicer display names
 display_names = {
-    "test/1_main/job/ours/reports.json": "Ours",
-    "test/3_evaluation_ablation/exploit_index_ablated/reports.json": "w/o Proactive\nIndex Utilization",
-    "test/3_evaluation_ablation/order_query_ablated/reports.json": "w/o Cost-Based\nQuery Prioritization",
-    "test/3_evaluation_ablation/ei_oq_ablated/reports.json": r"$\lambda$-Tune",
+    "test/1_main/job/ours/reports.json": "+Proactive\nIndex Utilization\n+Cost-Based\nQuery Prioritization",
+    "test/3_evaluation_ablation/job/exploit_index_ablated/reports.json": "+Cost-Based\nQuery Prioritization",
+    "test/3_evaluation_ablation/job/ei_oq_ablated/reports.json": r"$\lambda$-Tune",
+    "test/1_main/tpch/ours/reports.json": "+Proactive\nIndex Utilization\n+Cost-Based\nQuery Prioritization",
+    "test/3_evaluation_ablation/tpch/exploit_index_ablated/reports.json": "+Cost-Based\nQuery Prioritization",
+    "test/3_evaluation_ablation/tpch/ei_oq_ablated/reports.json": r"$\lambda$-Tune",
 }
 
 # Load and merge the data from all JSON files
@@ -104,7 +110,7 @@ query_time_grouped = (
 
 
 # Order benchmarks and sources
-sources_order = ["Ours", "w/o Proactive\nIndex Utilization", "w/o Cost-Based\nQuery Prioritization", r"$\lambda$-Tune"]
+sources_order = [r"$\lambda$-Tune", "+Cost-Based\nQuery Prioritization", "+Proactive\nIndex Utilization\n+Cost-Based\nQuery Prioritization"]
 total_time_grouped = total_time_grouped.reindex(benchmarks).reindex(
     columns=sources_order, fill_value=0
 )
@@ -132,9 +138,8 @@ print(other_time_grouped)
 
 # Define color mappings for the methods
 color_mapping = {
-    "Ours": ("#1f77b4", "#005792"),
-    "w/o Proactive\nIndex Utilization": ("#ff7f0e", "#d35400"),
-    "w/o Cost-Based\nQuery Prioritization": ("#2ca02c", "#1e7b1e"),
+    "+Proactive\nIndex Utilization\n+Cost-Based\nQuery Prioritization": ("#1f77b4", "#005792"),
+    "+Cost-Based\nQuery Prioritization": ("#ff7f0e", "#d35400"),
     r"$\lambda$-Tune": ("#d62728", "#8b0000"),
 }
 

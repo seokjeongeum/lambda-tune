@@ -5,8 +5,8 @@ set -o allexport
 source .env
 set +o allexport
 
-rm -r ./lambdatune/configs/2_prompt_ablation
-rm -r ./test/2_prompt_ablation
+rm -r ./lambdatune/configs/2_prompt_ablation/tpch
+rm -r ./test/2_prompt_ablation/tpch
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \

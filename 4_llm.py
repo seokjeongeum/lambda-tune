@@ -2,7 +2,6 @@ import json
 import pathlib
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 
 # --- Configuration ---
 plt.rcParams.update({
@@ -15,7 +14,7 @@ plt.rcParams.update({
 })
 
 base_dir = pathlib.Path("test")
-benchmarks = ["JOB", "TPCH"]
+benchmarks = ["JOB", "TPCH", "TPCDS"]
 models = ["ours", "4_llm"]
 
 display_names = {
@@ -73,26 +72,49 @@ if not results:
 
 # --- Plotting ---
 df = pd.DataFrame(results)
-pivot_df = df.pivot(index="benchmark", columns="model", values="best_time").reindex(models, axis=1)
+pivot_df = df.pivot(index="benchmark", columns="model", values="best_time").reindex(columns=models, index=benchmarks)
+pivot_df.fillna(0, inplace=True) # Replace any missing data with 0 for plotting
 
-fig, ax = plt.subplots(figsize=(12, 8))
-pivot_df.plot(kind="bar", ax=ax, width=0.8)
+# Create a subplot for each benchmark for individual y-scales
+fig, axes = plt.subplots(
+    nrows=1,
+    ncols=len(benchmarks),
+    figsize=(6 * len(benchmarks), 7),
+    sharey=False  # Key parameter to allow different y-axis scales
+)
+if len(benchmarks) == 1:
+    axes = [axes]  # Ensure axes is always iterable
 
-ax.set_title("LLM Model Comparison", pad=20)
-ax.set_ylabel("Best Time (s)")
-ax.set_xlabel("")
-ax.set_xticklabels(pivot_df.index, rotation=0)
-ax.grid(axis="y", linestyle="--", alpha=0.7)
+# Plot each benchmark's data on its respective subplot
+for ax, benchmark in zip(axes, benchmarks):
+    pivot_df.loc[[benchmark]].plot(kind="bar", ax=ax, legend=False, width=0.5)
 
-# Add annotations
-for container in ax.containers:
-    ax.bar_label(container, fmt="%.1f", padding=3, fontsize=16, weight="bold")
+    ax.set_title(benchmark, pad=20)
+    ax.set_xlabel("")
+    ax.set_xticklabels([])  # Remove the benchmark name from x-axis ticks
+    ax.tick_params(axis='x', length=0)
+    ax.grid(axis="y", linestyle="--", alpha=0.7)
 
-# Rename legend labels
-handles, labels = ax.get_legend_handles_labels()
-ax.legend(handles, [display_names[label] for label in labels], title="Model")
+    # Annotate bars with their values
+    for container in ax.containers:
+        ax.bar_label(container, fmt="%.1f", padding=3, fontsize=14, weight="bold")
 
-plt.tight_layout()
+# Add a shared y-label and a main title for the entire figure
+fig.text(0.04, 0.5, 'Best Time (s)', va='center', rotation='vertical', fontsize=22)
+fig.suptitle("LLM Model Comparison", fontsize=24, y=1.0)
+
+# Create a single shared legend for the models
+handles, labels = axes[0].get_legend_handles_labels()
+fig.legend(
+    handles,
+    [display_names[label] for label in labels],
+    title="Model",
+    loc="upper center",
+    bbox_to_anchor=(0.5, 0.93),
+    ncol=len(models)
+)
+
+plt.tight_layout(rect=[0.05, 0, 0.98, 0.88])  # Adjust layout to prevent overlap
 plt.savefig("4_llm_comparison.png", bbox_inches="tight")
 plt.savefig("4_llm_comparison.pdf", bbox_inches="tight")
 plt.show()

@@ -6,12 +6,12 @@ import pathlib  # Using pathlib for easier path manipulation
 base_dir = pathlib.Path("test")
 file_paths_to_process = [
     base_dir / "1_main" / "job" / "ours" / "reports.json",
-    base_dir / "2_prompt_ablation" / "data_definition_language_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "query_weight_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "qw_ddl_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "qw_ws_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "workload_statistics_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "ws_ddl_ablated" / "reports.json",
+    base_dir / "2_prompt_ablation" / "job" / "data_definition_language_ablated" / "reports.json",
+    base_dir / "2_prompt_ablation" / "job" / "query_weight_ablated" / "reports.json",
+    base_dir / "2_prompt_ablation" / "job" / "qw_ddl_ablated" / "reports.json",
+    base_dir / "2_prompt_ablation" / "job" / "qw_ws_ablated" / "reports.json",
+    base_dir / "2_prompt_ablation" / "job" / "workload_statistics_ablated" / "reports.json",
+    base_dir / "2_prompt_ablation" / "job" / "ws_ddl_ablated" / "reports.json",
 ]
 benchmark_order = ["job"]
 num_benchmarks = len(benchmark_order)

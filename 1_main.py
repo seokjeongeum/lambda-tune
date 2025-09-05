@@ -84,14 +84,16 @@ for file_path in file_paths_to_process:
 
     points_added = 0
     for duration, best_time in first_valid_points_in_file.values():
-        grouped_plot_data[benchmark_name][method_name].append((duration, best_time))
+        grouped_plot_data[benchmark_name][method_name].append(
+            (duration, best_time))
         points_added += 1
 
     if points_added > 0:
         print(
             f"    Found {points_added} unique first valid points for {benchmark_name}/{method_name}."
         )
-        print(f"    Best Execution Time: {file_min_best_time if file_min_best_time != float('inf') else 'N/A'}")
+        print(
+            f"    Best Execution Time: {file_min_best_time if file_min_best_time != float('inf') else 'N/A'}")
         print(f"    Total Tuning Duration: {file_max_duration}")
     else:
         print(f"    No suitable first valid data points found in {file_path}.")
@@ -119,7 +121,8 @@ else:
     # >>>--- END: Added Font Size Configuration --- >>>
 
     # Create a vertical stack of subplots
-    fig, axes = plt.subplots(num_benchmarks, 1, figsize=(10, 4 * num_benchmarks))
+    fig, axes = plt.subplots(
+        num_benchmarks, 1, figsize=(10, 4 * num_benchmarks))
     if num_benchmarks == 1:
         axes = [axes]
 
@@ -127,7 +130,8 @@ else:
 
     for i, benchmark_name in enumerate(benchmark_order):
         ax = axes[i]
-        print(f"\nGenerating subplot for benchmark: {benchmark_name} (Axis {i})")
+        print(
+            f"\nGenerating subplot for benchmark: {benchmark_name} (Axis {i})")
         plot_title = title_map.get(benchmark_name, benchmark_name.upper())
 
         # (Existing code for checking data...)
@@ -150,6 +154,7 @@ else:
         plot_method_order = ["lambdatune", "ours"]
         ours_data_for_inset = None
         ours_line_for_inset = None
+        all_y_vals_for_benchmark = []
 
         for method_name in plot_method_order:
             if method_name not in methods_data:
@@ -170,6 +175,8 @@ else:
             y_vals = [p[1] for p in sorted_points]
             if not x_vals:
                 continue
+
+            all_y_vals_for_benchmark.extend(y_vals)
 
             mapped_label = legend_label_map.get(method_name, method_name)
             (line,) = ax.plot(
@@ -192,26 +199,32 @@ else:
             if mapped_label not in legend_info:
                 legend_info[mapped_label] = line
 
-        if benchmark_name == "tpcds" and ours_data_for_inset and ours_line_for_inset:
+        if benchmark_name in ["tpcds", "job"] and ours_data_for_inset and ours_line_for_inset:
             x_vals, y_vals = ours_data_for_inset
             if x_vals and y_vals:
                 axins = ax.inset_axes([0.1, 0.1, 0.45, 0.45])
-                axins.plot(x_vals, y_vals, marker="o", linestyle="-", color=ours_line_for_inset.get_color(), markersize=6)
+                axins.plot(x_vals, y_vals, marker="o", linestyle="-",
+                           color=ours_line_for_inset.get_color(), markersize=6)
                 x_min, x_max = min(x_vals), max(x_vals)
                 y_min, y_max = min(y_vals), max(y_vals)
-                x_padding = (x_max - x_min) * 0.2 if (x_max - x_min) > 0 else 100
-                y_padding = (y_max - y_min) * 0.4 if (y_max - y_min) > 0 else 10
+                x_padding = (x_max - x_min) * \
+                    0.2 if (x_max - x_min) > 0 else 100
+                y_padding = (y_max - y_min) * \
+                    0.4 if (y_max - y_min) > 0 else 10
                 axins.set_xlim(x_min - x_padding, x_max + x_padding)
                 axins.set_ylim(y_min - y_padding, y_max + y_padding)
-                axins.tick_params(axis='x', labelsize=plt.rcParams["xtick.labelsize"] * 0.7)
-                axins.tick_params(axis='y', labelsize=plt.rcParams["ytick.labelsize"] * 0.7)
+                axins.tick_params(
+                    axis='x', labelsize=plt.rcParams["xtick.labelsize"] * 0.7)
+                axins.tick_params(
+                    axis='y', labelsize=plt.rcParams["ytick.labelsize"] * 0.7)
                 axins.grid(True, linestyle="--", alpha=0.6)
-                mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.6", lw=1.5)
+                mark_inset(ax, axins, loc1=2, loc2=4,
+                           fc="none", ec="0.6", lw=1.5)
 
         # Configure subplot (Titles and labels will now use the rcParams sizes)
-        ax.set_title(plot_title)  # Fontsize set by 'axes.titlesize' in rcParams
+        # Fontsize set by 'axes.titlesize' in rcParams
+        ax.set_title(plot_title)
         ax.grid(True, linestyle="--", alpha=0.6)
-        # Tick label sizes are set by 'xtick.labelsize' and 'ytick.labelsize'
 
     # Add a single, centered y-axis label for the entire figure
     fig.supylabel("Best Time (s)", fontsize=plt.rcParams["axes.labelsize"])
@@ -241,7 +254,8 @@ else:
     for fmt in output_formats:
         output_filename = f"{output_filename_base}.{fmt}"
         try:
-            plt.savefig(output_filename, format=fmt, bbox_inches="tight", dpi=300)
+            plt.savefig(output_filename, format=fmt,
+                        bbox_inches="tight", dpi=300)
             print(f"Saved plot to: {output_filename}")
         except Exception as e:
             print(f"Error saving plot to {output_filename}: {e}")

@@ -5,15 +5,15 @@ set -o allexport
 source .env
 set +o allexport
 
-rm -r ./lambdatune/configs/3_evaluation_ablation/tpch
-rm -r ./test/3_evaluation_ablation/tpch
+rm -r ./lambdatune/configs/3_evaluation_ablation/tpcds
+rm -r ./test/3_evaluation_ablation/tpcds
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark tpch\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/1_main/tpch/ours \
-    --out ./test/3_evaluation_ablation/tpch/exploit_index_ablated \
+    --configs ./lambdatune/configs/1_main/tpcds/ours \
+    --out ./test/3_evaluation_ablation/tpcds/exploit_index_ablated \
     --core 16 \
     --memory 62 \
     --token_budget 786\
@@ -24,10 +24,10 @@ rm -r ./test/3_evaluation_ablation/tpch
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark tpch\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/1_main/tpch/ours \
-    --out ./test/3_evaluation_ablation/tpch/order_query_ablated \
+    --configs ./lambdatune/configs/1_main/tpcds/ours \
+    --out ./test/3_evaluation_ablation/tpcds/order_query_ablated \
     --core 16 \
     --memory 62 \
     --token_budget 786\
@@ -39,10 +39,10 @@ rm -r ./test/3_evaluation_ablation/tpch
     
     
 .venv/bin/python lambdatune/run_lambdatune.py \
-    --benchmark tpch\
+    --benchmark tpcds\
     --system POSTGRES \
-    --configs ./lambdatune/configs/1_main/tpch/ours \
-    --out ./test/3_evaluation_ablation/tpch/ei_oq_ablated \
+    --configs ./lambdatune/configs/1_main/tpcds/ours \
+    --out ./test/3_evaluation_ablation/tpcds/ei_oq_ablated \
     --core 16 \
     --memory 62 \
     --token_budget 786\
