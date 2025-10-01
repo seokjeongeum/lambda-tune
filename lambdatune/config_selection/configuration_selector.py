@@ -233,12 +233,12 @@ class ConfigurationSelector:
                     clusters = self.sort_query_clusters(clusters)
 
                     for cluster in clusters:
-                        # --- Proposed methodology START ---
                         if self.order_query:
+                        # --- Proposed methodology START ---
                             queries_to_execute.extend(sorted(cluster.get_queries(), key=lambda x:self.costs[x]))
+                        # --- Proposed methodology END ---
                         else:
                             queries_to_execute.extend(cluster.get_queries())
-                        # --- Proposed methodology END ---
                         logging.debug(f"Cluster: {cluster.get_cluster_id()}, #Indexes: {[str(index) for index in cluster.get_indexes()]}, "
                                       f"Queries: {cluster.get_queries()}")
 
@@ -275,12 +275,10 @@ class ConfigurationSelector:
 
                 round_completed_query_times = dict()
 
-                # --- Proposed methodology START ---
                 i=0
                 while i<len(queries_to_execute):
                     query_id=queries_to_execute[i]
                     i+=1
-                # --- Proposed methodology END ---
                 # for query_id in queries_to_execute:
                     query_str = self.queries[query_id]
 
@@ -288,11 +286,11 @@ class ConfigurationSelector:
                         continue
                     query_indexes = indexes.get_query_indexes(query_id)
                     
-                    # --- Proposed methodology ---
+                                # --- Proposed methodology START ---
                     if self.exploit_index and remaining_time <= 0 and (query_indexes.isdisjoint(indexes_created)or best_execution_time < float('inf')):
                         completed = False
                         break
-                    # --- Proposed methodology ---
+                                # --- Proposed methodology END ---
 
                     logging.info(f"Running query: {query_id} with timeout: {remaining_time}")
 

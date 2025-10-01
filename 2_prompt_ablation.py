@@ -4,20 +4,36 @@ import pathlib  # Using pathlib for easier path manipulation
 
 # --- Configuration ---
 base_dir = pathlib.Path("test")
-file_paths_to_process = [
-    base_dir / "1_main" / "job" / "ours" / "reports.json",
-    base_dir / "2_prompt_ablation" / "job" / "data_definition_language_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "job" / "query_weight_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "job" / "qw_ddl_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "job" / "qw_ws_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "job" / "workload_statistics_ablated" / "reports.json",
-    base_dir / "2_prompt_ablation" / "job" / "ws_ddl_ablated" / "reports.json",
+benchmarks_to_process = ["job", "tpch", "tpcds"]
+ablation_methods = [
+    "data_definition_language_ablated",
+    "query_weight_ablated",
+    "qw_ddl_ablated",
+    "qw_ws_ablated",
+    "workload_statistics_ablated",
+    "ws_ddl_ablated",
 ]
-benchmark_order = ["job"]
+
+file_paths_to_process = []
+for benchmark in benchmarks_to_process:
+    file_paths_to_process.append(base_dir / "1_main" / benchmark / "ours" / "reports.json")
+    file_paths_to_process.append(
+        base_dir / "1_main" / benchmark / "lambdatune" / "reports.json"
+    )
+    for method in ablation_methods:
+        file_paths_to_process.append(
+            base_dir / "2_prompt_ablation" / benchmark / method / "reports.json"
+        )
+
+benchmark_order = ["job", "tpch", "tpcds"]
 num_benchmarks = len(benchmark_order)
 output_filename_base = "2_prompt_ablation_comparison"
 output_formats = ["png", "pdf"]
-title_map = {"job": "JOB Benchmark Prompt Ablation"}
+title_map = {
+    "job": "JOB Benchmark Prompt Ablation",
+    "tpch": "TPC-H Benchmark Prompt Ablation",
+    "tpcds": "TPC-DS Benchmark Prompt Ablation",
+}
 legend_label_map = {
     "ours": "Ours (Full Prompt)",
     "data_definition_language_ablated": "Ablated (DDL)",
@@ -26,8 +42,9 @@ legend_label_map = {
     "qw_ws_ablated": "Ablated (QW+WS)",
     "workload_statistics_ablated": "Ablated (Workload Statistics)",
     "ws_ddl_ablated": "Ablated (WS+DDL)",
+    "lambdatune": "Ablated (All)",
 }
-table_data = []
+table_data = {benchmark: [] for benchmark in benchmark_order}
 
 # --- Data Processing Loop for Each File ---
 for file_path in file_paths_to_process:
@@ -37,12 +54,8 @@ for file_path in file_paths_to_process:
         continue
 
     try:
-        if "1_main" in file_path.parts:
-            benchmark_name = "job"
-            method_name = "ours"
-        else:
-            benchmark_name = "job"
-            method_name = file_path.parts[-2]
+        benchmark_name = file_path.parts[-3]
+        method_name = file_path.parts[-2]
 
         if benchmark_name not in benchmark_order:
             print(
@@ -105,7 +118,7 @@ for file_path in file_paths_to_process:
             f"    Found {points_added} unique first valid points for {benchmark_name}/{method_name}."
         )
         print(f"    Best Execution Time: {file_min_best_time if file_min_best_time != float('inf') else 'N/A'}")
-        table_data.append({
+        table_data[benchmark_name].append({
             "method_key": method_name,
             "method_display": legend_label_map.get(method_name, method_name),
             "best_time": file_min_best_time if file_min_best_time != float('inf') else 'N/A',
@@ -117,39 +130,45 @@ for file_path in file_paths_to_process:
 # --- Results Summary Table ---
 print("\n--- Generating Results Table ---")
 
-if not table_data:
+if not any(table_data.values()):
     print("No data found from any file to create a table.")
 else:
-    # Define a consistent order for the methods in the table
-    method_order = [
-        "ours",
-        "data_definition_language_ablated",
-        "query_weight_ablated",
-        "workload_statistics_ablated",
-        "qw_ddl_ablated",
-        "qw_ws_ablated",
-        "ws_ddl_ablated",
-    ]
-    # Sort the collected data according to the desired order
-    order_map = {key: i for i, key in enumerate(method_order)}
-    table_data.sort(key=lambda x: order_map.get(x["method_key"], 99))
+    for benchmark, data in table_data.items():
+        if not data:
+            continue
 
-    # Prepare headers and find column widths for alignment
-    headers = ["Method", "Best Execution Time (s)"]
-    # Determine the maximum width needed for the method column
-    max_method_width = max(len(h) for h in [row["method_display"] for row in table_data] + [headers[0]])
+        print(f"\n--- Results for {benchmark.upper()} Benchmark ---")
+        # Define a consistent order for the methods in the table
+        method_order = [
+            "ours",
+            "data_definition_language_ablated",
+            "query_weight_ablated",
+            "workload_statistics_ablated",
+            "qw_ws_ablated",
+            "ws_ddl_ablated",
+            "qw_ddl_ablated",
+            "lambdatune",
+        ]
+        # Sort the collected data according to the desired order
+        order_map = {key: i for i, key in enumerate(method_order)}
+        data.sort(key=lambda x: order_map.get(x["method_key"], 99))
 
-    # Print table header
-    header_line = f"{headers[0]:<{max_method_width}} | {headers[1]:>25}"
-    print(header_line)
-    print("-" * len(header_line))
+        # Prepare headers and find column widths for alignment
+        headers = ["Method", "Best Execution Time (s)"]
+        # Determine the maximum width needed for the method column
+        max_method_width = max(len(h) for h in [row["method_display"] for row in data] + [headers[0]])
 
-    # Print each row of data
-    for row in table_data:
-        best_time_str = (
-            f"{row['best_time']:.2f}" if isinstance(row["best_time"], (int, float)) else "N/A"
-        )
-        data_line = f"{row['method_display']:<{max_method_width}} | {best_time_str:>25}"
-        print(data_line)
+        # Print table header
+        header_line = f"{headers[0]:<{max_method_width}} | {headers[1]:>25}"
+        print(header_line)
+        print("-" * len(header_line))
+
+        # Print each row of data
+        for row in data:
+            best_time_str = (
+                f"{row['best_time']:.2f}" if isinstance(row["best_time"], (int, float)) else "N/A"
+            )
+            data_line = f"{row['method_display']:<{max_method_width}} | {best_time_str:>25}"
+            print(data_line)
 
 print("\n--- Script Finished ---")

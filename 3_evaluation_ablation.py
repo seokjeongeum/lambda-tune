@@ -19,29 +19,34 @@ plt.rcParams.update(
 )
 
 # Define benchmarks and file paths for the JSON reports
-benchmarks = ["JOB", "TPCH"]
-file_paths = {
-    "JOB": [
-        "test/1_main/job/ours/reports.json",
-        "test/3_evaluation_ablation/job/exploit_index_ablated/reports.json",
-        "test/3_evaluation_ablation/job/ei_oq_ablated/reports.json",
-    ],
-    "TPCH": [
-        "test/1_main/tpch/ours/reports.json",
-        "test/3_evaluation_ablation/tpch/exploit_index_ablated/reports.json",
-        "test/3_evaluation_ablation/tpch/ei_oq_ablated/reports.json",
-    ],
+benchmarks = ["JOB", "TPCDS", "TPCH"]
+benchmark_display_map = {"JOB": "JOB", "TPCDS": "TPC-DS", "TPCH": "TPC-H"}
+# Define methods and their corresponding path templates and display names
+methods = {
+    "ours": {
+        "path_template": "test/1_main/{benchmark}/ours/reports.json",
+        "display_name": "+Proactive\nIndex Utilization\n+Cost-Based\nQuery Prioritization",
+    },
+    "exploit_index_ablated": {
+        "path_template": "test/3_evaluation_ablation/{benchmark}/exploit_index_ablated/reports.json",
+        "display_name": "+Cost-Based\nQuery Prioritization",
+    },
+    "ei_oq_ablated": {
+        "path_template": "test/3_evaluation_ablation/{benchmark}/ei_oq_ablated/reports.json",
+        "display_name": r"$\lambda$-Tune",
+    },
 }
 
-# Mapping for nicer display names
-display_names = {
-    "test/1_main/job/ours/reports.json": "+Proactive\nIndex Utilization\n+Cost-Based\nQuery Prioritization",
-    "test/3_evaluation_ablation/job/exploit_index_ablated/reports.json": "+Cost-Based\nQuery Prioritization",
-    "test/3_evaluation_ablation/job/ei_oq_ablated/reports.json": r"$\lambda$-Tune",
-    "test/1_main/tpch/ours/reports.json": "+Proactive\nIndex Utilization\n+Cost-Based\nQuery Prioritization",
-    "test/3_evaluation_ablation/tpch/exploit_index_ablated/reports.json": "+Cost-Based\nQuery Prioritization",
-    "test/3_evaluation_ablation/tpch/ei_oq_ablated/reports.json": r"$\lambda$-Tune",
-}
+# Generate file paths and display names programmatically
+file_paths = {benchmark: [] for benchmark in benchmarks}
+display_names = {}
+
+for benchmark in benchmarks:
+    for method_info in methods.values():
+        path = method_info["path_template"].format(benchmark=benchmark.lower())
+        file_paths[benchmark].append(path)
+        display_names[path] = method_info["display_name"]
+
 
 # Load and merge the data from all JSON files
 data = []
@@ -143,14 +148,14 @@ color_mapping = {
     r"$\lambda$-Tune": ("#d62728", "#8b0000"),
 }
 
-# Create horizontal subplots
+# Create vertical subplots
 fig, axes = plt.subplots(
-    nrows=1, ncols=len(benchmarks), figsize=(8 * len(benchmarks), 8), sharey=False
+    nrows=len(benchmarks), ncols=1, figsize=(10, 4.5 * len(benchmarks)), sharex=True
 )
 if len(benchmarks) == 1:
     axes = [axes]  # Ensure axes is iterable
 
-for ax, benchmark in zip(axes, benchmarks):
+for i, (ax, benchmark) in enumerate(zip(axes, benchmarks)):
     x = np.arange(len(sources_order))
     total_duration_vals = total_time_grouped.loc[benchmark].values
     index_vals = index_time_grouped.loc[benchmark].values
@@ -159,36 +164,60 @@ for ax, benchmark in zip(axes, benchmarks):
     bar_width = 0.5
 
     # Plot stacked bars for each source
-    for i, source in enumerate(sources_order):
+    for j, source in enumerate(sources_order):
         index_color, query_color = color_mapping[source]
         # Plot Index Creation Time
-        ax.bar(
-            x[i], index_vals[i], width=bar_width, color=index_color
-        )
+        ax.bar(x[j], index_vals[j], width=bar_width, color=index_color)
         # Plot Query Execution Time on top
         ax.bar(
-            x[i], query_vals[i], width=bar_width, bottom=index_vals[i], color=query_color
+            x[j],
+            query_vals[j],
+            width=bar_width,
+            bottom=index_vals[j],
+            color=query_color,
         )
 
     max_y_val = max(total_duration_vals) if total_duration_vals.size > 0 else 1
-    min_padding_fraction = 0.02
-    min_abs_y_padding = max_y_val * min_padding_fraction
 
     # Annotate each bar
-    for i, (idx_time, total_dur) in enumerate(
+    for j, (idx_time, total_dur) in enumerate(
         zip(index_vals, total_duration_vals)
     ):
-        pass
+        # Annotate Index Creation Time above its bar segment
+        ax.text(
+            j,
+            idx_time,
+            f"{int(idx_time)}s",
+            ha="center",
+            va="bottom",
+            color="black",
+            fontsize=16,
+        )
+        # Annotate Total Duration on top of the whole bar
+        ax.text(
+            j,
+            total_dur,
+            f"{int(total_dur)}s",
+            ha="center",
+            va="bottom",
+            color="black",
+            fontsize=16,
+            fontweight="bold",
+        )
 
-    ax.set_title(f"{benchmark.upper()} Benchmark", pad=20)
+    ax.set_title(
+        f"{benchmark_display_map.get(benchmark, benchmark.upper())} Benchmark", pad=20
+    )
     ax.set_xticks(x)
     # Use the full display names for the x-axis and rotate them
-    ax.set_xticklabels(
-        sources_order, rotation=45, ha="right"
-    )
-    ax.set_ylabel("Time (Seconds)")
+    if i == len(benchmarks) - 1:
+        ax.set_xticklabels(sources_order, rotation=45, ha="right")
+    else:
+        ax.set_xticklabels([])
+    if i == len(benchmarks) // 2:
+        ax.set_ylabel("Time (Seconds)")
     ax.grid(axis="y", linestyle="--", alpha=0.7)
-    ax.set_ylim(0, max_y_val * 1.35)
+    ax.set_ylim(0, max_y_val * 1.3)
 
 # Create a simplified global legend with distinct colors
 legend_elements = [
@@ -198,12 +227,12 @@ legend_elements = [
 fig.legend(
     handles=legend_elements,
     loc="upper center",
-    bbox_to_anchor=(0.5, 1.05),
+    bbox_to_anchor=(0.5, 1.0),
     ncol=2,
     fontsize=21,
 )
 
-plt.tight_layout(rect=[0.02, 0.15, 0.98, 0.90])
+plt.tight_layout(rect=[0.02, 0.15, 0.98, 0.95])
 plt.savefig("3_evaluation_ablation_comparison.png", bbox_inches="tight")
 plt.savefig("3_evaluation_ablation_comparison.pdf", bbox_inches="tight")
 plt.show()
